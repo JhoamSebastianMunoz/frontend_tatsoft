@@ -43,20 +43,20 @@ const App = () => {
     //   </Routes>
     // </Router>
 
-   <Router>
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/recuperar-password" element={<RecuperarPassword />} />
-      <Route path="/codigo-verificacion" element={< CodigoVerificacion/>} />
-      <Route path="/restablecer" element={<Restablecer/>}/>
-      <Route path="/restablecer" element={<Restablecer />} />
-      <Route path="/zonas" element={<Zonas />} />
-      <Route path="/gestion-zonas" element={<GestionZonas />} />
-      <Route path="/registrar-zona" element={<RegistrarZona />} />
-      <Route path="/editar-zona" element={<EditarZona />} />
-    </Routes>
-  </Router>
+//    <Router>
+//     <Routes>
+//       <Route path="/" element={<Login />} />
+//       <Route path="/recuperar-password" element={<RecuperarPassword />} />
+//       <Route path="/codigo-verificacion" element={< CodigoVerificacion/>} />
+//       <Route path="/restablecer" element={<Restablecer/>}/>
+//       <Route path="/restablecer" element={<Restablecer />} />
+//       <Route path="/zonas" element={<Zonas />} />
+//       <Route path="/gestion-zonas" element={<GestionZonas />} />
+//       <Route path="/registrar-zona" element={<RegistrarZona />} />
+//       <Route path="/editar-zona" element={<EditarZona />} />
+//     </Routes>
+//   </Router>
   );
-};
+ };
 
 export default App;
