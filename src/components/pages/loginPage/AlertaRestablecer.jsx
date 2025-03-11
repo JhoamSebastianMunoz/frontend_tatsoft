@@ -1,15 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Icono from "../../components/atoms/Iconos";
-import Tipografia from "../../components/atoms/Tipografia";
-import Boton from "../../components/atoms/Botones";
+import Icono from "../../../components/atoms/Iconos";
+import Tipografia from "../../../components/atoms/Tipografia";
+import Boton from "../../../components/atoms/Botones";
 
 const AlertaRestablecer = ({ onClose }) => {
   const navigate = useNavigate();
 
   const handleAceptar = () => {
-    onClose();
-    navigate("/"); 
+    if (onClose) {
+      onClose();
+    } else {
+      navigate("/");
+    }
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Tipografia from "../atoms/Tipografia";
 import Botones from "../atoms/Botones";
 import Iconos from "../atoms/Iconos";
-import Encabezado from "../molecules/encabezado";
+import Encabezado from "../molecules/Encabezado";
 
 const ListaProductos = () => {
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);

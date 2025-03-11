@@ -1,24 +1,50 @@
-import React, { useState } from "react";
-import Tipografia from "../../components/atoms/Tipografia";
-import Botones from "../../components/atoms/Botones";
-import Encabezado from "../../components/molecules/Encabezado";
-import AvatarUsuario from "../../components/atoms/AvatarUsuario";
-import AlertaInhabilitar from "../../pages/administrator/AlertaInhabilitar";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { userService } from "../../../context/services/ApiService";
+import Tipografia from "../../../components/atoms/Tipografia";
+import Botones from "../../../components/atoms/Botones";
+import Encabezado from "../../../components/molecules/Encabezado";
+import AvatarUsuario from "../../../components/atoms/AvatarUsuario";
+import AlertaInhabilitar from "./AlertaInhabilitar";
 
 const VerUsuario = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
   const [userStatus, setUserStatus] = useState("activo");
-
-  const userData = {
-    nombre: "Gisela",
-    apellido: "Rivera Londoño",
-    cc: "1097735978",
-    celular: "3097735678",
-    correo: "gisela@gmail.com",
-    rol: "Colaborador",
+  const [userData, setUserData] = useState({
+    nombreCompleto: "",
+    cedula: "",
+    celular: "",
+    correo: "",
+    rol: "",
     foto: null,
-    estado: userStatus, 
-  };
+    estado: "activo",
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        const response = await userService.getUserById(id);
+        setUserData({
+          ...response.data,
+          estado: userStatus, // Estado debe implementarse en el backend
+        });
+      } catch (error) {
+        console.error("Error al cargar los datos del usuario:", error);
+        setError("Error al cargar los datos del usuario. Por favor, intenta de nuevo más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchUserData();
+    }
+  }, [id, userStatus]);
 
   const handleShowAlert = () => {
     setShowAlert(true);
@@ -28,13 +54,23 @@ const VerUsuario = () => {
     setShowAlert(false);
   };
 
-  const handleConfirmStatusChange = () => {
-    setUserStatus(userStatus === "activo" ? "inactivo" : "activo");
-    setShowAlert(false);
+  const handleConfirmStatusChange = async () => {
+    try {
+      // Aquí implementaríamos la lógica para cambiar el estado del usuario
+      // Esto dependerá de cómo se maneje en el backend
+      // Por ahora solo cambiamos el estado local
+      const newStatus = userStatus === "activo" ? "inactivo" : "activo";
+      setUserStatus(newStatus);
+      setShowAlert(false);
+    } catch (error) {
+      console.error("Error al cambiar el estado del usuario:", error);
+      setError("Error al cambiar el estado del usuario. Por favor, intenta de nuevo más tarde.");
+    }
   };
 
   // Actualizado para incluir el parámetro de origen
   const handleEditarUsuario = () => {
+<<<<<<< HEAD:src/pages/administrator/VerUsuarioAdm.jsx
     // Guardar la ruta de origen en localStorage
     localStorage.setItem('rutaOrigenEdicion', '/ver/usuario');
     console.log("Ruta de origen guardada en localStorage: /ver/usuario");
@@ -42,16 +78,38 @@ const VerUsuario = () => {
     // También pasamos el parámetro por URL como respaldo
     window.location.href = "/editar/usuario?origen=ver";
     console.log("Redirigiendo a editar desde ver usuario");
+=======
+    navigate(`/editar/usuario/${id}`);
+>>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/administrator/VerUsuarioAdm.jsx
   };
 
   const buttonText = userStatus === "activo" ? "Inhabilitar" : "Habilitar";
-  const alertText = userStatus === "activo" 
-    ? "¿Confirmas la inhabilitación del usuario?" 
+  const alertText = userStatus === "activo"
+    ? "¿Confirmas la inhabilitación del usuario?"
     : "¿Confirmas la habilitación del usuario?";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <Tipografia>Cargando información del usuario...</Tipografia>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
+<<<<<<< HEAD:src/pages/administrator/VerUsuarioAdm.jsx
       <Encabezado ruta="/" mensaje="Detalle de Usuario" />
+=======
+      <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
+>>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/administrator/VerUsuarioAdm.jsx
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:gap-6">
           <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
@@ -74,12 +132,13 @@ const VerUsuario = () => {
                   variant="h2"
                   className="text-white text-center font-semibold my-2"
                 >
-                  {userData.nombre} {userData.apellido}
+                  {userData.nombreCompleto}
                 </Tipografia>
+
                 <div className="mt-2 w-full flex flex-col sm:flex-row gap-2">
-                  <Botones 
+                  <Botones
                     tipo={userStatus === "activo" ? "cancelar" : "alerta"}
-                    label={buttonText} 
+                    label={buttonText}
                     onClick={handleShowAlert}
                     className="w-full py-2"
                   />
@@ -92,28 +151,21 @@ const VerUsuario = () => {
                 </div>
               </div>
             </div>
+
             <div className="p-4 space-y-4">
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
                   Nombre:
                 </Tipografia>
                 <Tipografia className="font-medium p-1">
-                  {userData.nombre}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Apellido:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.apellido}
+                  {userData.nombreCompleto}
                 </Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
                   CC:
                 </Tipografia>
-                <Tipografia className="font-medium p-1">{userData.cc}</Tipografia>
+                <Tipografia className="font-medium p-1">{userData.cedula}</Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
@@ -149,6 +201,7 @@ const VerUsuario = () => {
               </div>
             </div>
           </div>
+
           <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden md:w-1/3 lg:w-1/4">
             <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-6">
               <div className="flex flex-col items-center">
@@ -167,7 +220,7 @@ const VerUsuario = () => {
                   variant="h2"
                   className="text-white text-center text-xl lg:text-2xl font-semibold"
                 >
-                  {userData.nombre} {userData.apellido}
+                  {userData.nombreCompleto}
                 </Tipografia>
                 <Tipografia
                   variant="body"
@@ -177,9 +230,14 @@ const VerUsuario = () => {
                 </Tipografia>
               </div>
             </div>
+<<<<<<< HEAD:src/pages/administrator/VerUsuarioAdm.jsx
             <div className="p-5 flex flex-col items-center">
               <Botones 
                 tipo="secundario"
+=======
+            <div className="p-5 space-y-3">
+              <Botones
+>>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/administrator/VerUsuarioAdm.jsx
                 label="Editar Usuario"
                 onClick={handleEditarUsuario}
                 className="w-full py-2"
@@ -207,29 +265,14 @@ const VerUsuario = () => {
                   variant="label"
                   className="text-gray-500 text-sm block mb-1"
                 >
-                  Nombre
+                  Nombre Completo
                 </Tipografia>
                 <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
-                    {userData.nombre}
+                    {userData.nombreCompleto}
                   </Tipografia>
                 </div>
               </div>
-
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Apellido
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.apellido}
-                  </Tipografia>
-                </div>
-              </div>
-
               <div>
                 <Tipografia
                   variant="label"
@@ -238,10 +281,9 @@ const VerUsuario = () => {
                   Número de Identificación
                 </Tipografia>
                 <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">{userData.cc}</Tipografia>
+                  <Tipografia className="font-medium">{userData.cedula}</Tipografia>
                 </div>
               </div>
-
               <div>
                 <Tipografia
                   variant="label"
@@ -255,7 +297,6 @@ const VerUsuario = () => {
                   </Tipografia>
                 </div>
               </div>
-
               <div className="lg:col-span-2">
                 <Tipografia
                   variant="label"
@@ -269,7 +310,6 @@ const VerUsuario = () => {
                   </Tipografia>
                 </div>
               </div>
-
               <div className="lg:col-span-2">
                 <Tipografia
                   variant="label"
@@ -301,8 +341,8 @@ const VerUsuario = () => {
       </div>
 
       {showAlert && (
-        <AlertaInhabilitar 
-          onClose={handleCloseAlert} 
+        <AlertaInhabilitar
+          onClose={handleCloseAlert}
           onConfirm={handleConfirmStatusChange}
           alertText={alertText}
           isEnabling={userStatus !== "activo"}

@@ -1,7 +1,7 @@
 import React from "react";
-import Icono from "../../components/atoms/Iconos";
-import Tipografia from "../../components/atoms/Tipografia";
-import Boton from "../../components/atoms/Botones";
+import Icono from "../../../components/atoms/Iconos";
+import Tipografia from "../../../components/atoms/Tipografia";
+import Boton from "../../../components/atoms/Botones";
 
 const AlertaEdicion = ({ onClose, onConfirm, onCancel }) => {
   const handleConfirmar = () => {
