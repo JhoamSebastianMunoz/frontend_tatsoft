@@ -1,14 +1,28 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // Importar useNavigate y useLocation
 import Tipografia from "../atoms/Tipografia";
 import Botones from "../atoms/Botones";
 
 const Card = ({ nombre, celular, Rol }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [habilitado, setHabilitado] = useState(true);
+  const navigate = useNavigate(); 
+  const location = useLocation(); 
+  
+  const isGestionUsuarios = location.pathname === "/gestion/usuarios" || 
+                            location.pathname === "/gestion" || 
+                            location.pathname.includes("/gestion");
+  
+  const handleEditarUsuario = () => {
+    const rutaOrigen = isGestionUsuarios ? '/gestion/usuarios' : '/ver/usuario';
+    localStorage.setItem('rutaOrigenEdicion', rutaOrigen);
+    console.log(`Ruta de origen guardada en localStorage: ${rutaOrigen}`);
+    navigate(`/editar/usuario?origen=${isGestionUsuarios ? 'gestion' : 'ver'}`);
+  };
 
   return (
     <Tipografia>
-      <div className="m-2 w-full min-w-[280px] max-w-[380px] bg-white border border-gray-200 rounded-lg shadow-sm relative">
+      <div className="m-1 w-full min-w-[280px] max-w-[380px] bg-white border border-gray-200 rounded-lg shadow-sm relative">
         <div className="bg-purple-100 rounded-t-lg p-3 flex justify-between items-center">
           <div
             className="w-14 h-3 rounded-md transition-colors duration-200"
@@ -26,7 +40,9 @@ const Card = ({ nombre, celular, Rol }) => {
             {isOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                 <ul className="py-1 text-sm text-gray-600">
-                  <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={()=>navigate("/ver/usuario")}
+                  >
                     Ver
                   </li>
                   <li
@@ -53,7 +69,11 @@ const Card = ({ nombre, celular, Rol }) => {
             <span className="text-sm text-black">{Rol}</span>
           </div>
           <div className="flex justify-end mt-3">
-            <Botones label="Editar" tipo="primario" />
+            <Botones
+              label="Editar"
+              tipo="secundario"
+              onClick={handleEditarUsuario} 
+            />
           </div>
         </div>
       </div>

@@ -1,13 +1,15 @@
 import React from "react";
 import Tipografia from "./Tipografia";
 
-const Boton = ({ 
-  label, 
-  onClick, 
-  tipo = "primario", 
-  size = "medium", 
-  textSize = "base" 
+const Boton = ({
+  label,
+  onClick,
+  tipo = "primario",
+  size = "medium",
+  textSize = "base",
+  className = ""
 }) => {
+
   const tipos = {
     primario: "bg-[#B06AFF] hover:bg-purple-600",
     secundario: "bg-[#842AF3] hover:bg-purple-800",
@@ -24,7 +26,18 @@ const Boton = ({
   return (
     <Tipografia size={textSize}>
       <button
-        className={`font-bold text-white m-2 rounded-[12px] cursor-pointer transition-colors duration-200 ${tipos[tipo]} ${tamaños[size]}`}
+        className={`
+          font-bold 
+          text-white 
+          m-2 
+          rounded-[12px] 
+          cursor-pointer 
+          transition-colors 
+          duration-200 
+          ${tipos[tipo]} 
+          ${tamaños[size]}
+          ${className}
+        `}
         onClick={onClick}
       >
         {label}

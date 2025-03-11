@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AvatarTexto from "../../components/molecules/AvatarTexto";
 import CampoTextoProfile from "../../components/atoms/CamposTextoProfile";
 import Tipografia from "../../components/atoms/Tipografia";
@@ -15,6 +15,7 @@ const EditarUsuario = (props) => {
     cc: propCc,
     correo: propCorreo,
     rol: propRol,
+    rutaOrigen, 
   } = props;
   
   const [userData, setUserData] = useState({
@@ -28,6 +29,35 @@ const EditarUsuario = (props) => {
 
   const [originalData] = useState({...userData});
   const [showAlert, setShowAlert] = useState(false);
+  const [origenRuta, setOrigenRuta] = useState("/ver/usuario");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (rutaOrigen) {
+        setOrigenRuta(rutaOrigen);
+        localStorage.setItem('rutaOrigenEdicion', rutaOrigen);
+      } else {
+        const rutaGuardada = localStorage.getItem('rutaOrigenEdicion');
+        if (rutaGuardada) {
+          setOrigenRuta(rutaGuardada);
+        } else {
+          const urlParams = new URLSearchParams(window.location.search);
+          const origen = urlParams.get('origen');
+          
+          if (origen === 'gestion') {
+            setOrigenRuta("/gestion/usuarios");
+            localStorage.setItem('rutaOrigenEdicion', "/gestion/usuarios");
+          } else if (origen === 'ver') {
+            setOrigenRuta("/ver/usuario");
+            localStorage.setItem('rutaOrigenEdicion', "/ver/usuario");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error al detectar ruta de origen:", error);
+    }
+  }, [rutaOrigen]);
 
   const handleChange = (field, value) => {
     if (field === "cc") {
@@ -58,8 +88,11 @@ const EditarUsuario = (props) => {
   };
 
   const handleSave = () => {
-    console.log("Guardando cambios:", userData);
-    setShowAlert(true);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setShowAlert(true);
+    }, 800);
   };
 
   const handleCancel = () => {
@@ -68,113 +101,132 @@ const EditarUsuario = (props) => {
 
   const handleCloseAlert = () => {
     setShowAlert(false);
-    window.location.href = "/ver/usuario";
+    const rutaFinal = origenRuta;
+    localStorage.removeItem('rutaOrigenEdicion');
+    window.location.href = rutaFinal;
   };
 
   const handleVolver = () => {
-    window.location.href = "/ver/usuario";
+    const rutaFinal = origenRuta;
+    localStorage.removeItem('rutaOrigenEdicion');
+    window.location.href = rutaFinal;
   };
 
   const nombreStr = userData.nombre || '';
   const apellidoStr = userData.apellido || '';
   const fullName = `${nombreStr} ${apellidoStr}`.trim();
   
+  const isDirty = JSON.stringify(userData) !== JSON.stringify(originalData);
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">  
-      <div className="max-w-4xl mx-auto px-10 py-3">
+    <div className="min-h-screen bg-gradient-to-r from-purple-50 via-indigo-50 to-white p-4 md:p-6">  
+      <div className="max-w-5xl mx-auto">
+        
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-900 to-indigo-700 p-6 relative">
-            <div className="absolute top-4 left-4 cursor-pointer" onClick={handleVolver}>
-              <Icono name="volver" size={45} color="white" />
-            </div>
-            
+          {/* Banner superior con avatar */}
+          <div className="bg-gradient-to-r from-purple-800 to-indigo-700 p-8 md:p-12">
             <div className="flex flex-col items-center">
-              <div className="mb-3 transform hover:scale-105 transition-transform duration-300">
-                <AvatarTexto nombre={fullName} size="medium" />
+              <div className="mb-4 transform hover:scale-105 transition-transform duration-300">
+                <AvatarTexto nombre={fullName} size="large" />
               </div>
               {userData.rol && (
-                <div className="px-4 py-1 bg-white bg-opacity-20 rounded-full">
-                  <Tipografia className="text-white">{userData.rol}</Tipografia>
+                <div className="px-6 py-1.5 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+                  <Tipografia className="text-white font-medium">{userData.rol}</Tipografia>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="p-4 md:p-1">
-            <div className="flex justify-between items-center ">
-              <Tipografia size="xl" className="font-semibold text-gray-600 px-4 mb-1">
-                Editando Usuario
+          <div className="p-6 md:p-10">
+            <div className="flex justify-between items-center mb-8">
+              <Tipografia size="2xl" className="font-bold text-gray-800">
+                Editar Perfil de Usuario
               </Tipografia>
+              {isDirty && (
+                <div className="bg-yellow-100 px-3 py-1 rounded-full flex items-center">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-yellow-700">Cambios sin guardar</span>
+                </div>
+              )}
             </div>
-            <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
-              <div className="shadow-md p-7 rounded-xl">
-                <Tipografia className="text-purple-700 font-medium mb-4">
-                  Información Personal
-                </Tipografia>
-                <div className="space-y-5">
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-purple-50 p-6 rounded-xl">
+                <div className="flex items-center mb-6">
+                  <Tipografia className="text-lg font-semibold text-purple-800">
+                    Información Personal
+                  </Tipografia>
+                </div>
+                
+                <div className="space-y-6">
                   <CampoTextoProfile 
                     label="Nombre" 
                     value={userData.nombre}
-                    editable={true}
-                    onChange={(value) => handleChange("nombre", value)}
+                    onChange={(e) => handleChange("nombre", e)}
+                    onEdit={() => {}}
                   />
                   <CampoTextoProfile 
                     label="Apellido" 
                     value={userData.apellido}
-                    editable={true}
-                    onChange={(value) => handleChange("apellido", value)}
+                    onChange={(e) => handleChange("apellido", e)}
+                    onEdit={() => {}}
                   />
-                  <CampoTexto
+                  <CampoTextoProfile
                     label="Documento de Identidad" 
                     value={userData.cc}
-                    readOnly={true}
                     disabled={true}
-                    type="text"
+                    className="bg-gray-100"
                   />
                 </div>
               </div>
 
-              <div className="p-7 shadow-md rounded-xl">
-                <Tipografia className="text-purple-700 font-medium mb-4">
-                  Información de Contacto
-                </Tipografia>
-                <div className="space-y-5">
+              <div className="bg-purple-100 p-6 rounded-xl">
+                <div className="flex items-center mb-6">
+    
+                  <Tipografia className="text-lg font-semibold text-indigo-800">
+                    Información de Contacto
+                  </Tipografia>
+                </div>
+                
+                <div className="space-y-6">
                   <CampoTextoProfile 
                     label="Celular" 
                     value={userData.celular}
-                    editable={true}
-                    onChange={(value) => handleChange("celular", value)}
+                    onChange={(e) => handleChange("celular", e)}
+                    onEdit={() => {}}
                     type="text"
                   />
                   <CampoTextoProfile 
                     label="Correo Electrónico" 
                     value={userData.correo}
-                    editable={true}
-                    onChange={(value) => handleChange("correo", value)}
-                    type="text"
+                    onChange={(e) => handleChange("correo", e)}
+                    onEdit={() => {}}
+                    type="email"
                   />
                   <CampoTextoProfile 
                     label="Rol en la Empresa" 
                     value={userData.rol}
-                    editable={true}
-                    onChange={(value) => handleChange("rol", value)}
+                    onChange={(e) => handleChange("rol", e)}
+                    onEdit={() => {}}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col sm:flex-row justify-center w-full gap-3 pb-4">
+            <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
               <Boton 
-                tipo="primario" 
-                label="Guardar Cambios" 
+                tipo="secundario" 
+                label={loading ? "Guardando..." : "Guardar Cambios"}
                 onClick={handleSave}
-                className="w-full sm:w-auto px-4 py-2"
+                className="w-full sm:w-auto px-8 py-1 text-base"
+                disabled={loading || !isDirty}
               />
               <Boton
                 tipo="cancelar"
-                label="Cancelar"
+                label="Descartar Cambios"
                 onClick={handleCancel}
-                className="w-full sm:w-auto px-4 py-2"
+                className="w-full sm:w-auto px-8 py-1 text-base"
+                disabled={loading || !isDirty}
               />
             </div>
           </div>

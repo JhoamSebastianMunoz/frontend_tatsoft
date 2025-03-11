@@ -1,18 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Tipografia from "../../components/atoms/Tipografia";
 import Logo from "../../components/atoms/Logo";
 import CamposTexto from "../../components/atoms/CamposTexto";
 import Botones from "../../components/atoms/Botones";
 import image from "../../assets/pixelcut-export (1).jpg";
+import { BallTriangle } from "react-loader-spinner";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  
+  const handleLogin = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      navigate("/admi");
+    }, 1500);
+  };
 
   return (
     <Tipografia>
       <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-[#842AF3] via-[#DA33E1] to-[#52307C] ">
-
         <div className="w-full max-w-4xl bg-white md:rounded-3xl md:shadow-lg overflow-hidden flex flex-col md:flex-row">
           <div className="w-full md:w-1/2 relative">
             <img
@@ -38,9 +47,22 @@ const Login = () => {
                 </p>
               </div>
               <div className="mt-4 md:mt-5 flex justify-center">
-                <Botones label="Iniciar sesión" 
-                tipo="secundario"
-                onClick={()=>navigate("/ver/usuario")}/>
+                {loading ? (
+                  <BallTriangle
+                    height={50}
+                    width={50}
+                    radius={5}
+                    color="#842AF3"
+                    ariaLabel="ball-triangle-loading"
+                    visible={true}
+                  />
+                ) : (
+                  <Botones 
+                    label="Iniciar sesión" 
+                    tipo="secundario" 
+                    onClick={handleLogin}
+                  />
+                )}
               </div>
               <footer className="text-center text-xs text-gray-500 mt-4">
                 con ❤️ por Tatsoft - 2024
