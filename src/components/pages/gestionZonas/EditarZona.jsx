@@ -1,32 +1,19 @@
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Tipografia from "../../components/atoms/Tipografia";
-import Boton from "../../components/atoms/Botones";
-import Encabezado from "../../components/molecules/Encabezado";
-import CamposTexto from "../../components/atoms/CamposTexto";
-import Icono from "../../components/atoms/Iconos";
-=======
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
+import Boton from "../../../components/atoms/Botones";
+import Encabezado from "../../../components/molecules/Encabezado";
+import CamposTexto from "../../../components/atoms/CamposTexto";
 
 const EditarZona = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [zona, setZona] = useState({
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-    nombre: "Zona Norte Armenia",
-    descripcion:
-      "Área asignada para operaciones en la región norte de la ciudad de Armenia abarcado desde el parque fundadores hasta el portal del Quindío",
-=======
     nombre_zona_trabajo: "",
     ubicacion: { lat: 23.6345, lng: -102.5528 },
     descripcion: "",
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
   });
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -66,8 +53,6 @@ const EditarZona = () => {
     setZona({ ...zona, [e.target.name]: e.target.value });
   };
 
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-=======
   const handleMapClick = (event) => {
     // Simulación de clic en mapa
     const randomLat = 23.6345 + (Math.random() - 0.5) * 0.01;
@@ -79,7 +64,6 @@ const EditarZona = () => {
     });
   };
 
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
   const handleGuardarClick = (e) => {
     e.preventDefault();
     
@@ -119,68 +103,6 @@ const EditarZona = () => {
     }
   };
 
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-  const handleCancelar = () => {
-    navigate("/gestion-zonas");
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Encabezado mensaje="Editar Zona" />
-
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-xl shadow-md p-8">
-          <Tipografia>
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                Información de la Zona
-              </h2>
-
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-black block">
-                    Nombre de la Zona
-                  </label>
-                  <CamposTexto
-                    type="text"
-                    name="nombre"
-                    value={zona.nombre}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">
-                    Descripción
-                  </label>
-                  <textarea
-                    name="descripcion"
-                    value={zona.descripcion}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out h-32"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-4 justify-end pt-6 border-t border-gray-100">
-              <Boton
-                onClick={handleCancelar}
-                label="Cancelar"
-                tipo="cancelar"
-              />
-
-              <Boton
-                onClick={handleGuardarClick}
-                label="Guardar Cambios"
-                tipo="secundario"
-              />
-            </div>
-          </Tipografia>
-=======
   if (loading && !zona.nombre_zona_trabajo) {
     return (
       <div className="w-screen h-screen flex items-center justify-center">
@@ -199,15 +121,12 @@ const EditarZona = () => {
         <span className="text-xl font-medium">Editar Zona</span>
       </div>
      
-      {/* Content */}
       <div className="p-6 flex flex-col space-y-4">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
           </div>
         )}
-
-        {/* Nombre */}
         <div>
           <label className="font-medium">Nombre:</label>
           <input
@@ -219,15 +138,13 @@ const EditarZona = () => {
             required
           />
         </div>
-       
-        {/* Ubicación */}
+  
         <div>
           <label className="font-medium">Ubicación:</label>
           <div className="text-sm mt-1 mb-2">
             Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
           </div>
-         
-          {/* Simulación de mapa */}
+        
           <div
             className="w-full h-48 bg-gray-200 rounded flex items-center justify-center cursor-pointer"
             onClick={handleMapClick}
@@ -239,8 +156,6 @@ const EditarZona = () => {
             </div>
           </div>
         </div>
-       
-        {/* Descripción */}
         <div>
           <label className="font-medium">Descripción:</label>
           <textarea
@@ -251,8 +166,6 @@ const EditarZona = () => {
             required
           />
         </div>
-       
-        {/* Button */}
         <div className="flex justify-center mt-4">
           <button
             onClick={handleGuardarClick}
@@ -261,7 +174,6 @@ const EditarZona = () => {
           >
             {loading ? "Guardando..." : "Guardar cambios"}
           </button>
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
         </div>
       </div>
 
@@ -300,28 +212,10 @@ const EditarZona = () => {
       )}
 
       {guardado && (
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
-          <div className="bg-white w-96 rounded-xl shadow-2xl overflow-hidden transform transition-all">
-            <div className="px-6 py-5">
-              <div className="text-center">
-                <Tipografia>
-                  <Icono name="confirmar" size="50" />
-                  <h3 className="text-lg font-medium text-black mb-3">
-                    ¡Cambios guardados con éxito!
-                  </h3>
-                  <p className="text-sm text-black">
-                    Serás redirigido en unos segundos
-                  </p>
-                </Tipografia>
-              </div>
-            </div>
-=======
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <Icono name="confirmar" size={50} className="mx-auto mb-4" />
             <p className="text-lg font-semibold">Cambios guardados con éxito</p>
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
           </div>
         </div>
       )}
