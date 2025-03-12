@@ -3,6 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
+import Boton from "../../../components/atoms/Botones";
+import Encabezado from "../../../components/molecules/Encabezado";
+import CamposTexto from "../../../components/atoms/CamposTexto";
 
 const EditarZona = () => {
   const { id } = useParams();
@@ -118,15 +121,12 @@ const EditarZona = () => {
         <span className="text-xl font-medium">Editar Zona</span>
       </div>
      
-      {/* Content */}
       <div className="p-6 flex flex-col space-y-4">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
           </div>
         )}
-
-        {/* Nombre */}
         <div>
           <label className="font-medium">Nombre:</label>
           <input
@@ -138,15 +138,13 @@ const EditarZona = () => {
             required
           />
         </div>
-       
-        {/* Ubicación */}
+  
         <div>
           <label className="font-medium">Ubicación:</label>
           <div className="text-sm mt-1 mb-2">
             Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
           </div>
-         
-          {/* Simulación de mapa */}
+        
           <div
             className="w-full h-48 bg-gray-200 rounded flex items-center justify-center cursor-pointer"
             onClick={handleMapClick}
@@ -158,8 +156,6 @@ const EditarZona = () => {
             </div>
           </div>
         </div>
-       
-        {/* Descripción */}
         <div>
           <label className="font-medium">Descripción:</label>
           <textarea
@@ -170,8 +166,6 @@ const EditarZona = () => {
             required
           />
         </div>
-       
-        {/* Button */}
         <div className="flex justify-center mt-4">
           <button
             onClick={handleGuardarClick}
@@ -183,30 +177,40 @@ const EditarZona = () => {
         </div>
       </div>
 
-      {/* Confirmación modal */}
       {mostrarAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-semibold">¿Desea guardar los cambios?</p>
-            <div className="flex justify-center mt-4">
-              <button
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+          <div className="bg-white w-96 rounded-xl shadow-2xl overflow-hidden transform transition-all">
+            <div className="px-6 py-5">
+              <div className="text-center">
+                <Tipografia>
+                  <Icono name="confirmar" size="50" />
+                  <h3 className="text-lg font-medium text-black mb-3">
+                    ¿Desea guardar los cambios?
+                  </h3>
+                  <p className="text-sm text-black">
+                    Esta acción actualizará la información de la zona. ¿Estás
+                    seguro de continuar?
+                  </p>
+                </Tipografia>
+              </div>
+            </div>
+            <div className="bg-gray-50 px-6 py-4 flex justify-between">
+              <Boton
                 onClick={() => setMostrarAlerta(false)}
-                className="bg-red-400 text-white px-4 py-2 rounded-lg mx-2"
-              >
-                Cancelar
-              </button>
-              <button
+                label="cancelar"
+                tipo="cancelar"
+              />
+
+              <Boton
                 onClick={handleConfirmarGuardar}
-                className="bg-green-400 text-white px-4 py-2 rounded-lg mx-2"
-              >
-                Confirmar
-              </button>
+                label="Confirmar"
+                tipo="secundario"
+              />
             </div>
           </div>
         </div>
       )}
 
-      {/* Mensaje de éxito */}
       {guardado && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">

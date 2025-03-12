@@ -22,12 +22,30 @@ const RegistroUsuario = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) => {
+  const [errores, setErrores] = useState({
+    nombre: "",
+    apellido: "",
+    cedula: "",
+    numeroCelular: "",
+    correoElectronico: "",
+    rol: "",
+    password: "",
+    confirmarPassword: "",
+  });
+
+  const manejarCambio = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
+    
+    if (errores[name]) {
+      setErrores((prevErrores) => ({
+        ...prevErrores,
+        [name]: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -98,14 +116,14 @@ const RegistroUsuario = () => {
             </div>
           )}
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Tipografia>
+          <Tipografia>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <CampoTexto
                 type="text"
                 name="nombre"
                 label="Nombre"
                 value={formData.nombre}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
@@ -114,7 +132,7 @@ const RegistroUsuario = () => {
                 name="apellido"
                 label="Apellido"
                 value={formData.apellido}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
@@ -123,7 +141,7 @@ const RegistroUsuario = () => {
                 name="cedula"
                 label="Número de identificación"
                 value={formData.cedula}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
@@ -132,7 +150,7 @@ const RegistroUsuario = () => {
                 name="numeroCelular"
                 label="Teléfono celular"
                 value={formData.numeroCelular}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
@@ -141,7 +159,7 @@ const RegistroUsuario = () => {
                 name="correoElectronico"
                 label="Correo electrónico"
                 value={formData.correoElectronico}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
@@ -149,7 +167,7 @@ const RegistroUsuario = () => {
                 <select
                   name="rol"
                   value={formData.rol}
-                  onChange={handleChange}
+                  onChange={manejarCambio}
                   className="w-full border-b border-gray-300 pb-2 appearance-none focus:border-purple-500 focus:outline-none"
                   required
                 >
@@ -177,7 +195,7 @@ const RegistroUsuario = () => {
                 name="password"
                 label="Contraseña"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
@@ -186,20 +204,20 @@ const RegistroUsuario = () => {
                 type="password"
                 name="confirmarPassword"
                 value={formData.confirmarPassword}
-                onChange={handleChange}
+                onChange={manejarCambio}
                 className="w-full border-b border-gray-300 pb-2 focus:border-purple-500 focus:outline-none"
                 required
               />
-            </Tipografia>
-            <div className="flex justify-center">
-              <Boton 
-                tipo="secundario" 
-                label={loading ? "Registrando..." : "Registrar"} 
-                type="submit"
-                disabled={loading}
-              />
-            </div>
-          </form>
+              <div className="flex justify-center">
+                <Boton 
+                  tipo="secundario" 
+                  label={loading ? "Registrando..." : "Registrar"} 
+                  type="submit"
+                  disabled={loading}
+                />
+              </div>
+            </form>
+          </Tipografia>
         </div>
       </div>
     </div>

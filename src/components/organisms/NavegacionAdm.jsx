@@ -26,12 +26,12 @@ const NavegacionAdministrador = () => {
     {
       name: "gest-productos",
       label: "Gestión de Productos",
-      subItems: ["Agregar Producto", "Actualizar Stock"],
+      subItems: ["Agregar Producto", "Categoría"],
     },
     {
       name: "inventario",
       label: "Gestión de Inventario",
-      subItems: ["Ver Inventario"],
+      subItems: ["Ver Inventario", "Ingreso de Stock", "Historial de ingreso"],
     },
     {
       name: "gest-zonas",

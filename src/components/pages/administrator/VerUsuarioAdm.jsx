@@ -68,6 +68,7 @@ const VerUsuario = () => {
     }
   };
 
+  // Actualizado para incluir el parámetro de origen
   const handleEditarUsuario = () => {
     navigate(`/editar/usuario/${id}`);
   };
