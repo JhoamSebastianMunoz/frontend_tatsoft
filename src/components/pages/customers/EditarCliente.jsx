@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
-import CampoTextoProfile from "../../components/atoms/CamposTextoProfile";
-import Tipografia from "../../components/atoms/Tipografia";
-import Boton from "../../components/atoms/Botones";
-import CampoTexto from "../../components/atoms/CamposTexto";
+import { useNavigate, useLocation } from "react-router-dom";
+import CampoTextoProfile from "../../atoms/CamposTextoProfile";
+import Tipografia from "../../atoms/Tipografia";
+import Boton from "../../atoms/Botones";
+import CampoTexto from "../../atoms/CamposTexto";
 import AlertaEdicion from "../../pages/administrator/AlertaEdicion";
-import Icono from "../../components/atoms/Iconos";
+import Icono from "../../atoms/Iconos";
 
 const EditarCliente = (props) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const datosEjemplo = {
     razonSocial: "Empresa ABC S.A.S.",
     nombre: "Juan",
@@ -59,7 +63,7 @@ const EditarCliente = (props) => {
         if (rutaGuardada) {
           setOrigenRuta(rutaGuardada);
         } else {
-          const urlParams = new URLSearchParams(window.location.search);
+          const urlParams = new URLSearchParams(location.search);
           const origen = urlParams.get('origen');
           
           if (origen === 'gestion') {
@@ -74,7 +78,7 @@ const EditarCliente = (props) => {
     } catch (error) {
       console.error("Error al detectar ruta de origen:", error);
     }
-  }, [rutaOrigen]);
+  }, [rutaOrigen, location]);
 
   useEffect(() => {
     const isModified = JSON.stringify(clienteData) !== JSON.stringify(originalData);
@@ -142,7 +146,7 @@ const EditarCliente = (props) => {
   const redirigirInformacionClientes = () => {
     const rutaFinal = origenRuta;
     localStorage.removeItem('rutaOrigenEdicion');
-    window.location.href = rutaFinal;
+    navigate(rutaFinal);
   };
 
   const handleVolver = () => {

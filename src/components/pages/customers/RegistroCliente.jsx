@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Encabezado from "../../components/molecules/Encabezado";
-import Boton from "../../components/atoms/Botones";
-import Tipografia from "../../components/atoms/Tipografia";
-import Icono from "../../components/atoms/Iconos";
+import Encabezado from "../../molecules/Encabezado";
+import Boton from "../../atoms/Botones";
+import Tipografia from "../../atoms/Tipografia";
+import Icono from "../../atoms/Iconos";
 
 const RegistroCliente = () => {
   const navigate = useNavigate();

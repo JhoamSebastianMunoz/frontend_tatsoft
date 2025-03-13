@@ -7,7 +7,7 @@ import Encabezado from "../../../components/molecules/Encabezado";
 import AvatarUsuario from "../../../components/atoms/AvatarUsuario";
 import AlertaInhabilitar from "./AlertaInhabilitar";
 
-const VerUsuario = () => {
+const VerUsuarioAdm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
@@ -70,17 +70,8 @@ const VerUsuario = () => {
 
   // Actualizado para incluir el parámetro de origen
   const handleEditarUsuario = () => {
-<<<<<<< HEAD:src/pages/administrator/VerUsuarioAdm.jsx
-    // Guardar la ruta de origen en localStorage
-    localStorage.setItem('rutaOrigenEdicion', '/ver/usuario');
-    console.log("Ruta de origen guardada en localStorage: /ver/usuario");
-    
-    // También pasamos el parámetro por URL como respaldo
-    window.location.href = "/editar/usuario?origen=ver";
-    console.log("Redirigiendo a editar desde ver usuario");
-=======
     navigate(`/editar/usuario/${id}`);
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/administrator/VerUsuarioAdm.jsx
+    console.log("Ruta de origen guardada en localStorage: /ver/usuario");
   };
 
   const buttonText = userStatus === "activo" ? "Inhabilitar" : "Habilitar";
@@ -98,9 +89,6 @@ const VerUsuario = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-<<<<<<< HEAD:src/pages/administrator/VerUsuarioAdm.jsx
-      <Encabezado ruta="/" mensaje="Detalle de Usuario" />
-=======
       <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
 
       {error && (
@@ -109,7 +97,6 @@ const VerUsuario = () => {
         </div>
       )}
 
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/administrator/VerUsuarioAdm.jsx
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:gap-6">
           <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
@@ -230,14 +217,8 @@ const VerUsuario = () => {
                 </Tipografia>
               </div>
             </div>
-<<<<<<< HEAD:src/pages/administrator/VerUsuarioAdm.jsx
-            <div className="p-5 flex flex-col items-center">
-              <Botones 
-                tipo="secundario"
-=======
             <div className="p-5 space-y-3">
               <Botones
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/administrator/VerUsuarioAdm.jsx
                 label="Editar Usuario"
                 onClick={handleEditarUsuario}
                 className="w-full py-2"
@@ -352,4 +333,4 @@ const VerUsuario = () => {
   );
 };
 
-export default VerUsuario;
+export default VerUsuarioAdm;

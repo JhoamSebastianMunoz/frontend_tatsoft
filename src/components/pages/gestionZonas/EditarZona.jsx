@@ -1,32 +1,16 @@
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Tipografia from "../../components/atoms/Tipografia";
-import Boton from "../../components/atoms/Botones";
-import Encabezado from "../../components/molecules/Encabezado";
-import CamposTexto from "../../components/atoms/CamposTexto";
-import Icono from "../../components/atoms/Iconos";
-=======
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
 
 const EditarZona = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [zona, setZona] = useState({
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-    nombre: "Zona Norte Armenia",
-    descripcion:
-      "Área asignada para operaciones en la región norte de la ciudad de Armenia abarcado desde el parque fundadores hasta el portal del Quindío",
-=======
     nombre_zona_trabajo: "",
     ubicacion: { lat: 23.6345, lng: -102.5528 },
     descripcion: "",
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
   });
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -66,8 +50,6 @@ const EditarZona = () => {
     setZona({ ...zona, [e.target.name]: e.target.value });
   };
 
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
-=======
   const handleMapClick = (event) => {
     // Simulación de clic en mapa
     const randomLat = 23.6345 + (Math.random() - 0.5) * 0.01;
@@ -79,7 +61,6 @@ const EditarZona = () => {
     });
   };
 
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
   const handleGuardarClick = (e) => {
     e.preventDefault();
     
@@ -119,7 +100,6 @@ const EditarZona = () => {
     }
   };
 
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
   const handleCancelar = () => {
     navigate("/gestion-zonas");
   };
@@ -180,88 +160,6 @@ const EditarZona = () => {
               />
             </div>
           </Tipografia>
-=======
-  if (loading && !zona.nombre_zona_trabajo) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <Tipografia>Cargando información de la zona...</Tipografia>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-screen h-screen flex flex-col bg-white">
-      {/* Header */}
-      <div className="bg-purple-600 text-white p-4 flex items-center">
-        <button onClick={() => navigate("/gestion-zonas")} className="text-white mr-4 flex items-center justify-center rounded-full bg-white bg-opacity-30 h-8 w-8">
-          <span>&#8592;</span>
-        </button>
-        <span className="text-xl font-medium">Editar Zona</span>
-      </div>
-     
-      {/* Content */}
-      <div className="p-6 flex flex-col space-y-4">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {/* Nombre */}
-        <div>
-          <label className="font-medium">Nombre:</label>
-          <input
-            type="text"
-            name="nombre_zona_trabajo"
-            value={zona.nombre_zona_trabajo}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mt-1 text-sm"
-            required
-          />
-        </div>
-       
-        {/* Ubicación */}
-        <div>
-          <label className="font-medium">Ubicación:</label>
-          <div className="text-sm mt-1 mb-2">
-            Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
-          </div>
-         
-          {/* Simulación de mapa */}
-          <div
-            className="w-full h-48 bg-gray-200 rounded flex items-center justify-center cursor-pointer"
-            onClick={handleMapClick}
-          >
-            <div className="text-center text-gray-600">
-              <div className="text-3xl mb-2">📍</div>
-              <div>Haz clic para simular selección de ubicación</div>
-              <div className="text-xs mt-1">(Se requiere API key de Google Maps para mostrar el mapa real)</div>
-            </div>
-          </div>
-        </div>
-       
-        {/* Descripción */}
-        <div>
-          <label className="font-medium">Descripción:</label>
-          <textarea
-            name="descripcion"
-            value={zona.descripcion}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mt-1 text-sm h-24"
-            required
-          />
-        </div>
-       
-        {/* Button */}
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={handleGuardarClick}
-            disabled={loading}
-            className="bg-purple-500 text-white py-2 px-4 rounded-md w-full max-w-xs"
-          >
-            {loading ? "Guardando..." : "Guardar cambios"}
-          </button>
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
         </div>
       </div>
 
@@ -300,7 +198,6 @@ const EditarZona = () => {
       )}
 
       {guardado && (
-<<<<<<< HEAD:src/pages/GestionZonas/EditarZona.jsx
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
           <div className="bg-white w-96 rounded-xl shadow-2xl overflow-hidden transform transition-all">
             <div className="px-6 py-5">
@@ -316,12 +213,6 @@ const EditarZona = () => {
                 </Tipografia>
               </div>
             </div>
-=======
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <Icono name="confirmar" size={50} className="mx-auto mb-4" />
-            <p className="text-lg font-semibold">Cambios guardados con éxito</p>
->>>>>>> 2b29aaa072bfa5b81ea401657c84a67b85c5fddc:src/components/pages/gestionZonas/EditarZona.jsx
           </div>
         </div>
       )}

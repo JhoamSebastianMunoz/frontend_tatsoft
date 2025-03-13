@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Tipografia from '../../components/atoms/Tipografia';
+import Tipografia from '../../atoms/Tipografia';
 
 const Pagina404 = () => {
   useEffect(() => {

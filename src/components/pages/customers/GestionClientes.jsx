@@ -1,20 +1,50 @@
 import React, { useState } from "react";
-import Encabezado from "../../components/molecules/Encabezado";
-import Boton from "../../components/atoms/Botones";
-import Buscador from "../../components/molecules/Buscador";
-import Tipografia from "../../components/atoms/Tipografia";
+import Encabezado from "../../molecules/Encabezado";
+import Boton from "../../atoms/Botones";
+import Buscador from "../../molecules/Buscador";
+import Tipografia from "../../atoms/Tipografia";
 import { useNavigate } from "react-router-dom";
 
-const GestionUsuarios = () => {
+const GestionClientes = () => {
   const navigate = useNavigate();
 
-  const [usuarios, setUsuarios] = useState([
-    { nombre: "María Camila Uribe", celular: "3758460232", Rol: "Colaborador" },
-    { nombre: "Juan Pérez", celular: "3142567890", Rol: "Administrador" },
-    { nombre: "Ana Gómez", celular: "3004567890", Rol: "Colaborador" },
-    { nombre: "Carlos Ramírez", celular: "3216549870", Rol: "Administrador" },
-    { nombre: "Laura Méndez", celular: "3001234567", Rol: "Colaborador" },
-    { nombre: "Sofía Herrera", celular: "3127654321", Rol: "Administrador" },
+  const [tiendas, setTiendas] = useState([
+    {
+      razonSocial: "Minimarket La Esquina",
+      nombre: "Laura Jiménez",
+      telefono: "3158460232",
+      tipo: "Minorista",
+    },
+    {
+      razonSocial: "Supermercado El Ahorro",
+      nombre: "Carlos Rodríguez",
+      telefono: "3002567890",
+      tipo: "Mayorista",
+    },
+    {
+      razonSocial: "Tienda Don José",
+      nombre: "José Martínez",
+      telefono: "3114567890",
+      tipo: "Minorista",
+    },
+    {
+      razonSocial: "Distribuidora Torres",
+      nombre: "Alejandro Torres",
+      telefono: "3506549870",
+      tipo: "Mayorista",
+    },
+    {
+      razonSocial: "Abarrotes López",
+      nombre: "Valentina López",
+      telefono: "3211234567",
+      tipo: "Minorista",
+    },
+    {
+      razonSocial: "Comercial Sánchez",
+      nombre: "Mateo Sánchez",
+      telefono: "3167654321",
+      tipo: "Mayorista",
+    },
   ]);
 
   const [filtro, setFiltro] = useState("Todos");
@@ -22,28 +52,29 @@ const GestionUsuarios = () => {
   const [verTarjetas, setVerTarjetas] = useState(true);
   const [menuAbierto, setMenuAbierto] = useState(null);
 
-  const usuariosFiltrados = usuarios.filter(
-    (usuario) =>
-      (filtro === "Todos" || usuario.Rol === filtro) &&
-      usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  const tiendasFiltradas = tiendas.filter(
+    (tienda) =>
+      (filtro === "Todos" || tienda.tipo === filtro) &&
+      (tienda.razonSocial.toLowerCase().includes(busqueda.toLowerCase()) ||
+        tienda.nombre.toLowerCase().includes(busqueda.toLowerCase()))
   );
 
-  const handleVerUsuario = () => {
-    navigate("/ver/usuario");
+  const handleVerCliente = () => {
+    navigate("/ver/cliente");
   };
 
-  const handleEditarUsuario = (usuario) => {
-    localStorage.setItem("rutaOrigenEdicion", "/gestion/usuarios");
-    console.log("Ruta de origen guardada en localStorage: /gestion/usuarios");
+  const handleEditarTienda = (tienda) => {
+    localStorage.setItem("rutaOrigenEdicion", "/gestion/clientes");
+    console.log("Ruta de origen guardada en localStorage: /gestion/clientes");
 
-    navigate("/editar/usuario?origen=gestion");
+    window.location.href = "/editar/cliente?origen=gestion";
     console.log("Redirigiendo a editar desde gestión");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white ">
       <Encabezado
-        mensaje="Gestión de usuarios"
+        mensaje="Gestión de clientes"
         className="p-4"
         onClick={() => navigate("/")}
       />
@@ -52,18 +83,18 @@ const GestionUsuarios = () => {
           <div>
             <div className="flex items-center mt-1">
               <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
-                {usuarios.length} Total
+                {tiendas.length} Total
               </span>
               <span className="bg-purple-200 text-blue-800 text-xs font-medium px-3 py-0.5 rounded-full">
-                {usuariosFiltrados.length} Filtrados
+                {tiendasFiltradas.length} Filtrados
               </span>
             </div>
           </div>
           <div className="mt-3 sm:mt-0 flex">
             <Boton
               tipo="secundario"
-              label="Registrar Usuario"
-              onClick={() => navigate("/registro/usuario")}
+              label="Registrar Cliente"
+              onClick={() => navigate("/registro/cliente")}
             />
             <button
               onClick={() => setVerTarjetas(!verTarjetas)}
@@ -89,11 +120,11 @@ const GestionUsuarios = () => {
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg p-2">
+      <div className="bg-white rounded-lg p-2 ">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2">
             <Buscador
-              placeholder="Buscar usuarios por nombre"
+              placeholder="Buscar cliente"
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
@@ -125,7 +156,7 @@ const GestionUsuarios = () => {
         </div>
       </div>
       <Tipografia>
-        <div className="flex overflow-x-auto space-x-2 p-4 bg-white rounded-lg">
+        <div className="flex overflow-x-auto space-x-2 p-4 bg-white rounded-lg ">
           <button
             className={`px-4 py-2 whitespace-nowrap rounded-md ${
               filtro === "Todos"
@@ -134,29 +165,29 @@ const GestionUsuarios = () => {
             }`}
             onClick={() => setFiltro("Todos")}
           >
-            Todos los usuarios
+            Todos los clientes
           </button>
           <button
             className={`px-4 py-2 whitespace-nowrap rounded-md ${
-              filtro === "Administrador"
+              filtro === "Mayorista"
                 ? "bg-purple-100 text-purple-700 font-medium"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
-            onClick={() => setFiltro("Administrador")}
+            onClick={() => setFiltro("Mayorista")}
           >
-            Administradores
+            Mayoristas
           </button>
           <button
             className={`px-4 py-2 whitespace-nowrap rounded-md ${
-              filtro === "Colaborador"
+              filtro === "Minorista"
                 ? "bg-purple-100 text-purple-700 font-medium"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
-            onClick={() => setFiltro("Colaborador")}
+            onClick={() => setFiltro("Minorista")}
           >
-            Colaboradores
+            Minoristas
           </button>
-          <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100 ">
+          <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100">
             Inactivos
           </button>
         </div>
@@ -164,76 +195,76 @@ const GestionUsuarios = () => {
         <div className="bg-white rounded-lg shadow-md p-4">
           <div className="border-b pb-3 mb-4 flex justify-between items-center">
             <h3 className="font-medium text-black-900">
-              Lista de usuarios
+              Lista de clientes
               <span className="ml-2 text-sm font-normal text-black-700">
-                Mostrando {usuariosFiltrados.length} de {usuarios.length}
+                Mostrando {tiendasFiltradas.length} de {tiendas.length}
               </span>
             </h3>
           </div>
           {verTarjetas ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {usuariosFiltrados.length > 0 ? (
-                usuariosFiltrados.map((usuario, index) => (
+              {tiendasFiltradas.length > 0 ? (
+                tiendasFiltradas.map((tienda, index) => (
                   <div
-                    key={index}
-                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative"
-                  >
-                    <div
-                      className={`h-2 ${
-                        usuario.Rol === "Administrador"
-                          ? "bg-purple-500"
-                          : "bg-green-500"
-                      }`}
-                    ></div>
-                    <div className="absolute top-3 right-3 z-10">
-                      <button
-                        onClick={() =>
-                          setMenuAbierto(menuAbierto === index ? null : index)
-                        }
-                        className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                  key={index}
+                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative"
+                >
+                  <div
+                    className={`h-2 ${
+                      tienda.tipo === "Mayorista"
+                        ? "bg-purple-500"
+                        : "bg-green-500"
+                    }`}
+                  ></div>
+                  <div className="absolute top-3 right-3 z-10">
+                    <button
+                      onClick={() =>
+                        setMenuAbierto(menuAbierto === index ? null : index)
+                      }
+                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
                       >
-                        <svg
-                          className="w-6 h-6"
-                          fill="currentColor"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                        </svg>
-                      </button>
-
-                      {menuAbierto === index && (
-                        <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-                          <ul className="py-1 text-sm text-gray-700">
-                            <li
-                              className="px-3 py-2 hover:bg-purple-100 cursor-pointer"
-                              onClick={() => {
-                                handleVerUsuario();
-                                setMenuAbierto(null);
-                              }}
-                            >
-                              Ver
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
+                        <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                      </svg>
+                    </button>
+                
+                    {menuAbierto === index && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                        <ul className="py-1 text-sm text-gray-600">
+                          <li
+                            className="px-3 py-2 hover:bg-purple-100 cursor-pointer"
+                            onClick={() => {
+                              handleVerCliente();
+                              setMenuAbierto(null);
+                            }}
+                          >
+                            Ver
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                     <div className="p-4">
                       <h3 className="font-medium text-lg text-gray-900">
-                        {usuario.nombre}
+                        {tienda.razonSocial}
                       </h3>
+                      <p className="text-gray-600">Dueño: {tienda.nombre}</p>
                       <p className="text-gray-600">
-                        Celular: {usuario.celular}
+                        Teléfono: {tienda.telefono}
                       </p>
                       <p className="mt-2">
                         <span
                           className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                            usuario.Rol === "Administrador"
+                            tienda.tipo === "Mayorista"
                               ? "bg-purple-100 text-purple-800"
                               : "bg-green-100 text-green-800"
                           }`}
                         >
-                          {usuario.Rol}
+                          {tienda.tipo}
                         </span>
                       </p>
                     </div>
@@ -249,16 +280,11 @@ const GestionUsuarios = () => {
                         }
                       `}</style>
                       <div className="card-buttons-container flex justify-between items-center px-1">
-                        <Boton 
-                          label="Eliminar" 
-                          tipo="cancelar" 
-                          size="small" 
-                        />
+                        <Boton tipo="cancelar" label="Eliminar" size="small" />
                         <Boton
+                          onClick={() => handleEditarTienda(tienda)}
                           label="Editar"
-                          tipo="secundario"
                           size="small"
-                          onClick={() => handleEditarUsuario(usuario)}
                         />
                       </div>
                     </div>
@@ -278,13 +304,13 @@ const GestionUsuarios = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                       />
                     </svg>
                   </div>
                   <p className="text-gray-500">
-                    No se encontraron usuarios que coincidan con los criterios
-                    de búsqueda.
+                    No se encontraron tiendas que coincidan con los criterios de
+                    búsqueda.
                   </p>
                 </div>
               )}
@@ -295,13 +321,16 @@ const GestionUsuarios = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Usuario
+                      Razón Social
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Celular
+                      Dueño
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Rol
+                      Teléfono
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tipo
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
@@ -309,51 +338,39 @@ const GestionUsuarios = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {usuariosFiltrados.length > 0 ? (
-                    usuariosFiltrados.map((usuario, index) => (
+                  {tiendasFiltradas.length > 0 ? (
+                    tiendasFiltradas.map((tienda, index) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-gray-900">
-                            {usuario.nombre}
+                            {tienda.razonSocial}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                          {usuario.celular}
+                          {tienda.nombre}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                          {tienda.telefono}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              usuario.Rol === "Administrador"
+                              tienda.tipo === "Mayorista"
                                 ? "bg-purple-100 text-purple-800"
                                 : "bg-green-100 text-green-800"
                             }`}
                           >
-                            {usuario.Rol}
+                            {tienda.tipo}
                           </span>
                         </td>
-                        <td className="px-5 py-4 bg-gray-50 whitespace-nowrap text-right text-center">
-                          <style jsx>{`
-                            @media (max-width: 640px) {
-                              .table-buttons-container {
-                                flex-direction: column;
-                                align-items: flex-end;
-                                gap: 8px;
-                                padding: 8px 0;
-                              }
-                            }
-                          `}</style>
-                          <div className="card-buttons-container flex justify-beetew items-center px-1">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                          <div className="flex justify-end gap-2">
                             <Boton
-                              onClick={() => handleEditarUsuario(usuario)}
+                              onClick={() => handleEditarTienda(tienda)}
                               label="Editar"
-                              tipo="secundario"
                               size="small"
                             />
-                            <Boton 
-                              tipo="cancelar" 
-                              label="Eliminar" 
-                              size="small"
-                            />
+                            <Boton tipo="cancelar" label="Eliminar" size="small" />
                           </div>
                         </td>
                       </tr>
@@ -361,10 +378,10 @@ const GestionUsuarios = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan={4}
+                        colSpan={5}
                         className="px-6 py-8 text-center text-gray-500"
                       >
-                        No se encontraron usuarios que coincidan con los
+                        No se encontraron tiendas que coincidan con los
                         criterios de búsqueda.
                       </td>
                     </tr>
@@ -373,18 +390,18 @@ const GestionUsuarios = () => {
               </table>
             </div>
           )}
-          {usuariosFiltrados.length > 0 && (
+          {tiendasFiltradas.length > 0 && (
             <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between mt-4">
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
                     Mostrando <span className="font-medium">1</span> a{" "}
                     <span className="font-medium">
-                      {usuariosFiltrados.length}
+                      {tiendasFiltradas.length}
                     </span>{" "}
                     de{" "}
                     <span className="font-medium">
-                      {usuariosFiltrados.length}
+                      {tiendasFiltradas.length}
                     </span>{" "}
                     resultados
                   </p>
@@ -414,4 +431,4 @@ const GestionUsuarios = () => {
   );
 };
 
-export default GestionUsuarios;
+export default GestionClientes;

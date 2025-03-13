@@ -1,7 +1,7 @@
 import React from "react";
 import UsuarioAvatar from "../atoms/AvatarUsuario";
 import Tipografia from "../atoms/Tipografia";
-import { FiEdit } from "react-icons/fi";
+
 
 const AvatarTexto = ({ 
   nombre = "Usuario", 
@@ -38,12 +38,6 @@ const AvatarTexto = ({
     <div className={`relative flex flex-col items-center gap-3 ${className}`}>
       <div className={`relative ${sizeClasses[size]}`}>
         <UsuarioAvatar />
-        <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4">
-          <FiEdit 
-            className={`bg-white rounded-full p-0.5 text-gray-500 cursor-pointer hover:text-purple-600 transition-colors ${iconSizeClasses[size]}`}
-            onClick={onEditClick} 
-          />
-        </div>
       </div>
       <Tipografia 
         size={textSizeMap[size]} 

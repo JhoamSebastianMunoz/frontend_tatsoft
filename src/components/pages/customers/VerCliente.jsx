@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import Tipografia from "../../components/atoms/Tipografia";
-import Botones from "../../components/atoms/Botones";
-import Encabezado from "../../components/molecules/Encabezado";
-import AvatarUsuario from "../../components/atoms/AvatarUsuario";
+import Tipografia from "../../atoms/Tipografia";
+import Botones from "../../atoms/Botones";
+import Encabezado from "../../molecules/Encabezado";
 import AlertaInhabilitar from "../../pages/administrator/AlertaInhabilitar";
 
 const VerCliente = () => {

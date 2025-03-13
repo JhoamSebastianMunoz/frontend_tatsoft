@@ -9,22 +9,15 @@ const Sidebar = ({ activeMenuItem = null }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileView, setMobileView] = useState(false);
 
-  // Configura inicialmente el menú activo
-  useEffect(() => {
-    if (activeMenuItem) {
-      setOpenMenu(activeMenuItem);
-    }
-  }, [activeMenuItem]);
-
   // Detectar el tamaño de la pantalla para modo responsive
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setMobileView(true);
-        setSidebarOpen(false);
+        setSidebarOpen(false); // Siempre cerrado en vista móvil al iniciar
       } else {
         setMobileView(false);
-        setSidebarOpen(true);
+        setSidebarOpen(false); // Sidebar cerrado por defecto incluso en desktop
       }
     };
 
@@ -95,7 +88,7 @@ const Sidebar = ({ activeMenuItem = null }) => {
     <>
       {/* Botón hamburguesa */}
       <button
-        className="fixed top-3 left-4 z-30 p-2 bg-purple-900 text-white rounded-md shadow-md"
+        className="fixed top-3 left-4 z-30 p-2 bg-purple-900 text-white rounded-md"
         onClick={toggleSidebar}
         aria-label="Toggle menu"
       >
@@ -118,34 +111,18 @@ const Sidebar = ({ activeMenuItem = null }) => {
           />
         </svg>
       </button>
-
-      {/* Sidebar */}
       <div
         className={`fixed left-0 top-0 z-20 w-64 h-full bg-white border-r shadow-lg border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-4 border-b flex justify-between items-center">
+        <div className="p-4 border-b flex justify-center items-center">
           <h2 className="text-purple-800 font-bold text-xl">Menu</h2>
           {mobileView && (
             <button
               onClick={toggleSidebar}
               className="text-gray-500 hover:text-purple-700"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
             </button>
           )}
         </div>
