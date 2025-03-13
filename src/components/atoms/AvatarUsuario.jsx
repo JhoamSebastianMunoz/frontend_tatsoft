@@ -1,8 +1,12 @@
 import React from "react";
-import Avatar from '../../assets/Avatar/perfil.jpg';
+import Avatar from '../../assets/Avatar/avatarTatsoft.jpg';
 
 
+<<<<<<< HEAD
 const UsuarioAvatar = ({ src = Avatar, alt = "Avatar", size = 90 }) => {
+=======
+const UsuarioAvatar = ({ src = Avatar, alt = "Avatar", size = 60 }) => {
+>>>>>>> test-2
   return (
     <img
       src={src}

@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import UsuarioAvatar from "../atoms/AvatarUsuario";
 import Tipografia from "../atoms/Tipografia";
+<<<<<<< HEAD
 import { FiEdit, FiCamera } from "react-icons/fi";
+=======
+
+>>>>>>> test-2
 
 const AvatarTexto = ({
   nombre = "Usuario",
@@ -59,12 +63,22 @@ const AvatarTexto = ({
   const borderClass = avatarBorderColor ? `${borderSizeMap[size]} ${avatarBorderColor}` : "";
   
   return (
+<<<<<<< HEAD
     <div className={`relative flex flex-col items-center ${className}`}>
       {/* Contenedor del avatar con efectos de hover */}
       <div 
         className={`relative ${sizeClasses[size]} mb-4`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+=======
+    <div className={`relative flex flex-col items-center gap-3 ${className}`}>
+      <div className={`relative ${sizeClasses[size]}`}>
+        <UsuarioAvatar />
+      </div>
+      <Tipografia 
+        size={textSizeMap[size]} 
+        className={`font-medium ${textColor}`}
+>>>>>>> test-2
       >
         {/* Avatar con o sin borde y sombra */}
         <div className={`rounded-full overflow-hidden ${borderClass} shadow-md`}>

@@ -3,9 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
+<<<<<<< HEAD
 import Boton from "../../../components/atoms/Botones";
 import Encabezado from "../../../components/molecules/Encabezado";
 import CamposTexto from "../../../components/atoms/CamposTexto";
+=======
+>>>>>>> test-2
 
 const EditarZona = () => {
   const { id } = useParams();
@@ -103,6 +106,7 @@ const EditarZona = () => {
     }
   };
 
+<<<<<<< HEAD
   if (loading && !zona.nombre_zona_trabajo) {
     return (
       <div className="w-screen h-screen flex items-center justify-center">
@@ -174,6 +178,68 @@ const EditarZona = () => {
           >
             {loading ? "Guardando..." : "Guardar cambios"}
           </button>
+=======
+  const handleCancelar = () => {
+    navigate("/gestion-zonas");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Encabezado mensaje="Editar Zona" />
+
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-white rounded-xl shadow-md p-8">
+          <Tipografia>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                Información de la Zona
+              </h2>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-black block">
+                    Nombre de la Zona
+                  </label>
+                  <CamposTexto
+                    type="text"
+                    name="nombre"
+                    value={zona.nombre}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 block">
+                    Descripción
+                  </label>
+                  <textarea
+                    name="descripcion"
+                    value={zona.descripcion}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out h-32"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 justify-end pt-6 border-t border-gray-100">
+              <Boton
+                onClick={handleCancelar}
+                label="Cancelar"
+                tipo="cancelar"
+              />
+
+              <Boton
+                onClick={handleGuardarClick}
+                label="Guardar Cambios"
+                tipo="secundario"
+              />
+            </div>
+          </Tipografia>
+>>>>>>> test-2
         </div>
       </div>
 
@@ -212,10 +278,28 @@ const EditarZona = () => {
       )}
 
       {guardado && (
+<<<<<<< HEAD
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <Icono name="confirmar" size={50} className="mx-auto mb-4" />
             <p className="text-lg font-semibold">Cambios guardados con éxito</p>
+=======
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+          <div className="bg-white w-96 rounded-xl shadow-2xl overflow-hidden transform transition-all">
+            <div className="px-6 py-5">
+              <div className="text-center">
+                <Tipografia>
+                  <Icono name="confirmar" size="50" />
+                  <h3 className="text-lg font-medium text-black mb-3">
+                    ¡Cambios guardados con éxito!
+                  </h3>
+                  <p className="text-sm text-black">
+                    Serás redirigido en unos segundos
+                  </p>
+                </Tipografia>
+              </div>
+            </div>
+>>>>>>> test-2
           </div>
         </div>
       )}

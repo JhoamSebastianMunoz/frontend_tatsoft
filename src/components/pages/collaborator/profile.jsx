@@ -96,12 +96,17 @@ const Profile = () => {
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 overflow-x-hidden">
+=======
+    <div className="min-h-screen overflow-x-hidden">
+>>>>>>> test-2
       <div className="fixed top-0 left-0 z-50">
         <Sidebar  />
       </div>
       <div className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md">
         <Encabezado 
+<<<<<<< HEAD
           className="py-4 md:py-5"
           mensaje="Mi Perfil"
   
@@ -109,6 +114,15 @@ const Profile = () => {
       </div>
 
       <div className="flex justify-center md:ml-64 px-4 py-6 pt-20 transition-all duration-300">
+=======
+          className="py-4 md:py-3"
+          mensaje="Mi Perfil"
+        />
+      </div>
+
+      {/* Contenedor principal centrado sin respetar el sidebar */}
+      <div className="flex justify-center px-4 py-6 pt-20 transition-all duration-300">
+>>>>>>> test-2
         <div className="w-full max-w-3xl">
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
@@ -122,11 +136,20 @@ const Profile = () => {
           )}
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
 
+<<<<<<< HEAD
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6">
               <div className="flex justify-center mb-6">
                 <AvatarTexto 
                   nombre={userData.nombreCompleto || "Usuario"} 
                   size="xlarge" 
+=======
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-5">
+              <div className="flex justify-center mb-6">
+                <AvatarTexto 
+                  nombre={userData.nombreCompleto || "Usuario"} 
+                  size="large" 
+                  
+>>>>>>> test-2
                   showEditButton={true}
                   onEditClick={handleEditAvatar} 
                 />
