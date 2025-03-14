@@ -1,50 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { userService } from "../../../context/services/ApiService";
-import Tipografia from "../../../components/atoms/Tipografia";
-import Botones from "../../../components/atoms/Botones";
-import Encabezado from "../../../components/molecules/Encabezado";
-import AvatarUsuario from "../../../components/atoms/AvatarUsuario";
-import AlertaInhabilitar from "./AlertaInhabilitar";
+import React, { useState } from "react";
+import Tipografia from "../../atoms/Tipografia";
+import Botones from "../../atoms/Botones";
+import Encabezado from "../../molecules/Encabezado";
+import AlertaInhabilitar from "../../pages/administrator/AlertaInhabilitar";
 
-const VerUsuarioAdm = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const VerCliente = () => {
   const [showAlert, setShowAlert] = useState(false);
-  const [userStatus, setUserStatus] = useState("activo");
-  const [userData, setUserData] = useState({
-    nombreCompleto: "",
-    cedula: "",
-    celular: "",
-    correo: "",
-    rol: "",
-    foto: null,
-    estado: "activo",
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [clienteStatus, setClienteStatus] = useState("activo");
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
-        const response = await userService.getUserById(id);
-        setUserData({
-          ...response.data,
-          estado: userStatus, // Estado debe implementarse en el backend
-        });
-      } catch (error) {
-        console.error("Error al cargar los datos del usuario:", error);
-        setError("Error al cargar los datos del usuario. Por favor, intenta de nuevo más tarde.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchUserData();
-    }
-  }, [id, userStatus]);
+  const clienteData = {
+    RazonSocial: "Tienda el galán",
+    nombre: "Carlos Alberto",
+    apellido: "Muñoz",
+    celular: "3097735678",
+    nit: "12345678",
+    dirrecion: "B/El galan calle 30 #20",
+    estado: clienteStatus, 
+  };
 
   const handleShowAlert = () => {
     setShowAlert(true);
@@ -54,178 +26,141 @@ const VerUsuarioAdm = () => {
     setShowAlert(false);
   };
 
-  const handleConfirmStatusChange = async () => {
-    try {
-      // Aquí implementaríamos la lógica para cambiar el estado del usuario
-      // Esto dependerá de cómo se maneje en el backend
-      // Por ahora solo cambiamos el estado local
-      const newStatus = userStatus === "activo" ? "inactivo" : "activo";
-      setUserStatus(newStatus);
-      setShowAlert(false);
-    } catch (error) {
-      console.error("Error al cambiar el estado del usuario:", error);
-      setError("Error al cambiar el estado del usuario. Por favor, intenta de nuevo más tarde.");
-    }
+  const handleConfirmStatusChange = () => {
+    setClienteStatus(clienteStatus === "activo" ? "inactivo" : "activo");
+    setShowAlert(false);
   };
 
   // Actualizado para incluir el parámetro de origen
-  const handleEditarUsuario = () => {
-    navigate(`/editar/usuario/${id}`);
-    console.log("Ruta de origen guardada en localStorage: /ver/usuario");
+  const handleEditarCliente = () => {
+    // Guardar la ruta de origen en localStorage
+    localStorage.setItem('rutaOrigenEdicion', '/ver/cliente');
+    console.log("Ruta de origen guardada en localStorage: /ver/cliente");
+    
+    // También pasamos el parámetro por URL como respaldo
+    window.location.href = "/editar/cliente?origen=ver";
+    console.log("Redirigiendo a editar desde ver cliente");
   };
 
-  const buttonText = userStatus === "activo" ? "Inhabilitar" : "Habilitar";
-  const alertText = userStatus === "activo"
-    ? "¿Confirmas la inhabilitación del usuario?"
-    : "¿Confirmas la habilitación del usuario?";
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <Tipografia>Cargando información del usuario...</Tipografia>
-      </div>
-    );
-  }
+  const buttonText = clienteStatus === "activo" ? "Inhabilitar" : "Habilitar";
+  const alertText = clienteStatus === "activo" 
+    ? "¿Confirmas la inhabilitación del cliente?" 
+    : "¿Confirmas la habilitación del cliente?";
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
+      <Encabezado ruta="/gestion/clientes" mensaje="Detalle de cliente" />
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:gap-6">
           <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
             <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-4 relative">
               <div className="flex flex-col items-center pt-5 pb-4">
-                <div className="bg-gray-200 rounded-full w-24 h-24 flex items-center justify-center overflow-hidden mb-2">
-                  {userData.foto ? (
-                    <img
-                      src={userData.foto}
-                      alt="Foto de perfil"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center text-gray-500 text-sm">
-                      <AvatarUsuario size="100" />
-                    </div>
-                  )}
-                </div>
                 <Tipografia
                   variant="h2"
                   className="text-white text-center font-semibold my-2"
                 >
-                  {userData.nombreCompleto}
+                  {clienteData.RazonSocial} {clienteData.nombre}
                 </Tipografia>
-
                 <div className="mt-2 w-full flex flex-col sm:flex-row gap-2">
-                  <Botones
-                    tipo={userStatus === "activo" ? "cancelar" : "alerta"}
-                    label={buttonText}
+                  <Botones 
+                    tipo={clienteStatus === "activo" ? "cancelar" : "alerta"}
+                    label={buttonText} 
                     onClick={handleShowAlert}
                     className="w-full py-2"
                   />
                   <Botones
                     variant="primary"
-                    label="Editar Usuario"
-                    onClick={handleEditarUsuario}
+                    label="Editar Cliente"
+                    onClick={handleEditarCliente}
                     className="w-full py-2"
                   />
                 </div>
               </div>
             </div>
-
             <div className="p-4 space-y-4">
+              <div>
+                <Tipografia variant="label" className="text-gray-700 text-base">
+                  Razón social:
+                </Tipografia>
+                <Tipografia className="font-medium p-1">
+                  {clienteData.RazonSocial}
+                </Tipografia>
+              </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
                   Nombre:
                 </Tipografia>
                 <Tipografia className="font-medium p-1">
-                  {userData.nombreCompleto}
+                  {clienteData.nombre}
                 </Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
-                  CC:
+                  Apellido:
                 </Tipografia>
-                <Tipografia className="font-medium p-1">{userData.cedula}</Tipografia>
+                <Tipografia className="font-medium p-1">{clienteData.apellido}</Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
                   Celular:
                 </Tipografia>
                 <Tipografia className="font-medium p-1">
-                  {userData.celular}
+                  {clienteData.celular}
                 </Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
-                  Correo:
+                  Nit:
                 </Tipografia>
                 <Tipografia className="font-medium p-1">
-                  {userData.correo}
+                  {clienteData.nit}
                 </Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
-                  Rol:
+                  Dirreción:
                 </Tipografia>
                 <Tipografia className="font-medium p-1">
-                  {userData.rol}
+                  {clienteData.dirrecion}
                 </Tipografia>
               </div>
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
                   Estado:
                 </Tipografia>
-                <Tipografia className={`font-medium p-1 ${userData.estado === "activo" ? "text-green-600" : "text-red-600"}`}>
-                  {userData.estado === "activo" ? "Activo" : "Inactivo"}
+                <Tipografia className={`font-medium p-1 ${clienteData.estado === "activo" ? "text-green-600" : "text-red-600"}`}>
+                  {clienteData.estado === "activo" ? "Activo" : "Inactivo"}
                 </Tipografia>
               </div>
             </div>
           </div>
-
           <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden md:w-1/3 lg:w-1/4">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-6">
+            <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-8">
               <div className="flex flex-col items-center">
-                <div className="rounded-full mb-3 flex items-center justify-center">
-                  {userData.foto ? (
-                    <img
-                      src={userData.foto}
-                      alt="Foto de perfil"
-                      className="w-32 h-32 object-cover rounded-full"
-                    />
-                  ) : (
-                    <AvatarUsuario size="130" />
-                  )}
-                </div>
                 <Tipografia
                   variant="h2"
                   className="text-white text-center text-xl lg:text-2xl font-semibold"
                 >
-                  {userData.nombreCompleto}
+                {clienteData.RazonSocial}
                 </Tipografia>
                 <Tipografia
                   variant="body"
-                  className="text-purple-200 mt-1 text-center"
+                  className="text-purple-200 mt-5 text-center"
                 >
-                  {userData.rol}
+                  {clienteData.rol}
                 </Tipografia>
               </div>
             </div>
-            <div className="p-5 space-y-3">
-              <Botones
-                label="Editar Usuario"
-                onClick={handleEditarUsuario}
+            <div className="p-5 flex flex-col items-center">
+              <Botones 
+                tipo="secundario"
+                label="Editar Cliente"
+                onClick={handleEditarCliente}
                 className="w-full py-2"
               />
               <Botones
                 label={buttonText}
-                tipo={userStatus === "activo" ? "cancelar" : "alerta"}
+                tipo={clienteStatus === "activo" ? "cancelar" : "alerta"}
                 className="w-full py-2"
                 onClick={handleShowAlert}
               />
@@ -237,7 +172,7 @@ const VerUsuarioAdm = () => {
               variant="h2"
               className="text-xl font-semibold mb-5 text-purple-900"
             >
-              Información Personal
+              Información del cliente
             </Tipografia>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
@@ -246,25 +181,41 @@ const VerUsuarioAdm = () => {
                   variant="label"
                   className="text-gray-500 text-sm block mb-1"
                 >
-                  Nombre Completo
+                  Razon Social
                 </Tipografia>
                 <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
-                    {userData.nombreCompleto}
+                    {clienteData.RazonSocial}
                   </Tipografia>
                 </div>
               </div>
+
               <div>
                 <Tipografia
                   variant="label"
                   className="text-gray-500 text-sm block mb-1"
                 >
-                  Número de Identificación
+                  Nombre
                 </Tipografia>
                 <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">{userData.cedula}</Tipografia>
+                  <Tipografia className="font-medium">
+                    {clienteData.nombre}
+                  </Tipografia>
                 </div>
               </div>
+
+              <div>
+                <Tipografia
+                  variant="label"
+                  className="text-gray-500 text-sm block mb-1"
+                >
+                  Apellidos
+                </Tipografia>
+                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
+                  <Tipografia className="font-medium">{clienteData.apellido}</Tipografia>
+                </div>
+              </div>
+
               <div>
                 <Tipografia
                   variant="label"
@@ -274,23 +225,25 @@ const VerUsuarioAdm = () => {
                 </Tipografia>
                 <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
-                    {userData.celular}
+                    {clienteData.celular}
                   </Tipografia>
                 </div>
               </div>
+
               <div className="lg:col-span-2">
                 <Tipografia
                   variant="label"
                   className="text-gray-500 text-sm block mb-1"
                 >
-                  Correo Electrónico
+                  Nit
                 </Tipografia>
                 <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
-                    {userData.correo}
+                    {clienteData.nit}
                   </Tipografia>
                 </div>
               </div>
+
               <div className="lg:col-span-2">
                 <Tipografia
                   variant="label"
@@ -300,19 +253,19 @@ const VerUsuarioAdm = () => {
                 </Tipografia>
                 <div
                   className={`border rounded-lg p-2 lg:p-3 ${
-                    userData.estado === "activo"
+                    clienteData.estado === "activo"
                       ? "border-green-400 bg-green-100"
                       : "border-red-300 bg-red-50"
                   }`}
                 >
                   <Tipografia
                     className={`font-medium ${
-                      userData.estado === "activo"
+                      clienteData.estado === "activo"
                         ? "text-gray-800"
                         : "text-red-700"
                     }`}
                   >
-                    {userData.estado === "activo" ? "Activo" : "Inactivo"}
+                    {clienteData.estado === "activo" ? "Activo" : "Inactivo"}
                   </Tipografia>
                 </div>
               </div>
@@ -320,17 +273,16 @@ const VerUsuarioAdm = () => {
           </div>
         </div>
       </div>
-
       {showAlert && (
-        <AlertaInhabilitar
-          onClose={handleCloseAlert}
+        <AlertaInhabilitar 
+          onClose={handleCloseAlert} 
           onConfirm={handleConfirmStatusChange}
           alertText={alertText}
-          isEnabling={userStatus !== "activo"}
+          isEnabling={clienteStatus.Status !== "activo"}
         />
       )}
     </div>
   );
 };
 
-export default VerUsuarioAdm;
+export default VerCliente;

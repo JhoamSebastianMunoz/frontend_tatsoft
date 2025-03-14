@@ -23,6 +23,15 @@ import ColaboradoresZona from "./components/pages/gestionZonas/ColaboradoresZona
 import EditarColaboradorZona from "./components/pages/gestionZonas/EditarColaboradorZona";
 import AsignacionZonas from "./components/pages/gestionZonas/AsiganacionZonas";
 
+//pagina clientes
+import EditarCliente from "./components/pages/customers/editarCliente";
+import GestionClientes from "./components/pages/customers/GestionClientes";
+import RegistroCliente from "./components/pages/customers/RegistroCliente";
+import VerCliente from "./components/pages/customers/VerCliente";
+
+//Alertas
+import Page404 from "./components/pages/alert/page404";
+
 // Páginas de productos
 import RegistrarProducto from "./components/pages/gestionProductos/RegistrarProducto";
 import ProductList from "./components/pages/gestionProductos/ProductList";
@@ -35,6 +44,7 @@ import Profile from "./components/pages/collaborator/profile";
 // Componente para rutas no autorizadas
 import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
 import Loading from "./components/Loading/Loading";
+import Pagina404 from "./components/pages/alert/page404";
 
 // Componente de rutas protegidas
 const ProtectedRoute = ({ element, allowedRoles }) => {
@@ -43,15 +53,15 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
   if (loading) {
     return <Loading message="Verificando credenciales..." />;
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-  
+
   if (allowedRoles && !allowedRoles.includes(user?.rol)) {
     return <Navigate to="/unauthorized" replace />;
   }
-  
+
   return element;
 };
 
@@ -64,14 +74,14 @@ const App = () => {
       <Route path="/codigo-verificacion" element={<CodigoVerificacion />} />
       <Route path="/restablecer" element={<Restablecer />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
-      
+
       {/* Rutas de perfil */}
-      <Route 
-        path="/perfil" 
+      <Route
+        path="/perfil"
         element={
-          <ProtectedRoute 
-            element={<Profile />} 
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]} 
+          <ProtectedRoute
+            element={<Profile />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         } 
       />
@@ -195,61 +205,62 @@ const App = () => {
       <Route path="/gestion-productos" element={<GestionProductos />} />
       <Route path="/gestion-productos/registrar" element={<RegistrarProducto />} />
       <Route path="/editar-producto/:id" element={<EditarProducto />} />
-      
-      {/* Ruta por defecto - Redirige al login */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
-};
+           
+      {/* Ruta clientes */}
+      <Route
+      path="/ver/cliente"
+      element={
+        <ProtectedRoute
+          element={<VerCliente />}
+          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+     />
+     <Route
+      pathe="/editar/cliente"
+      element={
+        <ProtectedRoute
+          element={<EditarCliente />}
+          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+     />     
 
-export default App;
+     <Route
+      path="/gestion/clientes"
+      element={
+        <ProtectedRoute
+          element={<GestionClientes />}
+          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+     />     
+
+     <Route
+      path="/registro/cliente"
+      element={
+        <ProtectedRoute
+          element={<RegistroCliente />}
+          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+     />     
+
+     {/* Ruta por defecto - Redirige al login */}
+     <Route path="*" element={<Navigate to="/" replace />} />
+     <Route path="*" element={<Pagina404 />} />
+     </Routes>
+     );
+     };     
+
+     export default App;     
+     
+     
 
 
-// import React, { useState } from "react";
-// import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-// import "../src/index.css";
-// import Profile from "./pages/collaborator/profile";
-// import Zonas from './pages/GestionZonas/Zonas'
-// import GestionZonas from './pages/GestionZonas/GestionZonas';
-// import EditarZona from './pages/GestionZonas/EditarZona'
-// import RegistrarZona from './pages/GestionZonas/RegistraZona'
-// import AsignacionZonas from './pages/GestionZonas/AsiganacionZonas'
-// import ColaboradoresZona from './pages/GestionZonas/ColaboradoresZona'
-// import EditarColaboradorZona from "./pages/GestionZonas/EditarColaboradorZona";
-// import RegisterProductForm from './pages/RegisterProductForm/RegisterProductForm';
-// import ProductList from './pages/ProductList/ProductList';
-// import Login from "./pages/LoginPage/Login";
-// import RecuperarPassword from "./pages/LoginPage/RecuperarPassword";
-// import CodigoVerificacion from "./pages/LoginPage/CodigoVerification";
-// import Restablecer from "./pages/LoginPage/Restablecer";
-// import AlertaRestablecer from "./pages/LoginPage/AlertaRestablecer";
-// import NavegacionAdministrador from "./components/organisms/NavegacionAdm";
-// import NavegacionUsuario from "./components/organisms/NavegacionUsuario";
-// import VerUsuario from "./pages/administrator/VerUsuarioAdm";
-// import EditarUsuario from "./pages/administrator/EditarUsuario";
-// import AlertaInhabilitar from "./pages/administrator/AlertaInhabilitar";
-// import AlertaEdicion from "./pages/administrator/AlertaEdicion";
-// import RegistroUsuario from "./pages/administrator/RegistroUsuario";
 
-{/* <Router>
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/recuperar-password" element={<RecuperarPassword />} />
-      <Route path="/codigo-verificacion" element={< CodigoVerificacion/>} />
-      <Route path="/restablecer" element={<Restablecer/>}/>
-      <Route path="/restablecer" element={<Restablecer />} />
-      <Route path="/alerta-restablecer" element={<AlertaRestablecer />} /> 
-      <Route path="/perfil-colaborador" element={<Profile />} />
-      <Route path="/ver/usuario" element={<VerUsuario />} />
-      <Route path="/editar/usuario" element={<EditarUsuario />} />
-      <Route path="/inhabilitar-usuario" element={<AlertaInhabilitar/>}/>
-      <Route path="/guardar-cambios" element={<AlertaEdicion/>}/>
-      <Route path="/zonas" element={<Zonas />} />
-      <Route path="/gestion-zonas" element={<GestionZonas />} />
-      <Route path="/registrar-zona" element={<RegistrarZona />} />
-      <Route path="/editar-zona" element={<EditarZona />} />
-      <Route path="/gestion-zonas/asignar" element={<AsignacionZonas />} />
-      <Route path="/gestion-zonas/colaboradores" element={<ColaboradoresZona />} />
-      <Route path="/gestion-zonas/editar-colaboradores" element={<EditarColaboradorZona />} />
-    </Routes>
-    </Router> */}
+
+
+
+
+

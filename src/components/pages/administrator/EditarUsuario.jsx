@@ -134,6 +134,9 @@ const EditarUsuario = () => {
   const nombreStr = userData.nombre || '';
   const apellidoStr = userData.apellido || '';
   const fullName = `${nombreStr} ${apellidoStr}`.trim();
+  
+  // Verificar si hay cambios no guardados
+  const isDirty = JSON.stringify(userData) !== JSON.stringify(originalData);
 
   if (loading && !userData.nombre) {
     return (
@@ -144,8 +147,9 @@ const EditarUsuario = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">  
-      <div className="max-w-4xl mx-auto px-10 py-3">
+    <div className="min-h-screen bg-gradient-to-r from-purple-50 via-indigo-50 to-white p-4 md:p-6">  
+      <div className="max-w-5xl mx-auto">
+        
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-purple-900 to-indigo-700 p-6 relative">
             <div className="absolute top-4 left-4 cursor-pointer" onClick={handleVolver}>
@@ -153,12 +157,12 @@ const EditarUsuario = () => {
             </div>
            
             <div className="flex flex-col items-center">
-              <div className="mb-3 transform hover:scale-105 transition-transform duration-300">
-                <AvatarTexto nombre={fullName} size="medium" />
+              <div className="mb-4 transform hover:scale-105 transition-transform duration-300">
+                <AvatarTexto nombre={fullName} size="large" />
               </div>
               {userData.rol && (
-                <div className="px-4 py-1 bg-white bg-opacity-20 rounded-full">
-                  <Tipografia className="text-white">{userData.rol}</Tipografia>
+                <div className="px-6 py-1.5 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+                  <Tipografia className="text-white font-medium">{userData.rol}</Tipografia>
                 </div>
               )}
             </div>
@@ -175,6 +179,12 @@ const EditarUsuario = () => {
               <Tipografia size="xl" className="font-semibold text-gray-600 px-4 mb-1">
                 Editando Usuario
               </Tipografia>
+              {isDirty && (
+                <div className="bg-yellow-100 px-3 py-1 rounded-full flex items-center">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-yellow-700">Cambios sin guardar</span>
+                </div>
+              )}
             </div>
             <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
               <div className="shadow-md p-7 rounded-xl">
@@ -185,21 +195,20 @@ const EditarUsuario = () => {
                   <CampoTextoProfile
                     label="Nombre"
                     value={userData.nombre}
-                    editable={true}
-                    onChange={(value) => handleChange("nombre", value)}
+                    onChange={(e) => handleChange("nombre", e)}
+                    onEdit={() => {}}
                   />
                   <CampoTextoProfile
                     label="Apellido"
                     value={userData.apellido}
-                    editable={true}
-                    onChange={(value) => handleChange("apellido", value)}
+                    onChange={(e) => handleChange("apellido", e)}
+                    onEdit={() => {}}
                   />
                   <CampoTexto
                     label="Documento de Identidad"
                     value={userData.cc}
-                    readOnly={true}
                     disabled={true}
-                    type="text"
+                    className="bg-gray-100"
                   />
                 </div>
               </div>
@@ -211,22 +220,22 @@ const EditarUsuario = () => {
                   <CampoTextoProfile
                     label="Celular"
                     value={userData.celular}
-                    editable={true}
-                    onChange={(value) => handleChange("celular", value)}
+                    onChange={(e) => handleChange("celular", e)}
+                    onEdit={() => {}}
                     type="text"
                   />
                   <CampoTextoProfile
                     label="Correo Electrónico"
                     value={userData.correo}
-                    editable={true}
-                    onChange={(value) => handleChange("correo", value)}
-                    type="text"
+                    onChange={(e) => handleChange("correo", e)}
+                    onEdit={() => {}}
+                    type="email"
                   />
                   <CampoTextoProfile
                     label="Rol en la Empresa"
                     value={userData.rol}
-                    editable={true}
-                    onChange={(value) => handleChange("rol", value)}
+                    onChange={(e) => handleChange("rol", e)}
+                    onEdit={() => {}}
                   />
                 </div>
               </div>
@@ -241,7 +250,7 @@ const EditarUsuario = () => {
               />
               <Boton
                 tipo="cancelar"
-                label="Cancelar"
+                label="Descartar Cambios"
                 onClick={handleCancel}
                 className="w-full sm:w-auto px-4 py-2"
                 disabled={loading}
