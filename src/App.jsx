@@ -24,7 +24,7 @@ import EditarColaboradorZona from "./components/pages/gestionZonas/EditarColabor
 import AsignacionZonas from "./components/pages/gestionZonas/AsiganacionZonas";
 
 //pagina clientes
-import EditarCliente from "./components/pages/customers/editarCliente";
+import EditarCliente from "./components/pages/customers/EditarCliente";
 import GestionClientes from "./components/pages/customers/GestionClientes";
 import RegistroCliente from "./components/pages/customers/RegistroCliente";
 import VerCliente from "./components/pages/customers/VerCliente";
