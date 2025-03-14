@@ -1,13 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Tipografia from "../../atoms/Tipografia";
 import NavegacionAdministrador from "../../organisms/NavegacionAdm";
 import Icono from "../../atoms/Iconos";
-import Boton from "../../atoms/Botones";
-//import lecheCamisa from "../../assets/leche-camisa.png"; // Asegúrate de tener esta imagen
 
 const GestionProductos = () => {
-    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [openMenuId, setOpenMenuId] = useState(null);
     const [showNavegacion, setShowNavegacion] = useState(true);
@@ -32,39 +29,27 @@ const GestionProductos = () => {
       setSearchTerm(e.target.value);
     };
   
-    const handleRegistrarProducto = () => {
-      console.log("Registrar nuevo producto");
-      // Aquí iría la navegación a la página de registro de productos
-    };
-  
-    const handleEditarProducto = (id) => {
-      console.log(`Editar producto con ID: ${id}`);
-      // Aquí iría la navegación a la página de edición de productos
-    };
-  
     const handleVerProducto = (id) => {
       console.log(`Ver detalles del producto con ID: ${id}`);
-      setOpenMenuId(null); // Cerrar el menú después de la acción
+      setOpenMenuId(null);
     };
   
     const handleEliminarProducto = (id) => {
       console.log(`Eliminar producto con ID: ${id}`);
-      setOpenMenuId(null); // Cerrar el menú después de la acción
+      setOpenMenuId(null);
     };
   
     const toggleMenu = (id, e) => {
-      e.stopPropagation(); // Evitar que el clic se propague
+      e.stopPropagation();
       setOpenMenuId(openMenuId === id ? null : id);
     };
   
-    // Cerrar el menú cuando se hace clic en cualquier parte fuera del menú
     const handleOutsideClick = () => {
       if (openMenuId !== null) {
         setOpenMenuId(null);
       }
     };
   
-    // Función para agrupar productos en filas de 4
     const getProductosEnFilas = () => {
       const filas = [];
       for (let i = 0; i < productos.length; i += 4) {
@@ -122,13 +107,15 @@ const GestionProductos = () => {
             <span className="mr-2">≡</span>
             Filtros
           </button>
-          <button 
-            onClick={handleRegistrarProducto}
-            className="bg-purple-500 text-white py-1.5 px-4 rounded-md text-sm flex items-center"
+          
+          {/* Usando Link para navegación directa sin JavaScript */}
+          <Link 
+            to="/registrar-producto"
+            className="bg-purple-500 text-white py-1.5 px-4 rounded-md text-sm flex items-center no-underline"
           >
             Registrar Producto
             <span className="ml-2">📝</span>
-          </button>
+          </Link>
         </div>
         
         {/* Lista de productos */}
@@ -184,12 +171,13 @@ const GestionProductos = () => {
                       ${producto.precio.toLocaleString()}
                     </Tipografia>
                     
-                    <button
-                      onClick={() => handleEditarProducto(producto.id)}
-                      className="w-full bg-purple-500 text-white py-1 px-3 rounded-md text-sm"
+                    {/* Usando Link para navegación directa sin JavaScript */}
+                    <Link
+                      to={`/editar-producto/${producto.id}`}
+                      className="w-full bg-purple-500 text-white py-1 px-3 rounded-md text-sm text-center no-underline block"
                     >
                       Editar
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}

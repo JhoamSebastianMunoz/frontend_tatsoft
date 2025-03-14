@@ -24,9 +24,10 @@ import EditarColaboradorZona from "./components/pages/gestionZonas/EditarColabor
 import AsignacionZonas from "./components/pages/gestionZonas/AsiganacionZonas";
 
 // Páginas de productos
-import RegisterProductForm from "./components/pages/gestionProductos/RegisterProductForm";
+import RegistrarProducto from "./components/pages/gestionProductos/RegistrarProducto";
 import ProductList from "./components/pages/gestionProductos/ProductList";
 import GestionProductos from "./components/pages/gestionProductos/GestionProductos";
+import EditarProducto from "./components/pages/gestionProductos/EditarProducto"
 
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
@@ -190,17 +191,10 @@ const App = () => {
           />
         } 
       />
-      <Route 
-        path="/registrar-producto" 
-        element={
-          <ProtectedRoute 
-            element={<RegisterProductForm />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-
+      
       <Route path="/gestion-productos" element={<GestionProductos />} />
+      <Route path="/gestion-productos/registrar" element={<RegistrarProducto />} />
+      <Route path="/editar-producto/:id" element={<EditarProducto />} />
       
       {/* Ruta por defecto - Redirige al login */}
       <Route path="*" element={<Navigate to="/" replace />} />
