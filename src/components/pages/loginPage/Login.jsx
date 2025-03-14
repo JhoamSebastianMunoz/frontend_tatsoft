@@ -5,6 +5,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Logo from "../../../components/atoms/Logo";
 import CamposTexto from "../../../components/atoms/CamposTexto";
 import Botones from "../../../components/atoms/Botones";
+import { BallTriangle } from "react-loader-spinner";
 import image from "../../../assets/pixelcut-export (1).jpg";
 
 const Login = () => {
@@ -53,6 +54,28 @@ const Login = () => {
     }
   };
 
+  const CustomButton = () => (
+    <button
+      type="submit"
+      disabled={loading}
+      className={`flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-full transition-colors ${loading ? 'opacity-90' : ''}`}
+    >
+      {loading && (
+        <BallTriangle
+          height={24}
+          width={24}
+          radius={3}
+          color="#FFFFFF"
+          ariaLabel="Cargando"
+          visible={true}
+        />
+      )}
+      <Tipografia className="text-white">
+        {loading ? "Iniciando sesión" : "Iniciar sesión"}
+      </Tipografia>
+    </button>
+  );
+
   return (
     <Tipografia>
       <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-[#842AF3] via-[#DA33E1] to-[#52307C]">
@@ -100,12 +123,7 @@ const Login = () => {
                 </p>
               </div>
               <div className="mt-4 md:mt-5 flex justify-center">
-                <Botones 
-                  label={loading ? "Iniciando sesión..." : "Iniciar sesión"}
-                  tipo="secundario"
-                  type="submit"
-                  disabled={loading}
-                />
+                <CustomButton />
               </div>
               <footer className="text-center text-xs text-gray-500 mt-4">
                 con ❤️ por Tatsoft - 2024

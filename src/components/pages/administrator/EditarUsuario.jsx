@@ -134,6 +134,9 @@ const EditarUsuario = () => {
   const nombreStr = userData.nombre || '';
   const apellidoStr = userData.apellido || '';
   const fullName = `${nombreStr} ${apellidoStr}`.trim();
+  
+  // Verificar si hay cambios no guardados
+  const isDirty = JSON.stringify(userData) !== JSON.stringify(originalData);
 
   if (loading && !userData.nombre) {
     return (

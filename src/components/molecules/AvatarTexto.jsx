@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import { FiCamera, FiEdit } from "react-icons/fi";
 import UsuarioAvatar from "../atoms/AvatarUsuario";
 import Tipografia from "../atoms/Tipografia";
-import { FiEdit, FiCamera } from "react-icons/fi";
 
 const AvatarTexto = ({
   nombre = "Usuario",
@@ -48,6 +48,7 @@ const AvatarTexto = ({
     xxlarge: "border-4"
   };
 
+  // (badgeSizeMap está definido pero no se utiliza, lo dejamos por si lo requieres en el futuro)
   const badgeSizeMap = {
     small: "w-2 h-2",
     medium: "w-3 h-3",
@@ -57,51 +58,47 @@ const AvatarTexto = ({
   };
   
   const borderClass = avatarBorderColor ? `${borderSizeMap[size]} ${avatarBorderColor}` : "";
-  
+
   return (
-    <div className={`relative flex flex-col items-center ${className}`}>
-      {/* Contenedor del avatar con efectos de hover */}
+    <div className={`flex flex-col items-center gap-3 ${className}`}>
       <div 
-        className={`relative ${sizeClasses[size]} mb-4`}
+        className={`relative ${sizeClasses[size]}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Avatar con o sin borde y sombra */}
+        {/* Contenedor del avatar con borde y sombra */}
         <div className={`rounded-full overflow-hidden ${borderClass} shadow-md`}>
           <UsuarioAvatar />
         </div>
         
-        {/* Overlay al hacer hover */}
-        {showEditButton && onEditClick && isHovered && (
-          <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center transition-opacity duration-300 z-10">
-            <button
-              className="text-white hover:text-purple-300 focus:outline-none transition-colors duration-200"
-              onClick={onEditClick}
-              aria-label="Editar avatar"
-            >
-              <FiCamera className={iconSizeClasses[size]} />
-            </button>
-          </div>
+        {/* Overlay de edición al hacer hover */}
+        {showEditButton && onEditClick && (
+          <>
+            {isHovered ? (
+              <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center transition-opacity duration-300 z-10">
+                <button
+                  className="text-white hover:text-purple-300 focus:outline-none transition-colors duration-200"
+                  onClick={onEditClick}
+                  aria-label="Editar avatar"
+                >
+                  <FiCamera className={iconSizeClasses[size]} />
+                </button>
+              </div>
+            ) : (
+              <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4 z-20">
+                <button
+                  className="flex items-center justify-center bg-white rounded-full shadow-md hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300 ease-in-out p-1"
+                  onClick={onEditClick}
+                  aria-label="Editar avatar"
+                >
+                  <FiEdit className={`text-purple-600 ${iconSizeClasses[size]}`} />
+                </button>
+              </div>
+            )}
+          </>
         )}
         
-        {/* Botón de edición (visible siempre) */}
-        {showEditButton && onEditClick && !isHovered && (
-          <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4 z-20">
-            <button
-              className={`
-                flex items-center justify-center bg-white rounded-full shadow-md
-                hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400
-                transition-all duration-300 ease-in-out p-1
-              `}
-              onClick={onEditClick}
-              aria-label="Editar avatar"
-            >
-              <FiEdit className={`text-purple-600 ${iconSizeClasses[size]}`} />
-            </button>
-          </div>
-        )}
-        
-      
+        {/* Badge (si se provee) */}
         {badge && (
           <div className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 border border-white z-10">
             {badge}
@@ -109,6 +106,7 @@ const AvatarTexto = ({
         )}
       </div>
       
+      {/* Nombre del usuario */}
       <div className="text-center space-y-1">
         <Tipografia
           size={textSizeMap[size]}
@@ -116,8 +114,6 @@ const AvatarTexto = ({
         >
           {nombre}
         </Tipografia>
-        
-      
       </div>
     </div>
   );

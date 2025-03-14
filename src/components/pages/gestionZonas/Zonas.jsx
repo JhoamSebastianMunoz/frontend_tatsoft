@@ -205,7 +205,7 @@ const Zonas = () => {
                           </div>
                         </div>
                         <button 
-                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center"
+                          className="w-full bg-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center"
                           onClick={() => handleRealizarPreventa(cliente.id_cliente)}
                         >
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
