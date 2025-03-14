@@ -71,10 +71,7 @@ const VerUsuarioAdm = () => {
   // Actualizado para incluir el parámetro de origen
   const handleEditarUsuario = () => {
     navigate(`/editar/usuario/${id}`);
-<<<<<<< HEAD
-=======
     console.log("Ruta de origen guardada en localStorage: /ver/usuario");
->>>>>>> test-2
   };
 
   const buttonText = userStatus === "activo" ? "Inhabilitar" : "Habilitar";
@@ -336,8 +333,4 @@ const VerUsuarioAdm = () => {
   );
 };
 
-<<<<<<< HEAD
-export default VerUsuario;
-=======
 export default VerUsuarioAdm;
->>>>>>> test-2

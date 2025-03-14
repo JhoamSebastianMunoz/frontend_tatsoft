@@ -3,12 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
-<<<<<<< HEAD
-import Boton from "../../../components/atoms/Botones";
-import Encabezado from "../../../components/molecules/Encabezado";
-import CamposTexto from "../../../components/atoms/CamposTexto";
-=======
->>>>>>> test-2
 
 const EditarZona = () => {
   const { id } = useParams();
@@ -106,79 +100,6 @@ const EditarZona = () => {
     }
   };
 
-<<<<<<< HEAD
-  if (loading && !zona.nombre_zona_trabajo) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <Tipografia>Cargando información de la zona...</Tipografia>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-screen h-screen flex flex-col bg-white">
-      {/* Header */}
-      <div className="bg-purple-600 text-white p-4 flex items-center">
-        <button onClick={() => navigate("/gestion-zonas")} className="text-white mr-4 flex items-center justify-center rounded-full bg-white bg-opacity-30 h-8 w-8">
-          <span>&#8592;</span>
-        </button>
-        <span className="text-xl font-medium">Editar Zona</span>
-      </div>
-     
-      <div className="p-6 flex flex-col space-y-4">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        <div>
-          <label className="font-medium">Nombre:</label>
-          <input
-            type="text"
-            name="nombre_zona_trabajo"
-            value={zona.nombre_zona_trabajo}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mt-1 text-sm"
-            required
-          />
-        </div>
-  
-        <div>
-          <label className="font-medium">Ubicación:</label>
-          <div className="text-sm mt-1 mb-2">
-            Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
-          </div>
-        
-          <div
-            className="w-full h-48 bg-gray-200 rounded flex items-center justify-center cursor-pointer"
-            onClick={handleMapClick}
-          >
-            <div className="text-center text-gray-600">
-              <div className="text-3xl mb-2">📍</div>
-              <div>Haz clic para simular selección de ubicación</div>
-              <div className="text-xs mt-1">(Se requiere API key de Google Maps para mostrar el mapa real)</div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <label className="font-medium">Descripción:</label>
-          <textarea
-            name="descripcion"
-            value={zona.descripcion}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mt-1 text-sm h-24"
-            required
-          />
-        </div>
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={handleGuardarClick}
-            disabled={loading}
-            className="bg-purple-500 text-white py-2 px-4 rounded-md w-full max-w-xs"
-          >
-            {loading ? "Guardando..." : "Guardar cambios"}
-          </button>
-=======
   const handleCancelar = () => {
     navigate("/gestion-zonas");
   };
@@ -239,7 +160,6 @@ const EditarZona = () => {
               />
             </div>
           </Tipografia>
->>>>>>> test-2
         </div>
       </div>
 
@@ -278,12 +198,6 @@ const EditarZona = () => {
       )}
 
       {guardado && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <Icono name="confirmar" size={50} className="mx-auto mb-4" />
-            <p className="text-lg font-semibold">Cambios guardados con éxito</p>
-=======
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
           <div className="bg-white w-96 rounded-xl shadow-2xl overflow-hidden transform transition-all">
             <div className="px-6 py-5">
@@ -299,7 +213,6 @@ const EditarZona = () => {
                 </Tipografia>
               </div>
             </div>
->>>>>>> test-2
           </div>
         </div>
       )}
