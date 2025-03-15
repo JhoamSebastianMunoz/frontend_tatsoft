@@ -1,7 +1,7 @@
 import React from "react";
-import Tipografia from "../../components/atoms/Tipografia";
-import Icono from "../../components/atoms/Iconos";
-import Boton from "../../components/atoms/Botones";
+import Tipografia from "../../atoms/Tipografia";
+import Icono from "../../atoms/Iconos";
+import Boton from "../../atoms/Botones";
 
 const AlertaCancelar = ({ onClose, onConfirm, onCancel }) => {
     const handleConfirmar = () => {

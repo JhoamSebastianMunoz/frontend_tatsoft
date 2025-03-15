@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Tipografia from "../../atoms/Tipografia";
+import Tipografia from "../../../components/atoms/Tipografia";
 import NavegacionAdministrador from "../../organisms/NavegacionAdm";
-import Icono from "../../atoms/Iconos";
+import Icono from "../../../components/atoms/Iconos";
 
 const GestionProductos = () => {
     const [searchTerm, setSearchTerm] = useState("");

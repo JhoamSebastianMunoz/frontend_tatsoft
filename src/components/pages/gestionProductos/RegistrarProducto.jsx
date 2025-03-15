@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Tipografia from "../../atoms/Tipografia";
-import UsuarioAvatar from "../../atoms/AvatarUsuario";
-import Icono from "../../atoms/Iconos";
-import Boton from "../../atoms/Botones";
-import Alerta from "../../molecules/Alertas";
+import Tipografia from "../../../components/atoms/Tipografia";
+import UsuarioAvatar from "../../../components/atoms/AvatarUsuario";
+import Icono from "../../../components/atoms/Iconos";
+import Boton from "../../../components/atoms/Botones";
+import Alerta from "../../../components/molecules/Alertas";
 
 const RegistrarProducto = () => {
   const [formData, setFormData] = useState({
