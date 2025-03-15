@@ -27,6 +27,7 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     // Validar campos requeridos
     if (!formData.cedula || !formData.password) {
       setError("Por favor completa todos los campos.");
@@ -97,17 +98,17 @@ const Login = () => {
                   {error}
                 </div>
               )}
-              <CamposTexto
-                label="Número de identificación"
-                id="cedula"
-                type="text"
+              <CamposTexto 
+                label="Número de identificación" 
+                id="cedula" 
+                type="text" 
                 value={formData.cedula}
                 onChange={handleChange}
                 required
               />
-              <CamposTexto
-                label="Contraseña"
-                id="password"
+              <CamposTexto 
+                label="Contraseña" 
+                id="password" 
                 type="password"
                 value={formData.password}
                 onChange={handleChange}

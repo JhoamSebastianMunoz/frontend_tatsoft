@@ -45,10 +45,6 @@ import ConfirmarPreventa from "./components/pages/preventa/ConfirmarPreventa";
 import HistorialVentas from "./components/pages/ventas/HistorialVentas";
 import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 
-// Páginas de devoluciones
-import HistorialDevoluciones from "./components/pages/devoluciones/HistorialDevoluciones";
-import DetallesDevolucion from "./components/pages/devoluciones/DetallesDevolucion";
-
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
 
@@ -353,27 +349,6 @@ const App = () => {
           />
         }
       />
-
-      {/* Rutas de devoluciones */}
-      <Route
-        path="/devoluciones/historial"
-        element={
-          <ProtectedRoute
-            element={<HistorialDevoluciones />}
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-          />
-        }
-      />
-      <Route
-        path="/devoluciones/detalles/:id"
-        element={
-          <ProtectedRoute
-            element={<DetallesDevolucion />}
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-          />
-        }
-      />
-
       {/* Ruta por defecto - Redirige a página de error 404 */}
       <Route path="*" element={<Pagina404 />} />
     </Routes>
