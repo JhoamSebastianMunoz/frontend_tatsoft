@@ -1,23 +1,62 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Importar useNavigate y useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import Tipografia from "../atoms/Tipografia";
 import Botones from "../atoms/Botones";
 
-const Card = ({ nombre, celular, Rol }) => {
+/**
+ * Componente de tarjeta para mostrar información de usuario
+ * @param {Object} props - Propiedades del componente
+ * @param {string} props.nombre - Nombre del usuario
+ * @param {string} props.celular - Número de celular del usuario
+ * @param {string} props.Rol - Rol del usuario en el sistema
+ * @param {number} props.userId - ID del usuario (opcional)
+ * @param {boolean} props.habilitado - Estado de habilitación del usuario (por defecto: true)
+ */
+const Card = ({ nombre, celular, Rol, userId, habilitado: initialHabilitado = true }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [habilitado, setHabilitado] = useState(true);
-  const navigate = useNavigate(); 
-  const location = useLocation(); 
-  
-  const isGestionUsuarios = location.pathname === "/gestion/usuarios" || 
-                            location.pathname === "/gestion" || 
-                            location.pathname.includes("/gestion");
-  
+  const [habilitado, setHabilitado] = useState(initialHabilitado);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determina si el componente está siendo usado en la página de gestión de usuarios
+  const isGestionUsuarios = location.pathname === "/gestion/usuarios" ||
+                           location.pathname === "/gestion" ||
+                           location.pathname.includes("/gestion");
+
+  /**
+   * Maneja el evento de edición de usuario
+   */
   const handleEditarUsuario = () => {
     const rutaOrigen = isGestionUsuarios ? '/gestion/usuarios' : '/ver/usuario';
     localStorage.setItem('rutaOrigenEdicion', rutaOrigen);
-    console.log(`Ruta de origen guardada en localStorage: ${rutaOrigen}`);
-    navigate(`/editar/usuario?origen=${isGestionUsuarios ? 'gestion' : 'ver'}`);
+    
+    // Si tenemos el ID del usuario, lo usamos para la navegación
+    if (userId) {
+      navigate(`/editar/usuario/${userId}`);
+    } else {
+      // Fallback a la ruta con parámetro query si no tenemos el ID
+      navigate(`/editar/usuario?origen=${isGestionUsuarios ? 'gestion' : 'ver'}`);
+    }
+  };
+
+  /**
+   * Maneja el evento de visualización de usuario
+   */
+  const handleVerUsuario = () => {
+    if (userId) {
+      navigate(`/ver/usuario/${userId}`);
+    }
+    setIsOpen(false);
+  };
+
+  /**
+   * Cambia el estado de habilitación del usuario
+   */
+  const toggleHabilitado = () => {
+    setHabilitado(!habilitado);
+    setIsOpen(false);
+    // Aquí se debería hacer una llamada a la API para cambiar el estado del usuario
+    // userService.updateUserStatus(userId, !habilitado);
   };
 
   return (
@@ -32,6 +71,7 @@ const Card = ({ nombre, celular, Rol }) => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-purple-600 hover:text-purple-900"
+              aria-label="Opciones"
             >
               <svg className="w-6 h-2" fill="currentColor" viewBox="0 0 16 3">
                 <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
@@ -40,19 +80,17 @@ const Card = ({ nombre, celular, Rol }) => {
             {isOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                 <ul className="py-1 text-sm text-gray-600">
-                  <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={()=>navigate("/ver/usuario")}
+                  <li 
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={handleVerUsuario}
                   >
                     Ver
                   </li>
                   <li
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setHabilitado(false);
-                      setIsOpen(false);
-                    }}
+                    onClick={toggleHabilitado}
                   >
-                    Inhabilitar
+                    {habilitado ? "Inhabilitar" : "Habilitar"}
                   </li>
                 </ul>
               </div>
@@ -72,7 +110,7 @@ const Card = ({ nombre, celular, Rol }) => {
             <Botones
               label="Editar"
               tipo="secundario"
-              onClick={handleEditarUsuario} 
+              onClick={handleEditarUsuario}
             />
           </div>
         </div>
