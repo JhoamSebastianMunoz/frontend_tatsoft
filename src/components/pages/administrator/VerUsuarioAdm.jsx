@@ -6,6 +6,7 @@ import Botones from "../../../components/atoms/Botones";
 import Encabezado from "../../../components/molecules/Encabezado";
 import AvatarUsuario from "../../../components/atoms/AvatarUsuario";
 import AlertaInhabilitar from "./AlertaInhabilitar";
+import Loading from "../../../components/Loading/Loading";
 
 const VerUsuarioAdm = () => {
   const { id } = useParams();
@@ -80,25 +81,22 @@ const VerUsuarioAdm = () => {
     : "¿Confirmas la habilitación del usuario?";
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <Tipografia>Cargando información del usuario...</Tipografia>
-      </div>
-    );
+    return <Loading message="Cargando información del usuario..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
-
+      
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 mx-4">
           {error}
         </div>
       )}
-
+      
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:gap-6">
+          {/* Vista móvil */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
             <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-4 relative">
               <div className="flex flex-col items-center pt-5 pb-4">
@@ -115,13 +113,14 @@ const VerUsuarioAdm = () => {
                     </div>
                   )}
                 </div>
+                
                 <Tipografia
                   variant="h2"
                   className="text-white text-center font-semibold my-2"
                 >
                   {userData.nombreCompleto}
                 </Tipografia>
-
+                
                 <div className="mt-2 w-full flex flex-col sm:flex-row gap-2">
                   <Botones
                     tipo={userStatus === "activo" ? "cancelar" : "alerta"}
@@ -138,7 +137,7 @@ const VerUsuarioAdm = () => {
                 </div>
               </div>
             </div>
-
+            
             <div className="p-4 space-y-4">
               <div>
                 <Tipografia variant="label" className="text-gray-700 text-base">
@@ -188,7 +187,8 @@ const VerUsuarioAdm = () => {
               </div>
             </div>
           </div>
-
+          
+          {/* Vista desktop */}
           <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden md:w-1/3 lg:w-1/4">
             <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-6">
               <div className="flex flex-col items-center">
@@ -217,6 +217,7 @@ const VerUsuarioAdm = () => {
                 </Tipografia>
               </div>
             </div>
+            
             <div className="p-5 space-y-3">
               <Botones
                 label="Editar Usuario"
@@ -231,7 +232,7 @@ const VerUsuarioAdm = () => {
               />
             </div>
           </div>
-
+          
           <div className="hidden md:block md:w-2/3 lg:w-3/4 bg-white rounded-xl shadow-lg p-6 lg:p-7">
             <Tipografia
               variant="h2"
@@ -239,7 +240,7 @@ const VerUsuarioAdm = () => {
             >
               Información Personal
             </Tipografia>
-
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
               <div>
                 <Tipografia
@@ -254,6 +255,7 @@ const VerUsuarioAdm = () => {
                   </Tipografia>
                 </div>
               </div>
+              
               <div>
                 <Tipografia
                   variant="label"
@@ -265,6 +267,7 @@ const VerUsuarioAdm = () => {
                   <Tipografia className="font-medium">{userData.cedula}</Tipografia>
                 </div>
               </div>
+              
               <div>
                 <Tipografia
                   variant="label"
@@ -278,6 +281,7 @@ const VerUsuarioAdm = () => {
                   </Tipografia>
                 </div>
               </div>
+              
               <div className="lg:col-span-2">
                 <Tipografia
                   variant="label"
@@ -291,6 +295,7 @@ const VerUsuarioAdm = () => {
                   </Tipografia>
                 </div>
               </div>
+              
               <div className="lg:col-span-2">
                 <Tipografia
                   variant="label"
@@ -320,7 +325,7 @@ const VerUsuarioAdm = () => {
           </div>
         </div>
       </div>
-
+      
       {showAlert && (
         <AlertaInhabilitar
           onClose={handleCloseAlert}

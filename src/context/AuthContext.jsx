@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authService, userService } from '../context/services/ApiService';
+import { authService, userService } from './services/ApiService';
 
 const AuthContext = createContext();
 
@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
-
   const isAuthenticated = !!token;
 
   // Verificar token al iniciar la aplicación
@@ -29,7 +28,6 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     checkToken();
   }, [token]);
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
-import Tipografia from "../../atoms/Tipografia";
+import Tipografia from "../../../components/atoms/Tipografia";
+import Loading from "../../../components/Loading/Loading";
 
 const GestionZonas = () => {
   const navigate = useNavigate();
@@ -58,10 +59,14 @@ const GestionZonas = () => {
 
   // Filtrar zonas por término de búsqueda
   const zonasFiltradas = searchTerm
-    ? zonas.filter(zona => 
+    ? zonas.filter(zona =>
         zona.nombre_zona_trabajo.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : zonas;
+
+  if (loading) {
+    return <Loading message="Cargando zonas..." />;
+  }
 
   return (
     <div className="w-screen h-screen flex flex-col bg-white">
@@ -73,64 +78,64 @@ const GestionZonas = () => {
           Registrar zona
         </Link>
       </div>
-
+      
       {/* Buscador */}
       <div className="w-full flex justify-center p-4">
-        <input 
-          type="text" 
-          placeholder="Buscar Zona" 
+        <input
+          type="text"
+          placeholder="Buscar Zona"
           className="w-1/2 p-2 border rounded-lg"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-
+      
       {/* Mensaje de error */}
       {error && (
         <div className="mx-4 my-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error}
         </div>
       )}
-
+      
       {/* Contenedor de tarjetas */}
-      {loading ? (
-        <div className="flex justify-center items-center flex-grow">
-          <Tipografia>Cargando zonas...</Tipografia>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-auto flex-grow">
-          {zonasFiltradas.length > 0 ? (
-            zonasFiltradas.map((zona) => (
-              <div key={zona.id_zona_de_trabajo} className="p-4 border rounded-lg shadow bg-gray-50">
-                <h3 className="font-bold">{zona.nombre_zona_trabajo}</h3>
-                <p><strong>Ubicación:</strong> Coordenadas: {zona.latitud || '23.6345'}, {zona.longitud || '-102.5528'}</p>
-                <p className="text-sm text-gray-600">{zona.descripcion}</p>
-                <div className="flex justify-between mt-2">
-                  <div className="flex space-x-2">
-                    <Link to={`/editar-zona/${zona.id_zona_de_trabajo}`} className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-bold">
-                      Editar
-                    </Link>
-                    <Link to={`/gestion-zonas/colaboradores/${zona.id_zona_de_trabajo}`} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">
-                      Colaboradores
-                    </Link>
-                  </div>
-                  <button 
-                    onClick={() => handleEliminarClick(zona)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-auto flex-grow">
+        {zonasFiltradas.length > 0 ? (
+          zonasFiltradas.map((zona) => (
+            <div key={zona.id_zona_de_trabajo} className="p-4 border rounded-lg shadow bg-gray-50">
+              <h3 className="font-bold">{zona.nombre_zona_trabajo}</h3>
+              <p><strong>Ubicación:</strong> Coordenadas: {zona.latitud || '23.6345'}, {zona.longitud || '-102.5528'}</p>
+              <p className="text-sm text-gray-600">{zona.descripcion}</p>
+              <div className="flex justify-between mt-2">
+                <div className="flex space-x-2">
+                  <Link
+                    to={`/editar-zona/${zona.id_zona_de_trabajo}`}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
                   >
-                    Eliminar
-                  </button>
+                    Editar
+                  </Link>
+                  <Link
+                    to={`/gestion-zonas/colaboradores/${zona.id_zona_de_trabajo}`}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
+                  >
+                    Colaboradores
+                  </Link>
                 </div>
+                <button
+                  onClick={() => handleEliminarClick(zona)}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
+                >
+                  Eliminar
+                </button>
               </div>
-            ))
-          ) : (
-            <div className="col-span-2 text-center text-gray-500">
-              No se encontraron zonas. {zonas.length > 0 ? 'Intenta con otra búsqueda.' : 'Añade una nueva zona.'}
             </div>
-          )}
-        </div>
-      )}
-
+          ))
+        ) : (
+          <div className="col-span-2 text-center text-gray-500">
+            No se encontraron zonas. {zonas.length > 0 ? 'Intenta con otra búsqueda.' : 'Añade una nueva zona.'}
+          </div>
+        )}
+      </div>
+      
       {/* Alerta de Confirmación */}
       {mostrarAlerta && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -138,13 +143,13 @@ const GestionZonas = () => {
             <Icono name="eliminarAlert" size={50} className="mx-auto mb-4" />
             <p className="text-lg font-semibold">¿Desea eliminar la zona?</p>
             <div className="flex justify-center mt-4">
-              <button 
-                onClick={() => setMostrarAlerta(false)} 
+              <button
+                onClick={() => setMostrarAlerta(false)}
                 className="bg-red-400 text-white px-4 py-2 rounded-lg mx-2"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 onClick={handleConfirmarEliminar}
                 className="bg-green-400 text-white px-4 py-2 rounded-lg mx-2"
               >
@@ -154,7 +159,7 @@ const GestionZonas = () => {
           </div>
         </div>
       )}
-
+      
       {/* Alerta de Eliminación Exitosa */}
       {eliminado && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

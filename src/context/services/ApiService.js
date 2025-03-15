@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// URLs base de los microservicios 
+// URLs base de los microservicios
 const AUTH_API_URL = '/auth-api';
 const USERS_API_URL = '/users-api';
 const AREAS_API_URL = '/areas-api';
@@ -67,22 +67,22 @@ export const userService = {
   getUserProfile: () => usersApi.get('/api/usuarios/perfil'),
   
   // Nuevos endpoints de asignación de zonas
-  assignZonasToUser: (idZona, colaboradoresIds) => 
+  assignZonasToUser: (idZona, colaboradoresIds) =>
     usersApi.post(`/api/usuarios/asignar-zonas/${idZona}`, { zonas: colaboradoresIds }),
   
-  getUserZonas: (idUsuario) => 
+  getUserZonas: (idUsuario) =>
     usersApi.get(`/api/usuarios/zonas/${idUsuario}`),
   
-  getUserOwnZonas: () => 
+  getUserOwnZonas: () =>
     usersApi.get('/api/usuarios/mis-zonas'),
   
-  getClientesZona: (idZona) => 
+  getClientesZona: (idZona) =>
     usersApi.get(`/api/usuarios/getclientes-zonas/${idZona}`),
   
-  removeZonaFromUser: (idUsuario, idZona) => 
+  removeZonaFromUser: (idUsuario, idZona) =>
     usersApi.delete(`/api/usuarios/eliminar-zona/${idUsuario}/${idZona}`),
   
-  removeAllZonasFromUser: (idUsuario) => 
+  removeAllZonasFromUser: (idUsuario) =>
     usersApi.delete(`/api/usuarios/eliminar-zonas/${idUsuario}`)
 };
 
