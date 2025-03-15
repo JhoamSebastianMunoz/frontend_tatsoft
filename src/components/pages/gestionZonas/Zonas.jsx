@@ -5,7 +5,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
 import BarraZona from "../../../components/molecules/BarraZonas";
 import Encabezado from "../../../components/molecules/Encabezado";
-import Sidebar from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/SidebarAdm";
 
 const Zonas = () => {
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ const Zonas = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 to-indigo-50">
       <div className="fixed top-0 left-0 z-50 h-full">
-        <Sidebar activeMenuItem="gest-zonas" />
+        <SidebarAdm />
       </div>
       <div className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md">
         <Encabezado 

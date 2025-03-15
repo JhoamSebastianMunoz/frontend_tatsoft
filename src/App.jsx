@@ -247,7 +247,6 @@ const App = () => {
      />     
 
      {/* Ruta por defecto - Redirige al login */}
-     <Route path="*" element={<Navigate to="/" replace />} />
      <Route path="*" element={<Pagina404 />} />
      </Routes>
      );
