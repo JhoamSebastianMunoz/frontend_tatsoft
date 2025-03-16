@@ -46,7 +46,7 @@ import HistorialVentas from "./components/pages/ventas/HistorialVentas";
 import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 
 //páginas de preventa
-import Presale from "./components/pages/pre-sale/presale";
+import Preventa from "./components/pages/preventa/preventas";
 
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
@@ -291,7 +291,7 @@ const App = () => {
       path="/preventa"
       element={
         <ProtectedRoute 
-        element={<Presale />}
+        element={<Preventa />}
         allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
         />
       }
