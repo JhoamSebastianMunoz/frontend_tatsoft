@@ -40,13 +40,14 @@ import NuevaPreventa from "./components/pages/preventa/NuevaPreventa";
 import HistorialPreventas from "./components/pages/preventa/HistorialPreventas";
 import DetallesPreventa from "./components/pages/preventa/DetallesPreventa";
 import ConfirmarPreventa from "./components/pages/preventa/ConfirmarPreventa";
+import Preventa from "./components/pages/preventa/preventas";
 
 // Páginas de ventas
 import HistorialVentas from "./components/pages/ventas/HistorialVentas";
 import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 
-//páginas de preventa
-import Preventa from "./components/pages/preventa/preventas";
+//página de ventas y devoluciones
+import VentasDevoluciones from "./components/pages/ventasDevoluciones/VentasDevoluciones"
 
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
@@ -361,6 +362,18 @@ const App = () => {
           />
         }
       />
+
+      {/* Ruta de ventas y devoluciones */}
+        <Route
+        path="/ventas/devoluciones"
+        element={
+          <ProtectedRoute
+          element={<VentasDevoluciones/>}
+          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+          }
+        />
+      
       {/* Ruta por defecto - Redirige a página de error 404 */}
       <Route path="*" element={<Pagina404 />} />
     </Routes>
