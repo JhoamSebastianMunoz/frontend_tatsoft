@@ -7,18 +7,22 @@ import CampoTextoProfile from "../../../components/atoms/CamposTextoProfile";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Encabezado from "../../../components/molecules/Encabezado";
 import Boton from "../../atoms/Botones";
-import Sidebar from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/SidebarAdm";
+import Loading from "../../Loading/Loading";
 
 const Profile = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
+  
   const [userData, setUserData] = useState({
     nombreCompleto: "",
     cedula: "",
     celular: "",
     correo: "",
-    rol: "",
+    rol: ""
   });
+  
+  const [userZonas, setUserZonas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,25 +30,50 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        
+       
         // Verificamos si tenemos datos de usuario en el contexto
         if (user && Object.keys(user).length > 0) {
           setUserData(user);
+          
+          // Si es un colaborador, obtener sus zonas asignadas
+          if (user.rol === "COLABORADOR") {
+            try {
+              const zonasResponse = await userService.getUserOwnZonas();
+              if (zonasResponse && zonasResponse.data && zonasResponse.data.zonas) {
+                setUserZonas(zonasResponse.data.zonas);
+              }
+            } catch (zonasError) {
+              console.error("Error al cargar zonas del usuario:", zonasError);
+            }
+          }
+          
           setLoading(false);
           return;
         }
-        
+       
         // Si no hay datos en contexto pero hay token, consultamos la API
         if (token) {
           const response = await userService.getUserProfile();
           if (response && response.data) {
             setUserData(response.data);
+            
+            // Si es un colaborador, obtener sus zonas asignadas
+            if (response.data.rol === "COLABORADOR") {
+              try {
+                const zonasResponse = await userService.getUserOwnZonas();
+                if (zonasResponse && zonasResponse.data && zonasResponse.data.zonas) {
+                  setUserZonas(zonasResponse.data.zonas);
+                }
+              } catch (zonasError) {
+                console.error("Error al cargar zonas del usuario:", zonasError);
+              }
+            }
           } else {
             throw new Error("No se pudo obtener la información del perfil");
           }
         } else {
           // Redirección a login si no hay token
-          navigate("/login", { replace: true });
+          navigate("/", { replace: true });
           return;
         }
       } catch (error) {
@@ -54,59 +83,55 @@ const Profile = () => {
         setLoading(false);
       }
     };
-
+    
     fetchUserData();
   }, [user, token, navigate]);
 
   // Función para dividir el nombre correctamente
   const parseFullName = (fullName) => {
     if (!fullName) return { nombre: "", apellido: "" };
-    
+   
     const parts = fullName.trim().split(" ");
     if (parts.length === 1) return { nombre: parts[0], apellido: "" };
-    
+   
     // Asumimos que el primer nombre es el primer elemento y el resto son apellidos
     const nombre = parts[0];
     const apellido = parts.slice(1).join(" ");
-    
+   
     return { nombre, apellido };
   };
 
   const { nombre, apellido } = parseFullName(userData.nombreCompleto);
-
+  
   // Estados para la funcionalidad de edición (preparación para futuras implementaciones)
   const [isEditing, setIsEditing] = useState(false);
-  
+ 
   // Función para manejar el click en el avatar - este es un placeholder
   const handleEditAvatar = () => {
     console.log("Editar avatar");
     // Implementar lógica para editar avatar
   };
 
+  const handleZonasClick = () => {
+    navigate("/zonas");
+  };
+
   // Componente de carga
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700 mx-auto mb-3"></div>
-          <Tipografia>Cargando información del perfil...</Tipografia>
-        </div>
-      </div>
-    );
+    return <Loading message="Cargando información del perfil..." />;
   }
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <div className="fixed top-0 left-0 z-50">
-        <Sidebar  />
+      <div className="fixed top-0 left-0 z-50 h-full">
+        <SidebarAdm />
       </div>
       <div className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md">
-        <Encabezado 
+        <Encabezado
           className="py-4 md:py-3"
           mensaje="Mi Perfil"
         />
       </div>
-
       {/* Contenedor principal centrado sin respetar el sidebar */}
       <div className="flex justify-center px-4 py-6 pt-20 transition-all duration-300">
         <div className="w-full max-w-3xl">
@@ -121,18 +146,16 @@ const Profile = () => {
             </div>
           )}
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
-
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-5">
               <div className="flex justify-center mb-6">
-                <AvatarTexto 
-                  nombre={userData.nombreCompleto || "Usuario"} 
-                  size="large" 
-                  
+                <AvatarTexto
+                  nombre={userData.nombreCompleto || "Usuario"}
+                  size="large"
                   showEditButton={true}
-                  onEditClick={handleEditAvatar} 
+                  onEditClick={handleEditAvatar}
                 />
               </div>
-            
+           
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="text-center md:text-left mb-4 md:mb-0">
                   <div className="inline-flex items-center bg-purple-800 bg-opacity-50 px-4 py-2 rounded-full">
@@ -140,7 +163,7 @@ const Profile = () => {
                     <Tipografia className="text-white">{userData.rol || "Sin rol asignado"}</Tipografia>
                   </div>
                 </div>
-                
+               
                 <div className="mt-4 md:mt-0">
                   <button
                     onClick={() => setIsEditing(!isEditing)}
@@ -155,7 +178,6 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-
             <div className="p-4 md:p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                 <div>
@@ -167,19 +189,19 @@ const Profile = () => {
                       Información Personal
                     </Tipografia>
                     <div className="space-y-4">
-                      <CampoTextoProfile 
+                      <CampoTextoProfile
                         label="Nombre"
                         value={nombre}
                         readOnly={!isEditing}
                         icon="user"
                       />
-                      <CampoTextoProfile 
+                      <CampoTextoProfile
                         label="Apellido"
                         value={apellido}
                         readOnly={!isEditing}
                         icon="user"
                       />
-                      <CampoTextoProfile 
+                      <CampoTextoProfile
                         label="Documento de Identidad"
                         value={userData.cedula || "No disponible"}
                         readOnly={!isEditing}
@@ -188,7 +210,6 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
-
                 <div>
                   <div className="bg-gray-100 p-4 md:p-5 rounded-lg">
                     <Tipografia className="text-indigo-800 font-semibold mb-4 flex items-center">
@@ -198,19 +219,19 @@ const Profile = () => {
                       Información de Contacto
                     </Tipografia>
                     <div className="space-y-4">
-                      <CampoTextoProfile 
+                      <CampoTextoProfile
                         label="Teléfono Móvil"
                         value={userData.celular || "No disponible"}
                         readOnly={!isEditing}
                         icon="phone"
                       />
-                      <CampoTextoProfile 
+                      <CampoTextoProfile
                         label="Correo Electrónico"
                         value={userData.correo || "No disponible"}
                         readOnly={!isEditing}
                         icon="mail"
                       />
-                      <CampoTextoProfile 
+                      <CampoTextoProfile
                         label="Rol en el Sistema"
                         value={userData.rol || "No disponible"}
                         readOnly={true}
@@ -220,9 +241,32 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Mostrar información de zonas si es un colaborador */}
+              {userData.rol === "COLABORADOR" && userZonas.length > 0 && (
+                <div className="mt-8">
+                  <div className="bg-blue-50 p-4 md:p-5 rounded-lg">
+                    <Tipografia className="text-blue-800 font-semibold mb-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Zonas Asignadas
+                    </Tipografia>
+                    <div className="flex flex-wrap gap-2">
+                      {userZonas.map((zona, index) => (
+                        <div key={index} className="bg-blue-100 px-3 py-1 rounded-md text-blue-800">
+                          <Tipografia>{zona.nombre_zona_trabajo}</Tipografia>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex flex-wrap justify-center gap-4 mt-8">
                 <Boton
-                  onClick={() => navigate("/zonas")}
+                  onClick={handleZonasClick}
                   tipo="secundario"
                   label="Ir a Zonas de Trabajo"
                   size="large"

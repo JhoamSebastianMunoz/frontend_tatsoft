@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
+import Tipografia from "../../../components/atoms/Tipografia";
+import Boton from "../../../components/atoms/Botones";
 
 const RegistrarZona = () => {
   const navigate = useNavigate();
@@ -78,13 +80,13 @@ const RegistrarZona = () => {
           </button>
           Registrar Zona
         </div>
-
+        
         {error && (
           <div className="mx-6 mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
           </div>
         )}
-
+        
         <form onSubmit={handleGuardarClick} className="p-6 space-y-4">
           <div>
             <label className="font-bold">Nombre:</label>
@@ -97,13 +99,13 @@ const RegistrarZona = () => {
               required
             />
           </div>
-
+          
           <div>
             <label className="font-bold">Ubicación:</label>
             <div className="text-sm mt-1 mb-2">
               Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
             </div>
-
+            
             {/* Simulación de mapa */}
             <div
               className="w-full h-48 bg-gray-200 rounded flex items-center justify-center cursor-pointer"
@@ -116,7 +118,7 @@ const RegistrarZona = () => {
               </div>
             </div>
           </div>
-
+          
           <div>
             <label className="font-bold">Descripción:</label>
             <textarea
@@ -128,19 +130,18 @@ const RegistrarZona = () => {
               rows="4"
             />
           </div>
-
+          
           <div className="flex justify-center">
-            <button
+            <Boton
               type="submit"
+              label={loading ? "Guardando..." : "Guardar"}
               disabled={loading}
-              className="w-1/2 bg-purple-600 text-white p-2 rounded-lg text-lg"
-            >
-              {loading ? "Guardando..." : "Guardar"}
-            </button>
+              tipo="secundario"
+            />
           </div>
         </form>
       </div>
-
+      
       {/* Alerta de Confirmación */}
       {mostrarAlerta && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -163,7 +164,7 @@ const RegistrarZona = () => {
           </div>
         </div>
       )}
-
+      
       {/* Alerta de Registro Exitoso */}
       {guardado && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

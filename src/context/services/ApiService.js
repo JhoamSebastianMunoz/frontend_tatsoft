@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// URLs base de los microservicios 
+// URLs base de los microservicios
 const AUTH_API_URL = '/auth-api';
 const USERS_API_URL = '/users-api';
 const AREAS_API_URL = '/areas-api';
@@ -67,22 +67,22 @@ export const userService = {
   getUserProfile: () => usersApi.get('/api/usuarios/perfil'),
   
   // Nuevos endpoints de asignación de zonas
-  assignZonasToUser: (idZona, colaboradoresIds) => 
+  assignZonasToUser: (idZona, colaboradoresIds) =>
     usersApi.post(`/api/usuarios/asignar-zonas/${idZona}`, { zonas: colaboradoresIds }),
   
-  getUserZonas: (idUsuario) => 
+  getUserZonas: (idUsuario) =>
     usersApi.get(`/api/usuarios/zonas/${idUsuario}`),
   
-  getUserOwnZonas: () => 
+  getUserOwnZonas: () =>
     usersApi.get('/api/usuarios/mis-zonas'),
   
-  getClientesZona: (idZona) => 
+  getClientesZona: (idZona) =>
     usersApi.get(`/api/usuarios/getclientes-zonas/${idZona}`),
   
-  removeZonaFromUser: (idUsuario, idZona) => 
+  removeZonaFromUser: (idUsuario, idZona) =>
     usersApi.delete(`/api/usuarios/eliminar-zona/${idUsuario}/${idZona}`),
   
-  removeAllZonasFromUser: (idUsuario) => 
+  removeAllZonasFromUser: (idUsuario) =>
     usersApi.delete(`/api/usuarios/eliminar-zonas/${idUsuario}`)
 };
 
@@ -118,6 +118,14 @@ export const productService = {
   uploadImage: (formData) => productsApi.post('/upload-image', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  getAllCategories: () => productsApi.get('/getAll-category'),
+  getCategoryById: (id) => productsApi.get(`/getById-category/${id}`),
+  createCategory: (categoryData) => productsApi.post('/register-category', categoryData),
+  updateCategory: (id, categoryData) => productsApi.put(`/update-category/${id}`, categoryData),
+  deleteCategory: (id) => productsApi.delete(`/delete_category/${id}`),
+  registerStock: (id, stockData) => productsApi.post(`/register-stock/${id}`, stockData),
+  getHistoricalStock: () => productsApi.get('/get-hitoricalStock'),
+  getStockDetails: (id) => productsApi.get(`/get-detailsStock/${id}`)
 };
 
 // Servicios de preventas
@@ -138,13 +146,6 @@ export const saleService = {
   getAllSales: () => presalesApi.get('/getAllSales'),
   getSaleById: (id) => presalesApi.get(`/getByIdSale/${id}`),
   getSaleDetails: (id) => presalesApi.get(`/getSaleDetails/${id}`),
-};
-
-// Servicios de devoluciones
-export const refundService = {
-  getAllRefunds: () => presalesApi.get('/getAllRefund'),
-  getRefundById: (id) => presalesApi.get(`/getByIdRefund/${id}`),
-  getRefundDetails: (id) => presalesApi.get(`/getRefundDetails/${id}`),
 };
 
 // Servicio de autenticación directa (para login)

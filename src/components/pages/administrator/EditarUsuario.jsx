@@ -8,6 +8,7 @@ import Boton from "../../../components/atoms/Botones";
 import CampoTexto from "../../../components/atoms/CamposTexto";
 import AlertaEdicion from "./AlertaEdicion";
 import Icono from "../../../components/atoms/Iconos";
+import Loading from "../../../components/Loading/Loading";
 
 const EditarUsuario = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const EditarUsuario = () => {
     correo: "",
     rol: "",
   });
+
   const [originalData, setOriginalData] = useState({});
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ const EditarUsuario = () => {
     if (field === "cc") {
       return; // No se permite editar el número de cédula
     }
-   
+    
     let stringValue = '';
     if (value && typeof value === 'object' && value.target) {
       stringValue = value.target.value;
@@ -77,13 +79,13 @@ const EditarUsuario = () => {
     else {
       stringValue = String(value);
     }
-   
+    
     if (field === "celular" && stringValue !== '') {
       if (!/^\d*$/.test(stringValue)) {
         return;
       }
     }
-   
+    
     setUserData(prev => ({
       ...prev,
       [field]: stringValue
@@ -134,16 +136,12 @@ const EditarUsuario = () => {
   const nombreStr = userData.nombre || '';
   const apellidoStr = userData.apellido || '';
   const fullName = `${nombreStr} ${apellidoStr}`.trim();
-  
+
   // Verificar si hay cambios no guardados
   const isDirty = JSON.stringify(userData) !== JSON.stringify(originalData);
-
+  
   if (loading && !userData.nombre) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <Tipografia>Cargando información del usuario...</Tipografia>
-      </div>
-    );
+    return <Loading message="Cargando información del usuario..." />;
   }
 
   return (
@@ -155,7 +153,7 @@ const EditarUsuario = () => {
             <div className="absolute top-4 left-4 cursor-pointer" onClick={handleVolver}>
               <Icono name="volver" size={45} color="white" />
             </div>
-           
+            
             <div className="flex flex-col items-center">
               <div className="mb-4 transform hover:scale-105 transition-transform duration-300">
                 <AvatarTexto nombre={fullName} size="large" />
@@ -167,7 +165,7 @@ const EditarUsuario = () => {
               )}
             </div>
           </div>
-
+          
           <div className="p-4 md:p-1">
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -186,6 +184,7 @@ const EditarUsuario = () => {
                 </div>
               )}
             </div>
+            
             <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
               <div className="shadow-md p-7 rounded-xl">
                 <Tipografia className="text-purple-700 font-medium mb-4">
@@ -212,6 +211,7 @@ const EditarUsuario = () => {
                   />
                 </div>
               </div>
+              
               <div className="p-7 shadow-md rounded-xl">
                 <Tipografia className="text-purple-700 font-medium mb-4">
                   Información de Contacto
@@ -240,28 +240,29 @@ const EditarUsuario = () => {
                 </div>
               </div>
             </div>
+            
             <div className="mt-4 flex flex-col sm:flex-row justify-center w-full gap-3 pb-4">
               <Boton
                 tipo="primario"
                 label={loading ? "Guardando..." : "Guardar Cambios"}
                 onClick={handleSave}
                 className="w-full sm:w-auto px-4 py-2"
-                disabled={loading}
+                disabled={loading || !isDirty}
               />
               <Boton
                 tipo="cancelar"
                 label="Descartar Cambios"
                 onClick={handleCancel}
                 className="w-full sm:w-auto px-4 py-2"
-                disabled={loading}
+                disabled={loading || !isDirty}
               />
             </div>
           </div>
         </div>
       </div>
-
+      
       {showAlert && (
-        <AlertaEdicion 
+        <AlertaEdicion
           onClose={handleCloseAlert}
           onConfirm={handleCloseAlert}
           onCancel={() => setShowAlert(false)}

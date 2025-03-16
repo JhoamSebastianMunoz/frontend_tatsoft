@@ -23,20 +23,27 @@ import ColaboradoresZona from "./components/pages/gestionZonas/ColaboradoresZona
 import EditarColaboradorZona from "./components/pages/gestionZonas/EditarColaboradorZona";
 import AsignacionZonas from "./components/pages/gestionZonas/AsiganacionZonas";
 
-//pagina clientes
+// Páginas de clientes
 import EditarCliente from "./components/pages/customers/EditarCliente";
 import GestionClientes from "./components/pages/customers/GestionClientes";
 import RegistroCliente from "./components/pages/customers/RegistroCliente";
 import VerCliente from "./components/pages/customers/VerCliente";
 
-//Alertas
-import Page404 from "./components/pages/alert/page404";
-
 // Páginas de productos
 import RegistrarProducto from "./components/pages/gestionProductos/RegistrarProducto";
 import ProductList from "./components/pages/gestionProductos/ProductList";
 import GestionProductos from "./components/pages/gestionProductos/GestionProductos";
-import EditarProducto from "./components/pages/gestionProductos/EditarProducto"
+import EditarProducto from "./components/pages/gestionProductos/EditarProducto";
+
+// Páginas de preventa
+import NuevaPreventa from "./components/pages/preventa/NuevaPreventa";
+import HistorialPreventas from "./components/pages/preventa/HistorialPreventas";
+import DetallesPreventa from "./components/pages/preventa/DetallesPreventa";
+import ConfirmarPreventa from "./components/pages/preventa/ConfirmarPreventa";
+
+// Páginas de ventas
+import HistorialVentas from "./components/pages/ventas/HistorialVentas";
+import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 
 //páginas de preventa
 import Presale from "./components/pages/pre-sale/presale";
@@ -44,9 +51,7 @@ import Presale from "./components/pages/pre-sale/presale";
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
 
-
-
-// Componente para rutas no autorizadas
+// Componente para rutas no autorizadas y errores
 import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
 import Loading from "./components/Loading/Loading";
 import Pagina404 from "./components/pages/alert/page404";
@@ -88,196 +93,278 @@ const App = () => {
             element={<Profile />}
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
-        } 
+        }
       />
-      
+     
       {/* Rutas de administrador - Gestión de usuarios */}
-      <Route 
-        path="/admin" 
-        element={
-          <ProtectedRoute 
-            element={<GestionUsuarios />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/ver/usuario/:id" 
-        element={
-          <ProtectedRoute 
-            element={<VerUsuario />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/editar/usuario/:id" 
-        element={
-          <ProtectedRoute 
-            element={<EditarUsuario />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/registrar/usuario" 
-        element={
-          <ProtectedRoute 
-            element={<RegistroUsuario />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      
-      {/* Rutas de gestión de zonas */}
-      <Route 
-        path="/zonas" 
-        element={
-          <ProtectedRoute 
-            element={<Zonas />} 
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/gestion-zonas" 
-        element={
-          <ProtectedRoute 
-            element={<GestionZonas />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/registrar-zona" 
-        element={
-          <ProtectedRoute 
-            element={<RegistrarZona />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/editar-zona/:id" 
-        element={
-          <ProtectedRoute 
-            element={<EditarZona />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      
-      {/* Nuevas rutas de gestión de zonas y colaboradores */}
-      <Route 
-        path="/gestion-zonas/colaboradores/:id" 
-        element={
-          <ProtectedRoute 
-            element={<ColaboradoresZona />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/gestion-zonas/editar-colaboradores/:id" 
-        element={
-          <ProtectedRoute 
-            element={<EditarColaboradorZona />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      <Route 
-        path="/gestion-zonas/asignar/:id" 
-        element={
-          <ProtectedRoute 
-            element={<AsignacionZonas />} 
-            allowedRoles={["ADMINISTRADOR"]} 
-          />
-        } 
-      />
-      
-      {/* Rutas de productos */}
-      <Route 
-        path="/productos" 
-        element={
-          <ProtectedRoute 
-            element={<ProductList />} 
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]} 
-          />
-        } 
-      />
-      
-      <Route path="/gestion-productos" element={<GestionProductos />} />
-      <Route path="/gestion-productos/registrar" element={<RegistrarProducto />} />
-      <Route path="/editar-producto/:id" element={<EditarProducto />} />
-           
-      {/* Ruta clientes */}
       <Route
-      path="/ver/cliente"
-      element={
-        <ProtectedRoute
-          element={<VerCliente />}
-          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
-     />
-     <Route
-      pathe="/editar/cliente"
-      element={
-        <ProtectedRoute
-          element={<EditarCliente />}
-          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
-     />     
-
-     <Route
-      path="/gestion/clientes"
-      element={
-        <ProtectedRoute
-          element={<GestionClientes />}
-          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
-     />     
-
-     <Route
-      path="/registro/cliente"
-      element={
-        <ProtectedRoute
-          element={<RegistroCliente />}
-          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
-     />     
-
-     {/* Ruta preventa */}
-     <Route path="/preventas"
-     element={
-      <ProtectedRoute
-      element={<Presale/>}
-      allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-     />
-     }
-     />
-
-
-
-
-     {/* Ruta por defecto - Redirige al login */}
-     <Route path="*" element={<Pagina404 />} />
-     </Routes>
-     );
-     };     
-
-     export default App;     
+        path="/admin"
+        element={
+          <ProtectedRoute
+            element={<GestionUsuarios />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/gestion/usuarios"
+        element={
+          <ProtectedRoute
+            element={<GestionUsuarios />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/ver/usuario/:id"
+        element={
+          <ProtectedRoute
+            element={<VerUsuario />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/editar/usuario/:id"
+        element={
+          <ProtectedRoute
+            element={<EditarUsuario />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/registrar/usuario"
+        element={
+          <ProtectedRoute
+            element={<RegistroUsuario />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
      
+      {/* Rutas de gestión de zonas */}
+      <Route
+        path="/zonas"
+        element={
+          <ProtectedRoute
+            element={<Zonas />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/gestion-zonas"
+        element={
+          <ProtectedRoute
+            element={<GestionZonas />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/registrar-zona"
+        element={
+          <ProtectedRoute
+            element={<RegistrarZona />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/editar-zona/:id"
+        element={
+          <ProtectedRoute
+            element={<EditarZona />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
      
+      {/* Nuevas rutas de gestión de zonas y colaboradores */}
+      <Route
+        path="/gestion-zonas/colaboradores/:id"
+        element={
+          <ProtectedRoute
+            element={<ColaboradoresZona />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/gestion-zonas/editar-colaboradores/:id"
+        element={
+          <ProtectedRoute
+            element={<EditarColaboradorZona />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/gestion-zonas/asignar/:id"
+        element={
+          <ProtectedRoute
+            element={<AsignacionZonas />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+     
+      {/* Rutas de productos */}
+      <Route
+        path="/productos"
+        element={
+          <ProtectedRoute
+            element={<ProductList />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/gestion-productos"
+        element={
+          <ProtectedRoute
+            element={<GestionProductos />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/registrar-producto"
+        element={
+          <ProtectedRoute
+            element={<RegistrarProducto />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/editar-producto/:id"
+        element={
+          <ProtectedRoute
+            element={<EditarProducto />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+         
+      {/* Rutas de clientes */}
+      <Route
+        path="/ver/cliente/:id"
+        element={
+          <ProtectedRoute
+            element={<VerCliente />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/editar/cliente/:id"
+        element={
+          <ProtectedRoute
+            element={<EditarCliente />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />    
+      <Route
+        path="/gestion/clientes"
+        element={
+          <ProtectedRoute
+            element={<GestionClientes />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />    
+      <Route
+        path="/registro/cliente"
+        element={
+          <ProtectedRoute
+            element={<RegistroCliente />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
 
+      {/* Rutas de preventas */}
+      <Route
+      path="/preventa"
+      element={
+        <ProtectedRoute 
+        element={<Presale />}
+        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+      />
+      <Route
+        path="/preventa/nueva"
+        element={
+          <ProtectedRoute
+            element={<NuevaPreventa />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/preventa/historial"
+        element={
+          <ProtectedRoute
+            element={<HistorialPreventas />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/preventa/detalles/:id"
+        element={
+          <ProtectedRoute
+            element={<DetallesPreventa />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/preventa/confirmar/:id"
+        element={
+          <ProtectedRoute
+            element={<ConfirmarPreventa />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/preventa/cliente/:id"
+        element={
+          <ProtectedRoute
+            element={<NuevaPreventa />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
 
-
-
-
-
-
-
+      {/* Rutas de ventas */}
+      <Route
+        path="/ventas/historial"
+        element={
+          <ProtectedRoute
+            element={<HistorialVentas />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/ventas/detalles/:id"
+        element={
+          <ProtectedRoute
+            element={<DetallesVenta />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      {/* Ruta por defecto - Redirige a página de error 404 */}
+      <Route path="*" element={<Pagina404 />} />
+    </Routes>
+  );
+};
+   
+export default App;

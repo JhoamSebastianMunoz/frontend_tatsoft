@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Tipografia from "../../atoms/Tipografia";
-import UsuarioAvatar from "../../atoms/AvatarUsuario";
-import Icono from "../../atoms/Iconos";
-import Boton from "../../atoms/Botones";
+import Tipografia from "../../../components/atoms/Tipografia";
+import UsuarioAvatar from "../../../components/atoms/AvatarUsuario";
+import Icono from "../../../components/atoms/Iconos";
+import Boton from "../../../components/atoms/Botones";
 
 const EditarProducto = () => {
   const { id } = useParams();
