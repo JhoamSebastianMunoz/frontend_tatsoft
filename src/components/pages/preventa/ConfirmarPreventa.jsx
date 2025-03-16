@@ -8,6 +8,7 @@ import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
+import SidebarAdm from "../../organisms/SidebarAdm";
 import Loading from "../../Loading/Loading";
 
 const ConfirmarPreventa = () => {
@@ -103,7 +104,7 @@ const ConfirmarPreventa = () => {
         mensaje="Confirmar Preventa" 
         onClick={handleVolver}
       />
-
+      <SidebarAdm/>
       <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
         {error && (

@@ -8,6 +8,7 @@ import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
+import SidebarAdm from "../../organisms/SidebarAdm";
 import CampoTexto from "../../atoms/CamposTexto";
 import Loading from "../../Loading/Loading";
 
@@ -107,7 +108,7 @@ const HistorialPreventas = () => {
         mensaje="Historial de Preventas" 
         onClick={() => navigate("/perfil")}
       />
-
+      <SidebarAdm/>
       <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
         {error && (

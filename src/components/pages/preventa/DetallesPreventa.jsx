@@ -8,6 +8,7 @@ import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
+import SidebarAdm from "../../organisms/SidebarAdm";
 import Loading from "../../Loading/Loading";
 
 const DetallesPreventa = () => {
@@ -84,6 +85,7 @@ const DetallesPreventa = () => {
         mensaje="Detalles de Preventa" 
         onClick={handleVolver}
       />
+      <SidebarAdm/>
 
       <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
@@ -91,7 +93,7 @@ const DetallesPreventa = () => {
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
             <div className="flex items-center">
               <Icono name="eliminarAlert" size={20} />
-              <span className="ml-2">{error}</span>
+              <span className="ml-1">{error}</span>
             </div>
           </div>
         )}
@@ -289,7 +291,7 @@ const DetallesPreventa = () => {
               No se encontró la preventa solicitada
             </Tipografia>
             <Boton 
-              tipo="primario" 
+              tipo="secundario" 
               label="Volver al Historial" 
               onClick={handleVolver}
             />

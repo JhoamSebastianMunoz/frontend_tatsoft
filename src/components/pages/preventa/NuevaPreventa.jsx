@@ -8,6 +8,7 @@ import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import CampoTexto from "../../atoms/CamposTexto";
 import Icono from "../../atoms/Iconos";
+import SidebarAdm from "../../organisms/SidebarAdm";
 import Loading from "../../Loading/Loading";
 
 const NuevaPreventa = () => {
@@ -174,7 +175,7 @@ const NuevaPreventa = () => {
         mensaje="Nueva Preventa" 
         onClick={() => navigate("/perfil")}
       />
-
+      <SidebarAdm/>
       <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
         {error && (
@@ -204,7 +205,7 @@ const NuevaPreventa = () => {
             
             {!clienteInfo && (
               <Boton 
-                tipo="secundario" 
+                tipo="secundario"
                 label="Seleccionar Cliente" 
                 onClick={handleSeleccionarCliente}
               />
