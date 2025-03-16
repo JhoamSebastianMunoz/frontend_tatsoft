@@ -38,8 +38,13 @@ import ProductList from "./components/pages/gestionProductos/ProductList";
 import GestionProductos from "./components/pages/gestionProductos/GestionProductos";
 import EditarProducto from "./components/pages/gestionProductos/EditarProducto"
 
+//páginas de preventa
+import Presale from "./components/pages/pre-sale/presale";
+
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
+
+
 
 // Componente para rutas no autorizadas
 import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
@@ -245,6 +250,19 @@ const App = () => {
         />
       }
      />     
+
+     {/* Ruta preventa */}
+     <Route path="/preventas"
+     element={
+      <ProtectedRoute
+      element={<Presale/>}
+      allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+     />
+     }
+     />
+
+
+
 
      {/* Ruta por defecto - Redirige al login */}
      <Route path="*" element={<Pagina404 />} />

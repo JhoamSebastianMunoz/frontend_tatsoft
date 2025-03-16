@@ -14,7 +14,7 @@ const Buscador = ({ placeholder = "Buscar productos, marcas y más...", iconName
             id="default-search"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="block w-full py-2 pl-4 pr-10 text-sm text-gray-600 border border-purple-300 rounded-full bg-white outline-none placeholder:font-semibold placeholder:text-gray-400 sm:py-3 sm:pl-5 sm:pr-12"
+            className="block w-full py-2 pl-4 pr-10 text-sm text-gray-600 border border-purple-300 rounded-full bg-white outline-none placeholder:font-semibold placeholder:text-gray-400 sm:py-2 sm:pl-5 sm:pr-12"
             placeholder={placeholder}
             required
           />
