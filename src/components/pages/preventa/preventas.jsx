@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Encabezado from "../../molecules/Encabezado";
 import SidebarAdm from "../../organisms/SidebarAdm";
 import Boton from "../../atoms/Botones";
@@ -6,7 +6,7 @@ import Buscador from "../../molecules/Buscador";
 import Tipografia from "../../atoms/Tipografia";
 import { useNavigate } from "react-router-dom";
 
-const Presale = () => {
+const Preventa = () => {
   const navigate = useNavigate();
 
   const [preventas, setPreventas] = useState([
@@ -62,6 +62,38 @@ const Presale = () => {
   const [verTarjetas, setVerTarjetas] = useState(true);
   const [menuAbierto, setMenuAbierto] = useState(null);
 
+  // Efecto para cerrar el menú al hacer scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (menuAbierto !== null) {
+        setMenuAbierto(null);
+      }
+    };
+
+    // Añadir el evento de scroll al contenedor principal
+    window.addEventListener('scroll', handleScroll, true);
+    
+    // Limpieza del evento cuando el componente se desmonte
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [menuAbierto]);
+
+  // Efecto para cerrar el menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuAbierto !== null && !event.target.closest('.menu-container')) {
+        setMenuAbierto(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuAbierto]);
+
   // Filtrar preventas según los criterios
   const preventasFiltradas = preventas.filter((preventa) => {
     return (
@@ -92,7 +124,7 @@ const Presale = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
       <div className="fixed top-0 w-full z-10">
         <Encabezado mensaje="Preventas" />
       </div>
@@ -260,7 +292,7 @@ const Presale = () => {
             )}
           </div>
 
-          <div className="flex overflow-x-auto space-x-2 p-3 bg-white rounded-lg mb-1">
+          <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg mb-1">
             <button
               className={`px-4 py-2 whitespace-nowrap rounded-md ${
                 filtro === "Todos"
@@ -336,7 +368,7 @@ const Presale = () => {
                           </svg>
                           <span className="text-xs">{preventa.fecha}</span>
                         </div>
-                        <div className="relative">
+                        <div className="relative menu-container">
                           <button
                             onClick={() =>
                               setMenuAbierto(
@@ -364,6 +396,15 @@ const Presale = () => {
                                   className="block w-full text-left px-10 py-2 text-sm text-gray-700 hover:bg-purple-100"
                                 >
                                   Ver
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleEliminar(preventa)
+                                    setMenuAbierto(null);
+                                  }}
+                                  className="block w-full text-left px-8 py-2 text-sm text-red-500 hover:bg-purple-100"
+                                >
+                                  Eliminar
                                 </button>
                               </div>
                             </div>
@@ -410,13 +451,7 @@ const Presale = () => {
                             }
                           }
                         `}</style>
-                        <div className="card-buttons-container flex justify-between items-center px-1">
-                          <Boton
-                            onClick={() => handleEliminar(preventa)}
-                            tipo="cancelar"
-                            label="Eliminar"
-                            size="small"
-                          />
+                        <div className="card-buttons-container flex justify-end items-center px-1">
                           <Boton
                             onClick={() => handleEditar(preventa)}
                             label="Editar"
@@ -576,4 +611,4 @@ const Presale = () => {
   );
 };
 
-export default Presale;
+export default Preventa;

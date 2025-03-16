@@ -19,10 +19,10 @@ const SidebarAdm = ({ activeMenuItem = null }) => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setMobileView(true);
-        setSidebarOpen(false); // Siempre cerrado en vista móvil al iniciar
+        setSidebarOpen(false); 
       } else {
         setMobileView(false);
-        setSidebarOpen(true); // Sidebar abierto por defecto en desktop
+        setSidebarOpen(false);
       }
     };
 
