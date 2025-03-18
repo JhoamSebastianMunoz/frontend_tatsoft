@@ -1,44 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { productService } from "../../../context/services/ApiService";
+import { imageService } from "../../../context/services/ImageService";
 import Tipografia from "../../../components/atoms/Tipografia";
-import UsuarioAvatar from "../../../components/atoms/AvatarUsuario";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
-import Alerta from "../../../components/molecules/Alertas";
+import Loading from "../../../components/Loading/Loading";
+import NavegacionAdministrador from "../../organisms/NavegacionAdm";
 
 const RegistrarProducto = () => {
+  const navigate = useNavigate();
+  
+  // Estados para manejo del formulario
   const [formData, setFormData] = useState({
-    nombre: "",
+    nombre_producto: "",
     categoria: "",
     precio: "",
-    stock: "",
-    descripcion: ""
+    cantidad_ingreso: "",
+    descripcion: "",
+    id_categoria: ""
   });
   
-  const [showNavegacion, setShowNavegacion] = useState(true);
+  // Estados para manejo de UI
   const [showCategorias, setShowCategorias] = useState(false);
   const [showNuevaCategoriaModal, setShowNuevaCategoriaModal] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState("");
+  const [categorias, setCategorias] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   
-  // Estados para manejar las alertas
+  // Estados para alertas
   const [showCancelarAlerta, setShowCancelarAlerta] = useState(false);
   const [showRegistroExitosoAlerta, setShowRegistroExitosoAlerta] = useState(false);
   const [showSeleccionadoAlerta, setShowSeleccionadoAlerta] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Estado para controlar qué menús están abiertos
-  const [menuOpen, setMenuOpen] = useState({
-    notificaciones: false,
-    gestionUsuarios: false,
-    gestionClientes: false,
-    gestionProductos: true, // Este comienza abierto
-    gestionZonas: false,
-    gestionAcumulados: false,
-    catalogo: false,
-    inventario: false
-  });
+  // Cargar categorías al montar el componente
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const response = await productService.getAllCategories();
+        if (response.data && Array.isArray(response.data)) {
+          setCategorias(response.data);
+        }
+      } catch (error) {
+        console.error("Error cargando categorías:", error);
+        setError("No se pudieron cargar las categorías. Por favor, intenta de nuevo más tarde.");
+      }
+    };
 
-  const toggleNavegacion = () => {
-    setShowNavegacion(!showNavegacion);
-  };
+    fetchCategorias();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -48,228 +62,236 @@ const RegistrarProducto = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Datos del producto:", formData);
-    // Mostrar alerta de registro exitoso
-    setShowRegistroExitosoAlerta(true);
-    // Automáticamente ocultar después de 3 segundos
+  const handleCategoriaChange = (categoria) => {
+    setFormData({
+      ...formData,
+      categoria: categoria.nombre_categoria,
+      id_categoria: categoria.id_categoria
+    });
+    setShowCategorias(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Verificar el tamaño del archivo (máximo 6MB según la API)
+    if (file.size > 6 * 1024 * 1024) {
+      setError("La imagen no puede superar los 6MB de tamaño.");
+      return;
+    }
+    
+    // Verificar el tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setError("El archivo seleccionado no es una imagen válida.");
+      return;
+    }
+    
+    setImageFile(file);
+    
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+    
+    // Mostrar alerta de selección exitosa
+    setShowSeleccionadoAlerta(true);
     setTimeout(() => {
-      setShowRegistroExitosoAlerta(false);
-      // Aquí podrías redirigir o limpiar el formulario
-      // navigate('/gestion-productos');
-    }, 3000);
+      setShowSeleccionadoAlerta(false);
+    }, 2000);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    
+    try {
+      // Validar campos requeridos
+      if (!formData.nombre_producto || !formData.precio || !formData.id_categoria) {
+        setError("Por favor completa todos los campos requeridos: nombre, precio y categoría.");
+        setLoading(false);
+        return;
+      }
+
+      // Primero subir la imagen si existe
+      let imageId = null;
+      if (imageFile) {
+        setIsUploading(true);
+        try {
+          const uploadResponse = await imageService.uploadImage(imageFile);
+          if (uploadResponse && uploadResponse.url) {
+            // Extraer el ID de la imagen de la URL o respuesta
+            imageId = uploadResponse.fileName || uploadResponse.url.split('/').pop();
+          }
+        } catch (imageError) {
+          console.error("Error subiendo imagen:", imageError);
+          setError("No se pudo subir la imagen. El producto se registrará sin imagen.");
+        } finally {
+          setIsUploading(false);
+        }
+      }
+
+      // Preparar los datos del producto
+      const productData = {
+        nombre_producto: formData.nombre_producto,
+        precio: parseFloat(formData.precio),
+        descripcion: formData.descripcion,
+        cantidad_ingreso: parseInt(formData.cantidad_ingreso) || 0,
+        id_imagen: imageId,
+        id_categoria: formData.id_categoria
+      };
+
+      // Registrar el producto
+      const response = await productService.createProduct(productData);
+      
+      // Mostrar alerta de éxito
+      setShowRegistroExitosoAlerta(true);
+      setTimeout(() => {
+        setShowRegistroExitosoAlerta(false);
+        navigate("/gestion-productos");
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error registrando producto:", error);
+      setError(
+        error.response?.data?.error || 
+        "Ocurrió un error al registrar el producto. Por favor, intenta de nuevo."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancelar = () => {
-    // Mostrar alerta de confirmación de cancelación
     setShowCancelarAlerta(true);
   };
 
   const confirmarCancelacion = () => {
-    // Ocultar alerta
     setShowCancelarAlerta(false);
-    // Aquí podrías redirigir a la página anterior
-    // navigate('/gestion-productos');
-    console.log("Registro cancelado");
+    navigate("/gestion-productos");
   };
 
-  const handleCargarImagen = () => {
-    console.log("Cargar imagen del producto");
-    // Simulando selección exitosa de imagen
-    setShowSeleccionadoAlerta(true);
-    setTimeout(() => {
-      setShowSeleccionadoAlerta(false);
-    }, 3000);
+  const cancelarCancelacion = () => {
+    setShowCancelarAlerta(false);
   };
 
-  const toggleMenu = (menuName) => {
-    setMenuOpen({
-      ...menuOpen,
-      [menuName]: !menuOpen[menuName]
-    });
-  };
-
-  const toggleCategorias = () => {
-    setShowCategorias(!showCategorias);
-  };
-
-  const agregarNuevaCategoria = () => {
-    if (nuevaCategoria.trim() !== "") {
-      categorias.push(nuevaCategoria);
-      setFormData({...formData, categoria: nuevaCategoria});
+  const agregarNuevaCategoria = async () => {
+    if (nuevaCategoria.trim() === "") return;
+    
+    try {
+      setLoading(true);
+      const response = await productService.createCategory({
+        nombre_categoria: nuevaCategoria,
+        descripcion: `Categoría ${nuevaCategoria} para productos`
+      });
+      
+      // Actualizar lista de categorías
+      const categoriasResponse = await productService.getAllCategories();
+      setCategorias(categoriasResponse.data);
+      
+      // Seleccionar la nueva categoría
+      const nuevaCategoriaObj = categoriasResponse.data.find(
+        c => c.nombre_categoria === nuevaCategoria
+      );
+      
+      if (nuevaCategoriaObj) {
+        handleCategoriaChange(nuevaCategoriaObj);
+      }
+      
       setNuevaCategoria("");
       setShowNuevaCategoriaModal(false);
-      setShowCategorias(false);
+      
+    } catch (error) {
+      console.error("Error creando categoría:", error);
+      setError("No se pudo crear la categoría. Por favor, intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Categorías disponibles según el mockup
-  const categorias = [
-    "Lácteos",
-    "Aseo",
-    "Hogar y Decoración",
-    "Productos Mascotas",
-    "Granos y Cereales",
-    "Panadería y Repostería",
-    "Frutas y Verduras",
-    "Carnes Frescas y Embutidos",
-    "Congelados",
-    "Bebidas",
-    "Otros"
-  ];
+  if (loading && !showNuevaCategoriaModal) {
+    return <Loading message="Procesando operación..." />;
+  }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Navegación lateral */}
-      {showNavegacion && (
-        <div className="w-44 bg-white shadow-md h-screen flex flex-col">
-          {/* Header con avatar */}
-          <div className="bg-purple-600 p-3 flex items-center">
-            <UsuarioAvatar size={35} />
-            <Tipografia className="ml-2 text-white">Gisela rivera</Tipografia>
-          </div>
-
-          {/* Opciones de menú */}
-          <div className="flex flex-col">
-            <MenuItem 
-              label="Notificaciones" 
-              iconName="notificaciones" 
-              isOpen={menuOpen.notificaciones}
-              onClick={() => toggleMenu('notificaciones')}
-            />
-            <MenuItem 
-              label="Gestión usuarios" 
-              iconName="gest-usuarios" 
-              isOpen={menuOpen.gestionUsuarios}
-              onClick={() => toggleMenu('gestionUsuarios')}
-            />
-            <MenuItem 
-              label="Gestión clientes" 
-              iconName="gest-clientes" 
-              isOpen={menuOpen.gestionClientes}
-              onClick={() => toggleMenu('gestionClientes')}
-            />
-            <MenuItem 
-              label="Gestión productos" 
-              iconName="gest-productos" 
-              isOpen={menuOpen.gestionProductos}
-              onClick={() => toggleMenu('gestionProductos')}
-            />
-            <MenuItem 
-              label="Gestión zonas" 
-              iconName="gest-zonas" 
-              isOpen={menuOpen.gestionZonas}
-              onClick={() => toggleMenu('gestionZonas')}
-            />
-            <MenuItem 
-              label="Gestión acumulados" 
-              iconName="gest-acumulados" 
-              isOpen={menuOpen.gestionAcumulados}
-              onClick={() => toggleMenu('gestionAcumulados')}
-            />
-            <MenuItem 
-              label="Catálogo" 
-              iconName="catalogo" 
-              isOpen={menuOpen.catalogo}
-              onClick={() => toggleMenu('catalogo')}
-            />
-            <MenuItem 
-              label="Inventario" 
-              iconName="inventario" 
-              isOpen={menuOpen.inventario}
-              onClick={() => toggleMenu('inventario')}
-            />
-          </div>
-
-          {/* Botón cerrar sesión */}
-          <div className="mt-auto">
-            <button 
-              className="w-full flex items-center p-3 bg-purple-600 text-white"
-            >
-              <Icono name="cerrar-sesion" />
-              <span className="ml-2">Cerrar sesión</span>
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="flex min-h-screen bg-gray-50">
+      <NavegacionAdministrador />
       
-      {/* Contenido principal */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="bg-purple-600 text-white p-4 flex items-center justify-between">
-          <button 
-            onClick={toggleNavegacion} 
-            className="text-white flex items-center justify-center h-10 w-10"
-          >
-            <span className="text-xl">☰</span>
-          </button>
+        <div className="bg-purple-600 text-white p-4 shadow-md">
           <Tipografia variant="h1" size="xl" className="text-white font-medium">
             Registrar Producto
           </Tipografia>
-          <div className="w-10"></div> {/* Espacio para equilibrar el header */}
         </div>
-
-        {/* Formulario */}
+        
+        {/* Contenido principal */}
         <div className="flex-1 p-6 flex justify-center">
-          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-lg">
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Nombre</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={formData.nombre}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  required
-                />
+          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl">
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+                <p className="font-medium">Error</p>
+                <p>{error}</p>
               </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Categoría</label>
-                <div className="relative">
-                  <div 
-                    className="w-full p-2 border rounded flex justify-between items-center cursor-pointer"
-                    onClick={toggleCategorias}
-                  >
-                    <span className="text-gray-700">{formData.categoria || "Seleccione una categoría"}</span>
-                    <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  
-                  {showCategorias && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                      {categorias.map((categoria, index) => (
-                        <div 
-                          key={index} 
-                          className="p-2 hover:bg-purple-100 cursor-pointer"
+            )}
+            
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">Nombre del Producto*</label>
+                  <input
+                    type="text"
+                    name="nombre_producto"
+                    value={formData.nombre_producto}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Categoría*</label>
+                  <div className="relative">
+                    <div
+                      className="w-full p-2 border rounded flex justify-between items-center cursor-pointer"
+                      onClick={() => setShowCategorias(!showCategorias)}
+                    >
+                      <span className="text-gray-700">
+                        {formData.categoria || "Seleccione una categoría"}
+                      </span>
+                      <Icono name="despliegue" size={16} />
+                    </div>
+                    
+                    {showCategorias && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                        {categorias.map((categoria) => (
+                          <div
+                            key={categoria.id_categoria}
+                            className="p-2 hover:bg-purple-100 cursor-pointer"
+                            onClick={() => handleCategoriaChange(categoria)}
+                          >
+                            {categoria.nombre_categoria}
+                          </div>
+                        ))}
+                        <div
+                          className="p-2 bg-purple-200 text-center hover:bg-purple-300 cursor-pointer"
                           onClick={() => {
-                            setFormData({...formData, categoria});
+                            setShowNuevaCategoriaModal(true);
                             setShowCategorias(false);
                           }}
                         >
-                          {categoria}
+                          + Agregar otra categoría
                         </div>
-                      ))}
-                      <div 
-                        className="p-2 bg-purple-200 text-center hover:bg-purple-300 cursor-pointer"
-                        onClick={() => {
-                          setShowNuevaCategoriaModal(true);
-                          setShowCategorias(false);
-                        }}
-                      >
-                        + Agregar otra categoría
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex mb-4 space-x-4">
-                <div className="w-1/2">
-                  <label className="block text-sm font-medium mb-1">Precio</label>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Precio*</label>
                   <input
                     type="number"
                     name="precio"
@@ -277,67 +299,99 @@ const RegistrarProducto = () => {
                     onChange={handleInputChange}
                     className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
+                    min="0"
+                    step="0.01"
                   />
                 </div>
-                <div className="w-1/2">
-                  <label className="block text-sm font-medium mb-1">Stock</label>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Stock Inicial</label>
                   <input
                     type="number"
-                    name="stock"
-                    value={formData.stock}
+                    name="cantidad_ingreso"
+                    value={formData.cantidad_ingreso}
                     onChange={handleInputChange}
                     className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
+                    min="0"
                   />
                 </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Descripción</label>
-                <textarea
-                  name="descripcion"
-                  value={formData.descripcion}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 h-20"
-                ></textarea>
-              </div>
-
-              <div className="flex justify-center mt-6 space-x-4">
-                <button
-                  type="button"
-                  className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md"
-                  onClick={handleCargarImagen}
-                >
-                  <Icono name="subir-archivo" customColor="white" size={20} />
-                  <span className="ml-2">Cargar imagen</span>
-                </button>
+                
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">Descripción</label>
+                  <textarea
+                    name="descripcion"
+                    value={formData.descripcion}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 h-20"
+                  ></textarea>
+                </div>
               </div>
               
-              <div className="flex justify-center mt-4 space-x-4">
-                <button
-                  type="button"
-                  className="px-8 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              {/* Sección de imagen */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Imagen del Producto</label>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="w-32 h-32 bg-gray-100 border rounded flex items-center justify-center overflow-hidden">
+                    {imagePreview ? (
+                      <img 
+                        src={imagePreview} 
+                        alt="Vista previa" 
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Icono name="gest-productos" size={40} className="text-gray-400" />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      id="imageInput"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      accept="image/*"
+                    />
+                    <label
+                      htmlFor="imageInput"
+                      className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md cursor-pointer hover:bg-purple-600 transition-colors"
+                    >
+                      <Icono name="subir-archivo" customColor="white" size={20} />
+                      <span className="ml-2">Seleccionar imagen</span>
+                    </label>
+                    
+                    <p className="text-xs text-gray-500 mt-2">
+                      Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 6MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-center space-x-4 mt-6">
+                <Boton
+                  tipo="cancelar"
+                  label="Cancelar"
                   onClick={handleCancelar}
-                >
-                  Cancelar
-                </button>
+                />
                 
                 <Boton
-                  label="Registrar"
                   tipo="primario"
-                  onClick={handleSubmit}
+                  label={loading ? "Registrando..." : "Registrar Producto"}
+                  type="submit"
+                  disabled={loading || isUploading}
                 />
               </div>
             </form>
           </div>
         </div>
       </div>
-
+      
       {/* Modal para agregar nueva categoría */}
       {showNuevaCategoriaModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-96">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
             <h3 className="text-lg font-semibold mb-4">Agregar nueva categoría</h3>
+            
             <input
               type="text"
               value={nuevaCategoria}
@@ -345,110 +399,72 @@ const RegistrarProducto = () => {
               className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Nombre de la categoría"
             />
+            
             <div className="flex justify-end space-x-2">
-              <Boton 
-                label="Cancelar" 
-                tipo="cancelar" 
-                onClick={() => setShowNuevaCategoriaModal(false)} 
+              <Boton
+                label="Cancelar"
+                tipo="cancelar"
+                onClick={() => setShowNuevaCategoriaModal(false)}
               />
-              <Boton 
-                label="Agregar" 
-                tipo="primario" 
-                onClick={agregarNuevaCategoria} 
+              
+              <Boton
+                label="Agregar"
+                tipo="primario"
+                onClick={agregarNuevaCategoria}
               />
             </div>
           </div>
         </div>
       )}
-
+      
       {/* Alerta de cancelar registro */}
       {showCancelarAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-90">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
             </div>
             <p className="text-center mb-4">¿Desea cancelar el registro?</p>
             <div className="flex justify-center space-x-2">
-              <button 
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md"
-                onClick={() => setShowCancelarAlerta(false)}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="bg-purple-500 text-white px-4 py-2 rounded-md"
+              <Boton
+                tipo="cancelar"
+                label="No"
+                onClick={cancelarCancelacion}
+              />
+              <Boton
+                tipo="primario"
+                label="Sí, cancelar"
                 onClick={confirmarCancelacion}
-              >
-                Confirmar
-              </button>
+              />
             </div>
           </div>
         </div>
       )}
-
+      
       {/* Alerta de registro exitoso */}
       {showRegistroExitosoAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-90">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
             <div className="flex justify-center mb-4">
               <Icono name="confirmar" size={65} />
             </div>
-            <p className="text-center mb-4">Producto registrado</p>
-            <div className="flex justify-center">
-              <button 
-                className="bg-purple-500 text-white px-4 py-2 rounded-md"
-                onClick={() => setShowRegistroExitosoAlerta(false)}
-              >
-                Confirmar
-              </button>
-            </div>
+            <p className="text-center mb-4">Producto registrado exitosamente</p>
           </div>
         </div>
       )}
-
-      {/* Alerta de producto seleccionado (para la imagen) */}
+      
+      {/* Alerta de imagen seleccionada */}
       {showSeleccionadoAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-90">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
             <div className="flex justify-center mb-4">
               <Icono name="confirmar" size={60} />
             </div>
-            <p className="text-center mb-4">Producto seleccionado</p>
-            <div className="flex justify-center">
-              <button 
-                className="bg-purple-500 text-white px-4 py-2 rounded-md"
-                onClick={() => setShowSeleccionadoAlerta(false)}
-              >
-                Aceptar
-              </button>
-            </div>
+            <p className="text-center mb-4">Imagen seleccionada correctamente</p>
           </div>
         </div>
       )}
     </div>
-  );
-};
-
-// Componente para los ítems del menú lateral
-const MenuItem = ({ label, iconName, isOpen, onClick }) => {
-  return (
-    <button 
-      className="flex items-center justify-between p-3 w-full hover:bg-purple-50 transition-colors"
-      onClick={onClick}
-    >
-      <div className="flex items-center">
-        <Icono name={iconName} size={20} />
-        <span className="ml-2 text-sm">{label}</span>
-      </div>
-      <svg 
-        className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} 
-        viewBox="0 0 20 20" 
-        fill="currentColor"
-      >
-        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-      </svg>
-    </button>
   );
 };
 

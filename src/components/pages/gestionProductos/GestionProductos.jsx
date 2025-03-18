@@ -1,199 +1,276 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { productService } from "../../../context/services/ApiService";
+import { imageService } from "../../../context/services/ImageService";
 import Tipografia from "../../../components/atoms/Tipografia";
-import NavegacionAdministrador from "../../organisms/NavegacionAdm";
 import Icono from "../../../components/atoms/Iconos";
+import Boton from "../../../components/atoms/Botones";
+import Buscador from "../../molecules/Buscador";
+import Loading from "../../Loading/Loading";
+import NavegacionAdministrador from "../../organisms/NavegacionAdm";
+import ProductoItem from "../../molecules/ProductoItem";
 
 const GestionProductos = () => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [openMenuId, setOpenMenuId] = useState(null);
-    const [showNavegacion, setShowNavegacion] = useState(true);
+  const navigate = useNavigate();
+  
+  // Estados para datos
+  const [productos, setProductos] = useState([]);
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
+  
+  // Estados para UI
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
+  
+  // Cargar productos y categorías al montar el componente
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Cargar categorías
+        const categoriasResponse = await productService.getAllCategories();
+        if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
+          setCategorias(categoriasResponse.data);
+        }
+        
+        // Cargar productos
+        const productosResponse = await productService.getAllProducts();
+        if (productosResponse.data && Array.isArray(productosResponse.data)) {
+          setProductos(productosResponse.data);
+          setProductosFiltrados(productosResponse.data);
+        }
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+        setError("No se pudieron cargar los productos. Por favor, intenta de nuevo más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Lista de productos
-    const productos = [
-      { id: 1, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 2, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 3, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 4, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 5, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 6, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 7, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-      { id: 8, nombre: "Leche Colanta Uht Deslactosada 1000 ML", precio: 5200 },
-    ];
+    fetchData();
+  }, []);
   
-    const toggleNavegacion = () => {
-      setShowNavegacion(!showNavegacion);
-    };
+  // Filtrar productos según búsqueda y categoría
+  useEffect(() => {
+    let resultado = [...productos];
+    
+    // Filtrar por término de búsqueda
+    if (searchTerm.trim() !== "") {
+      resultado = resultado.filter(producto => 
+        producto.nombre_producto.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filtrar por categoría seleccionada
+    if (categoriaSeleccionada !== 'Todas') {
+      resultado = resultado.filter(producto => 
+        producto.id_categoria === parseInt(categoriaSeleccionada)
+      );
+    }
+    
+    setProductosFiltrados(resultado);
+  }, [searchTerm, categoriaSeleccionada, productos]);
   
-    const handleSearchChange = (e) => {
-      setSearchTerm(e.target.value);
-    };
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
   
-    const handleVerProducto = (id) => {
-      console.log(`Ver detalles del producto con ID: ${id}`);
-      setOpenMenuId(null);
-    };
+  const handleCategoriaChange = (e) => {
+    setCategoriaSeleccionada(e.target.value);
+  };
   
-    const handleEliminarProducto = (id) => {
-      console.log(`Eliminar producto con ID: ${id}`);
-      setOpenMenuId(null);
-    };
+  const handleAgregarProducto = () => {
+    navigate("/registrar-producto");
+  };
   
-    const toggleMenu = (id, e) => {
-      e.stopPropagation();
-      setOpenMenuId(openMenuId === id ? null : id);
-    };
+  const handleVerProducto = (id) => {
+    // En una implementación futura, podría redirigir a una vista de detalle
+    console.log(`Ver producto con ID ${id}`);
+  };
   
-    const handleOutsideClick = () => {
-      if (openMenuId !== null) {
-        setOpenMenuId(null);
+  const handleEliminarProducto = (id) => {
+    setProductoAEliminar(id);
+    setShowDeleteModal(true);
+  };
+  
+  const confirmarEliminacion = async () => {
+    if (!productoAEliminar) return;
+    
+    try {
+      setLoading(true);
+      
+      // Primero, obtenemos el producto para saber si tiene imagen
+      const productoResponse = await productService.getProductById(productoAEliminar);
+      const imageId = productoResponse.data?.id_imagen;
+      
+      // Eliminar el producto
+      await productService.deleteProduct(productoAEliminar);
+      
+      // Después de eliminar el producto, eliminar su imagen si existe
+      if (imageId) {
+        try {
+          await imageService.deleteImage(imageId);
+        } catch (imageError) {
+          console.error("Error eliminando imagen:", imageError);
+          // No interrumpimos el flujo si falla la eliminación de la imagen
+        }
       }
-    };
+      
+      // Actualizar la lista de productos
+      setProductos(productos.filter(p => p.id_producto !== productoAEliminar));
+      setShowDeleteModal(false);
+      setProductoAEliminar(null);
+      
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+      setError("Ocurrió un error al eliminar el producto.");
+    } finally {
+      setLoading(false);
+    }
+  };
   
-    const getProductosEnFilas = () => {
-      const filas = [];
-      for (let i = 0; i < productos.length; i += 4) {
-        filas.push(productos.slice(i, i + 4));
-      }
-      return filas;
-    };
+  const cancelarEliminacion = () => {
+    setShowDeleteModal(false);
+    setProductoAEliminar(null);
+  };
   
-    return (
-      <div className="flex h-screen">
-        {/* Navegación lateral */}
-        {showNavegacion && (
-          <div className="w-64 h-full">
-            <NavegacionAdministrador />
+  if (loading && productos.length === 0) {
+    return <Loading message="Cargando productos..." />;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <NavegacionAdministrador />
+      
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-purple-600 text-white p-4 shadow-md">
+          <Tipografia variant="h1" size="xl" className="text-white font-medium">
+            Gestión de Productos
+          </Tipografia>
+        </div>
+        
+        {/* Herramientas de búsqueda y filtrado */}
+        <div className="bg-white p-4 shadow-sm">
+          <div className="container mx-auto">
+            <div className="flex flex-col md:flex-row items-center md:justify-between gap-4">
+              <div className="w-full md:w-1/2">
+                <Buscador
+                  placeholder="Buscar productos..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="flex-1 md:flex-none">
+                  <select
+                    className="w-full md:w-40 p-2 border rounded-md"
+                    value={categoriaSeleccionada}
+                    onChange={handleCategoriaChange}
+                  >
+                    <option value="Todas">Todas las categorías</option>
+                    {categorias.map(cat => (
+                      <option 
+                        key={cat.id_categoria} 
+                        value={cat.id_categoria}
+                      >
+                        {cat.nombre_categoria}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <Boton
+                  tipo="primario"
+                  label="Agregar Producto"
+                  onClick={handleAgregarProducto}
+                  className="whitespace-nowrap"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Mensajes de error */}
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4 rounded">
+            <p className="font-medium">Error</p>
+            <p>{error}</p>
           </div>
         )}
         
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col bg-white overflow-auto" onClick={handleOutsideClick}>
-          {/* Header */}
-          <div className="bg-purple-600 text-white p-4 flex items-center justify-between">
-            <button 
-              onClick={toggleNavegacion} 
-              className="text-white flex items-center justify-center rounded-full bg-white bg-opacity-30 h-10 w-10"
-            >
-              <span className="text-xl">☰</span>
-            </button>
-            <Tipografia variant="h1" size="xl" className="text-white font-medium">
-              Gestión de productos
-            </Tipografia>
-            <div className="w-10"></div> {/* Espacio para equilibrar el header */}
-          </div>
-        
-        {/* Barra de búsqueda */}
-        <div className="px-6 pt-4 pb-2">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar productos, marcas"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full p-2 pl-4 pr-10 border rounded-full text-sm"
-            />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        {/* Filtros y botón Registrar */}
-        <div className="px-6 py-2 flex justify-between items-center">
-          <button className="bg-purple-500 text-white py-1.5 px-4 rounded-md text-sm flex items-center">
-            <span className="mr-2">≡</span>
-            Filtros
-          </button>
-          
-          {/* Usando Link para navegación directa sin JavaScript */}
-          <Link 
-            to="/registrar-producto"
-            className="bg-purple-500 text-white py-1.5 px-4 rounded-md text-sm flex items-center no-underline"
-          >
-            Registrar Producto
-            <span className="ml-2">📝</span>
-          </Link>
-        </div>
-        
         {/* Lista de productos */}
-        <div className="p-4 flex-grow">
-          {getProductosEnFilas().map((fila, filaIndex) => (
-            <div key={filaIndex} className="flex mb-6 space-x-4">
-              {fila.map((producto) => (
-                <div key={producto.id} className="flex-1 relative">
-                  <div className="absolute top-0 right-0 z-10">
-                    <div className="relative">
-                      <button 
-                        className="bg-purple-100 p-1 rounded-full"
-                        onClick={(e) => toggleMenu(producto.id, e)}
-                      >
-                        <svg className="w-5 h-5 text-purple-800" viewBox="0 0 16 16" fill="currentColor">
-                          <circle cx="8" cy="4" r="1.5" />
-                          <circle cx="8" cy="8" r="1.5" />
-                          <circle cx="8" cy="12" r="1.5" />
-                        </svg>
-                      </button>
-                      
-                      {openMenuId === producto.id && (
-                        <div className="absolute right-0 mt-1 w-28 bg-white border shadow-lg rounded-md z-20">
-                          <div 
-                            className="px-3 py-1 text-sm hover:bg-gray-100 cursor-pointer"
-                            onClick={() => handleVerProducto(producto.id)}
-                          >
-                            Ver
-                          </div>
-                          <div 
-                            className="px-3 py-1 text-sm hover:bg-gray-100 cursor-pointer"
-                            onClick={() => handleEliminarProducto(producto.id)}
-                          >
-                            Eliminar
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-100 rounded-lg p-4 pt-8 flex flex-col items-center">
-                    <img 
-                      src={producto.imagen || "https://via.placeholder.com/100"} 
-                      alt={producto.nombre}
-                      className="w-20 h-20 object-contain mb-2"
-                    />
-                    
-                    <Tipografia size="sm" className="text-center mb-1 h-12 overflow-hidden">
-                      {producto.nombre}
-                    </Tipografia>
-                    
-                    <Tipografia size="base" className="font-bold text-center mb-2">
-                      ${producto.precio.toLocaleString()}
-                    </Tipografia>
-                    
-                    {/* Usando Link para navegación directa sin JavaScript */}
-                    <Link
-                      to={`/editar-producto/${producto.id}`}
-                      className="w-full bg-purple-500 text-white py-1 px-3 rounded-md text-sm text-center no-underline block"
-                    >
-                      Editar
-                    </Link>
-                  </div>
-                </div>
-              ))}
-              
-              {/* Rellenar espacios vacíos en la última fila */}
-              {filaIndex === getProductosEnFilas().length - 1 && fila.length < 4 && 
-                Array(4 - fila.length).fill().map((_, index) => (
-                  <div key={`empty-${index}`} className="flex-1"></div>
-                ))
-              }
-            </div>
-          ))}
+        <div className="flex-grow p-4 md:p-6">
+          <div className="container mx-auto">
+            {productosFiltrados.length === 0 ? (
+              <div className="bg-white p-8 rounded-lg shadow-sm text-center">
+                <Icono name="gest-productos" size={60} className="mx-auto text-gray-400 mb-4" />
+                <Tipografia size="lg" className="text-gray-600 mb-2">
+                  No se encontraron productos
+                </Tipografia>
+                <Tipografia className="text-gray-500 mb-6">
+                  {searchTerm || categoriaSeleccionada !== 'Todas' 
+                    ? "No hay productos que coincidan con tu búsqueda. Intenta con otros filtros."
+                    : "Aún no hay productos registrados. Comienza agregando un nuevo producto."}
+                </Tipografia>
+                <Boton
+                  tipo="primario"
+                  label="Agregar Producto"
+                  onClick={handleAgregarProducto}
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {productosFiltrados.map(producto => (
+                  <ProductoItem
+                    key={producto.id_producto}
+                    producto={producto}
+                    onView={handleVerProducto}
+                    onDelete={handleEliminarProducto}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      </div>
-    );
-  };
-  
-  export default GestionProductos;
+      
+      {/* Modal de confirmación para eliminar producto */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+            <div className="flex justify-center mb-4">
+              <Icono name="eliminarAlert" size={65} />
+            </div>
+            <Tipografia className="text-center mb-4">
+              ¿Estás seguro de que deseas eliminar este producto?
+            </Tipografia>
+            <Tipografia className="text-center text-gray-500 text-sm mb-4">
+              Esta acción no se puede deshacer.
+            </Tipografia>
+            <div className="flex justify-center space-x-2">
+              <Boton
+                tipo="cancelar"
+                label="Cancelar"
+                onClick={cancelarEliminacion}
+              />
+              <Boton
+                tipo="primario"
+                label="Eliminar"
+                onClick={confirmarEliminacion}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GestionProductos;
