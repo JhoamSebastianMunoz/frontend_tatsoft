@@ -49,6 +49,8 @@ import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 //página de ventas y devoluciones
 import VentasDevoluciones from "./components/pages/ventasDevoluciones/VentasDevoluciones"
 
+//página de devoluciones
+import Devoluciones from "./components/pages/devoluciones/devoluciones"
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
 
@@ -373,7 +375,17 @@ const App = () => {
           />
           }
         />
-      
+      {/* Ruta de devoluciones */}
+      <Route
+      path="/devoluciones"
+      element={
+        <ProtectedRoute
+        element={<Devoluciones/>}
+        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+      />
+
       {/* Ruta por defecto - Redirige a página de error 404 */}
       <Route path="*" element={<Pagina404 />} />
     </Routes>
