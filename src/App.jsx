@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
+
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
 import RecuperarPassword from "./components/pages/loginPage/RecuperarPassword";

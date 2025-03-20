@@ -7,9 +7,10 @@ import CampoTextoProfile from "../../../components/atoms/CamposTextoProfile";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Encabezado from "../../../components/molecules/Encabezado";
 import Boton from "../../atoms/Botones";
-import SidebarAdm from "../../organisms/SidebarAdm";
+// import SidebarAdm from "../../organisms/SidebarAdm";
 import Loading from "../../Loading/Loading";
-import UsuarioAvatar from "../../atoms/AvatarUsuario";
+import Sidebar from "./sidebarPrueba";
+
 
 const Profile = () => {
   const { user, token } = useAuth();
@@ -125,7 +126,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <div className="fixed top-0 left-0 z-50 h-full">
-        <SidebarAdm />
+        <Sidebar/>
       </div>
       <div className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md">
         <Encabezado
