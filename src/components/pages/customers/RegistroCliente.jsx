@@ -1,71 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { clientService, areaService } from "../../../context/services/ApiService";
-import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import Encabezado from "../../molecules/Encabezado";
 import Boton from "../../atoms/Botones";
 import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
-import Loading from "../../Loading/Loading";
-import CampoTexto from "../../atoms/CamposTexto";
 
 const RegistroCliente = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useAuth();
-  
-  // Extraer la zona ID si viene como parámetro en la URL
-  const queryParams = new URLSearchParams(location.search);
-  const zonaIdFromQuery = queryParams.get('zona_id');
-  
   const [returnPath, setReturnPath] = useState("/gestion/clientes");
-  const [zonas, setZonas] = useState([]);
-  const [loadingZonas, setLoadingZonas] = useState(false);
-
+  
   const [formData, setFormData] = useState({
-    razon_social: "",
-    nombre_completo_cliente: "",
-    rut_nit: "",
-    telefono: "",
+    razonSocial: "",
+    nombre: "",
+    apellido: "",
+    nit: "",
+    numeroCelular: "",
     direccion: "",
-    correo: "",
-    id_zona_de_trabajo: zonaIdFromQuery || ""
+    correoElectronico: "",
   });
 
   const [errores, setErrores] = useState({
-    razon_social: "",
-    nombre_completo_cliente: "",
-    rut_nit: "",
-    telefono: "",
+    razonSocial: "",
+    nombre: "",
+    apellido: "",
+    nit: "",
+    numeroCelular: "",
     direccion: "",
-    correo: "",
-    id_zona_de_trabajo: ""
+    correoElectronico: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [showCancelAlert, setShowCancelAlert] = useState(false);
-  const [errorSubmit, setErrorSubmit] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-
-  // Cargar zonas de trabajo
-  useEffect(() => {
-    const fetchZonas = async () => {
-      try {
-        setLoadingZonas(true);
-        const response = await areaService.getAllAreas();
-        if (response && response.data) {
-          setZonas(response.data);
-        }
-      } catch (error) {
-        console.error("Error al cargar zonas:", error);
-      } finally {
-        setLoadingZonas(false);
-      }
-    };
-
-    fetchZonas();
-  }, []);
 
   // Check for return path when component mounts
   useEffect(() => {
@@ -81,8 +46,7 @@ const RegistroCliente = () => {
       ...prevState,
       [name]: value,
     }));
-    
-    // Limpiar error específico cuando se cambia un valor
+
     if (errores[name]) {
       setErrores((prevErrores) => ({
         ...prevErrores,
@@ -95,48 +59,54 @@ const RegistroCliente = () => {
     let erroresTemp = {};
     let esValido = true;
 
-    // Validación para nombre_completo_cliente (obligatorio)
-    if (!formData.nombre_completo_cliente.trim()) {
-      erroresTemp.nombre_completo_cliente = "El nombre completo es obligatorio";
-      esValido = false;
-    } else if (formData.nombre_completo_cliente.trim().length < 5) {
-      erroresTemp.nombre_completo_cliente = "El nombre debe tener al menos 5 caracteres";
+    if (!formData.razonSocial.trim()) {
+      erroresTemp.razonSocial = "La razón social es obligatoria";
       esValido = false;
     }
 
-    // Validación para dirección (obligatorio)
+    if (!formData.nombre.trim() && !formData.razonSocial.trim()) {
+      erroresTemp.nombre = "El nombre es obligatorio";
+      esValido = false;
+    } else if (
+      formData.nombre.trim() &&
+      !/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(formData.nombre)
+    ) {
+      erroresTemp.nombre = "El nombre solo debe contener letras";
+      esValido = false;
+    }
+
+    if (!formData.apellido.trim() && !formData.razonSocial.trim()) {
+      erroresTemp.apellido = "El apellido es obligatorio";
+      esValido = false;
+    } else if (
+      formData.apellido.trim() &&
+      !/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(formData.apellido)
+    ) {
+      erroresTemp.apellido = "El apellido solo debe contener letras";
+      esValido = false;
+    }
+
+    if (!formData.nit.trim()) {
+      erroresTemp.nit = "El NIT es obligatorio";
+      esValido = false;
+    } else if (!/^\d{1,9}-?\d?$/.test(formData.nit)) {
+      erroresTemp.nit = "Ingrese un NIT válido (ej. 900123456-7)";
+      esValido = false;
+    }
+
+    if (!formData.numeroCelular.trim()) {
+      erroresTemp.numeroCelular = "El número de celular es obligatorio";
+      esValido = false;
+    } else if (!/^\d{10}$/.test(formData.numeroCelular)) {
+      erroresTemp.numeroCelular = "Ingrese un número de 10 dígitos";
+      esValido = false;
+    }
+
     if (!formData.direccion.trim()) {
       erroresTemp.direccion = "La dirección es obligatoria";
       esValido = false;
     } else if (formData.direccion.trim().length < 5) {
-      erroresTemp.direccion = "La dirección debe tener al menos 5 caracteres";
-      esValido = false;
-    }
-
-    // Validación para teléfono (obligatorio)
-    if (!formData.telefono.trim()) {
-      erroresTemp.telefono = "El teléfono es obligatorio";
-      esValido = false;
-    } else if (!/^\d{7,15}$/.test(formData.telefono.trim())) {
-      erroresTemp.telefono = "Ingresa un número de teléfono válido (entre 7 y 15 dígitos)";
-      esValido = false;
-    }
-
-    // Validación para NIT/RUT (opcional pero con formato si se proporciona)
-    if (formData.rut_nit && !/^[0-9\-]+$/.test(formData.rut_nit.trim())) {
-      erroresTemp.rut_nit = "El NIT/RUT debe contener solo números y guiones";
-      esValido = false;
-    }
-
-    // Validación para correo (opcional pero con formato si se proporciona)
-    if (formData.correo && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.correo.trim())) {
-      erroresTemp.correo = "Ingresa un correo electrónico válido";
-      esValido = false;
-    }
-
-    // Validación para zona de trabajo (obligatorio)
-    if (!formData.id_zona_de_trabajo) {
-      erroresTemp.id_zona_de_trabajo = "Selecciona una zona de trabajo";
+      erroresTemp.direccion = "Ingrese una dirección válida";
       esValido = false;
     }
 
@@ -148,66 +118,21 @@ const RegistroCliente = () => {
     return esValido;
   };
 
-  const manejarEnvio = async (e) => {
+  const manejarEnvio = (e) => {
     e.preventDefault();
-    
-    // Limpiar mensajes anteriores
-    setErrorSubmit("");
-    setSuccessMessage("");
-    
-    if (!validarFormulario()) {
-      return;
-    }
 
-    setLoading(true);
-
-    try {
-      // Preparar datos para envío (mapeo de nombres de campos)
-      const clienteData = {
-        razon_social: formData.razon_social,
-        nombre_completo_cliente: formData.nombre_completo_cliente,
-        direccion: formData.direccion,
-        telefono: formData.telefono,
-        rut_nit: formData.rut_nit,
-        correo: formData.correo,
-        id_zona_de_trabajo: formData.id_zona_de_trabajo,
-        estado: "Activo"
-      };
-
-      // Determinar si usar el método normal o solicitud según el rol
-      const isAdmin = user && user.rol === 'ADMINISTRADOR';
-
-      // Llamar al servicio correspondiente
-      let response;
-      if (isAdmin) {
-        response = await clientService.createClient(clienteData);
-      } else {
-        response = await clientService.requestCreateClient(clienteData);
-      }
-
-      console.log("Cliente registrado:", response);
-      setSuccessMessage(isAdmin ? "Cliente registrado exitosamente" : "Solicitud de cliente enviada, pendiente de aprobación");
+    if (validarFormulario()) {
+      console.log("Datos de registro de cliente:", formData);
       setShowAlert(true);
-    } catch (error) {
-      console.error("Error al registrar cliente:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        setErrorSubmit(error.response.data.error);
-      } else {
-        setErrorSubmit("Ha ocurrido un error al registrar el cliente. Por favor, inténtalo de nuevo más tarde.");
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleCloseAlert = () => {
     setShowAlert(false);
-    
-    // Redireccionar a la ruta especificada después de un registro exitoso
-    if (successMessage) {
-      navigate(returnPath);
-      sessionStorage.removeItem("returnPath");
-    }
+    // Navigate back to the stored return path
+    navigate(returnPath);
+    // Clear the stored path after using it
+    sessionStorage.removeItem("returnPath");
   };
 
   const manejarCancelar = () => {
@@ -220,19 +145,17 @@ const RegistroCliente = () => {
 
   const confirmarCancelacion = () => {
     setShowCancelAlert(false);
+    // Navigate back to the stored return path
     navigate(returnPath);
+    // Clear the stored path after using it
     sessionStorage.removeItem("returnPath");
   };
 
   const validarSoloNumeros = (e) => {
-    if (!/[0-9\-]/.test(e.key)) {
+    if (!/[0-9]/.test(e.key) && e.key !== "-") {
       e.preventDefault();
     }
   };
-
-  if (loadingZonas) {
-    return <Loading message="Cargando datos..." />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
@@ -269,55 +192,90 @@ const RegistroCliente = () => {
                   </p>
                 </div>
 
-                {errorSubmit && (
-                  <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-                    <p>{errorSubmit}</p>
-                  </div>
-                )}
-
                 <form onSubmit={manejarEnvio} className="space-y-6">
                   <div className="relative">
                     <label className="block text-sm font-medium text-black-900 mb-2">
-                      Razón Social
+                      Razón Social <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      name="razon_social"
-                      value={formData.razon_social}
+                      name="razonSocial"
+                      value={formData.razonSocial}
                       onChange={manejarCambio}
                       className={`block w-full bg-gray-100 rounded-md border ${
-                        errores.razon_social
+                        errores.razonSocial
                           ? "border-red-500"
                           : "border-gray-300"
                       } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
                     />
-                    {errores.razon_social && (
+                    {errores.razonSocial && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errores.razon_social}
+                        {errores.razonSocial}
                       </p>
                     )}
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-black-900 mb-2">
+                        Nombre
+                      </label>
+                      <input
+                        type="text"
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={manejarCambio}
+                        className={`block w-full bg-gray-100 rounded-md border ${
+                          errores.nombre ? "border-red-500" : "border-gray-300"
+                        } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
+                      />
+                      {errores.nombre && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errores.nombre}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-black-900 mb-2">
+                        Apellidos
+                      </label>
+                      <input
+                        type="text"
+                        name="apellido"
+                        value={formData.apellido}
+                        onChange={manejarCambio}
+                        className={`block w-full bg-gray-100 rounded-md border ${
+                          errores.apellido
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
+                      />
+                      {errores.apellido && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errores.apellido}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="relative">
                     <label className="block text-sm font-medium text-black-900 mb-2">
-                      Nombre Completo <span className="text-red-500">*</span>
+                      NIT <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      name="nombre_completo_cliente"
-                      value={formData.nombre_completo_cliente}
+                      name="nit"
+                      value={formData.nit}
                       onChange={manejarCambio}
+                      onKeyPress={validarSoloNumeros}
+                      placeholder="Ej: 900123456-7"
                       className={`block w-full bg-gray-100 rounded-md border ${
-                        errores.nombre_completo_cliente
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        errores.nit ? "border-red-500" : "border-gray-300"
                       } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
-                      required
                     />
-                    {errores.nombre_completo_cliente && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errores.nombre_completo_cliente}
-                      </p>
+                    {errores.nit && (
+                      <p className="mt-1 text-sm text-red-600">{errores.nit}</p>
                     )}
                   </div>
 
@@ -333,32 +291,11 @@ const RegistroCliente = () => {
                       className={`block w-full bg-gray-100 rounded-md border ${
                         errores.direccion ? "border-red-500" : "border-gray-300"
                       } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
-                      required
                     />
                     {errores.direccion && (
                       <p className="mt-1 text-sm text-red-600">
                         {errores.direccion}
                       </p>
-                    )}
-                  </div>
-
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-black-900 mb-2">
-                      NIT/RUT
-                    </label>
-                    <input
-                      type="text"
-                      name="rut_nit"
-                      value={formData.rut_nit}
-                      onChange={manejarCambio}
-                      onKeyPress={validarSoloNumeros}
-                      placeholder="Ej: 900123456-7"
-                      className={`block w-full bg-gray-100 rounded-md border ${
-                        errores.rut_nit ? "border-red-500" : "border-gray-300"
-                      } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
-                    />
-                    {errores.rut_nit && (
-                      <p className="mt-1 text-sm text-red-600">{errores.rut_nit}</p>
                     )}
                   </div>
 
@@ -369,68 +306,45 @@ const RegistroCliente = () => {
                       </label>
                       <input
                         type="tel"
-                        name="telefono"
-                        value={formData.telefono}
+                        name="numeroCelular"
+                        value={formData.numeroCelular}
                         onChange={manejarCambio}
                         onKeyPress={validarSoloNumeros}
                         className={`block w-full bg-gray-100 rounded-md border ${
-                          errores.telefono
+                          errores.numeroCelular
                             ? "border-red-500"
                             : "border-gray-300"
                         } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
-                        required
                       />
-                      {errores.telefono && (
+                      {errores.numeroCelular && (
                         <p className="mt-1 text-sm text-red-600">
-                          {errores.telefono}
+                          {errores.numeroCelular}
                         </p>
                       )}
                     </div>
 
                     <div className="relative">
                       <label className="block text-sm font-medium text-black-900 mb-2">
-                        Correo electrónico
+                        Correo electrónico{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
-                        name="correo"
-                        value={formData.correo}
+                        name="correoElectronico"
+                        value={formData.correoElectronico}
                         onChange={manejarCambio}
                         className={`block w-full bg-gray-100 rounded-md border ${
-                          errores.correo ? "border-red-500" : "border-gray-300"
+                          errores.correoElectronico
+                            ? "border-red-500"
+                            : "border-gray-300"
                         } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
                       />
-                      {errores.correo && (
+                      {errores.correoElectronico && (
                         <p className="mt-1 text-sm text-red-600">
-                          {errores.correo}
+                          {errores.correoElectronico}
                         </p>
                       )}
                     </div>
-                  </div>
-
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-black-900 mb-2">
-                      Zona de Trabajo <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="id_zona_de_trabajo"
-                      value={formData.id_zona_de_trabajo}
-                      onChange={manejarCambio}
-                      className={`block w-full bg-gray-100 rounded-md border ${
-                        errores.id_zona_de_trabajo ? "border-red-500" : "border-gray-300"
-                      } shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500 py-2 px-3 text-base`}
-                      required
-                    >
-                      <option value="">Seleccionar zona de trabajo</option>
-                      {zonas.map((zona) => (
-                        <option key={zona.id_zona_de_trabajo} value={zona.id_zona_de_trabajo}>
-                          {zona.nombre_zona_trabajo}
-                        </option>
-                      ))}
-                    </select>
-                    {errores.id_zona_de_trabajo && (
-                      <p className="mt-1 text-sm text-red-600">{errores.id_zona_de_trabajo}</p>
-                    )}
                   </div>
 
                   <div className="border-t border-gray-200 pt-3">
@@ -452,13 +366,11 @@ const RegistroCliente = () => {
                         tipo="cancelar"
                         label="Cancelar"
                         onClick={manejarCancelar}
-                        disabled={loading}
                       />
                       <Boton
                         tipo="secundario"
-                        label={loading ? "Procesando..." : "Registrar Cliente"}
+                        label="Registrar Cliente"
                         type="submit"
-                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -468,7 +380,6 @@ const RegistroCliente = () => {
           </div>
         </Tipografia>
       </div>
-
       {showAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
@@ -477,7 +388,7 @@ const RegistroCliente = () => {
                 <Icono name="confirmar" size="65" />
               </div>
               <Tipografia size="lg" className="font-bold mb-2">
-                {successMessage}
+                ¡Cliente registrado exitosamente!
               </Tipografia>
               <div className="w-full flex justify-center">
                 <Boton
@@ -490,7 +401,6 @@ const RegistroCliente = () => {
           </div>
         </div>
       )}
-
       {showCancelAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-lg p-5 max-w-md w-full mx-4">
@@ -509,11 +419,13 @@ const RegistroCliente = () => {
                   tipo="cancelar"
                   label="No"
                   onClick={cancelarCancelacion}
+                  
                 />
                 <Boton
                   tipo="secundario"
                   label="Sí, cancelar"
                   onClick={confirmarCancelacion}
+
                 />
               </div>
             </div>
@@ -525,3 +437,4 @@ const RegistroCliente = () => {
 };
 
 export default RegistroCliente;
+

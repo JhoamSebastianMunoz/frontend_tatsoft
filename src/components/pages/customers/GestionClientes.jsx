@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { clientService } from "../../../context/services/ApiService";
 import Encabezado from "../../molecules/Encabezado";
 import Boton from "../../atoms/Botones";
@@ -17,13 +17,12 @@ const GestionClientes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Obtener datos de clientes desde el backend
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         setLoading(true);
         const response = await clientService.getAllClients();
-        setClientes(response.data || []);
+        setClientes(response.data);
       } catch (err) {
         console.error("Error al cargar clientes:", err);
         setError("Error al cargar la lista de clientes. Por favor, intenta de nuevo más tarde.");
@@ -36,17 +35,19 @@ const GestionClientes = () => {
   }, []);
 
   // Filtrar clientes según búsqueda y filtro
-  const clientesFiltrados = clientes.filter((cliente) => {
-    // Filtrar por tipo (si aplicable)
-    const tipoMatch = filtro === "Todos" || cliente.tipo === filtro;
-    
-    // Filtrar por término de búsqueda
-    const searchMatch = !busqueda || 
-      cliente.razon_social?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      cliente.nombre_completo_cliente?.toLowerCase().includes(busqueda.toLowerCase());
-    
-    return tipoMatch && searchMatch;
-  });
+  const clientesFiltrados = clientes.filter(
+    (cliente) => {
+      // Filtrar por tipo (si aplicable)
+      const tipoMatch = filtro === "Todos" || cliente.tipo === filtro;
+      
+      // Filtrar por término de búsqueda
+      const searchMatch = !busqueda ||
+        cliente.razon_social?.toLowerCase().includes(busqueda.toLowerCase()) ||
+        cliente.nombre_completo_cliente?.toLowerCase().includes(busqueda.toLowerCase());
+      
+      return tipoMatch && searchMatch;
+    }
+  );
 
   const handleVerCliente = (clienteId) => {
     navigate(`/ver/cliente/${clienteId}`);
@@ -55,19 +56,6 @@ const GestionClientes = () => {
   const handleEditarCliente = (cliente) => {
     localStorage.setItem("rutaOrigenEdicion", "/gestion/clientes");
     navigate(`/editar/cliente/${cliente.id_cliente}`);
-  };
-
-  const handleEliminarCliente = async (clienteId) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este cliente?")) {
-      try {
-        await clientService.deleteClient(clienteId);
-        // Actualizar la lista de clientes después de eliminar
-        setClientes(clientes.filter(cliente => cliente.id_cliente !== clienteId));
-      } catch (error) {
-        console.error("Error al eliminar el cliente:", error);
-        setError("No se pudo eliminar el cliente. Inténtalo de nuevo más tarde.");
-      }
-    }
   };
 
   if (loading) {
@@ -201,14 +189,7 @@ const GestionClientes = () => {
           >
             Minoristas
           </button>
-          <button 
-            className={`px-4 py-2 whitespace-nowrap rounded-md ${
-              filtro === "Inactivo"
-                ? "bg-purple-100 text-purple-700 font-medium"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-            onClick={() => setFiltro("Inactivo")}
-          >
+          <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100">
             Inactivos
           </button>
         </div>
@@ -288,24 +269,6 @@ const GestionClientes = () => {
                           >
                             Ver
                           </li>
-                          <li
-                            className="px-3 py-2 hover:bg-purple-100 cursor-pointer"
-                            onClick={() => {
-                              handleEditarCliente(cliente);
-                              setMenuAbierto(null);
-                            }}
-                          >
-                            Editar
-                          </li>
-                          <li
-                            className="px-3 py-2 hover:bg-red-100 text-red-600 cursor-pointer"
-                            onClick={() => {
-                              handleEliminarCliente(cliente.id_cliente);
-                              setMenuAbierto(null);
-                            }}
-                          >
-                            Eliminar
-                          </li>
                         </ul>
                       </div>
                     )}
@@ -324,12 +287,10 @@ const GestionClientes = () => {
                         className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                           cliente.tipo === "Mayorista"
                             ? "bg-purple-100 text-purple-800"
-                            : cliente.estado === "Inactivo"
-                            ? "bg-red-100 text-red-800"
                             : "bg-green-100 text-green-800"
                         }`}
                       >
-                        {cliente.tipo || cliente.estado || "Cliente"}
+                        {cliente.tipo || "Cliente"}
                       </span>
                     </p>
                   </div>
@@ -347,12 +308,7 @@ const GestionClientes = () => {
                     `}</style>
                     
                     <div className="card-buttons-container flex justify-between items-center px-1">
-                      <Boton 
-                        tipo="cancelar" 
-                        label="Eliminar" 
-                        size="small" 
-                        onClick={() => handleEliminarCliente(cliente.id_cliente)}
-                      />
+                      <Boton tipo="cancelar" label="Eliminar" size="small" />
                       <Boton
                         onClick={() => handleEditarCliente(cliente)}
                         label="Editar"
@@ -378,7 +334,7 @@ const GestionClientes = () => {
                       Teléfono
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
+                      Tipo
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
@@ -404,32 +360,20 @@ const GestionClientes = () => {
                           className={`px-2 py-1 text-xs font-medium rounded-full ${
                             cliente.tipo === "Mayorista"
                               ? "bg-purple-100 text-purple-800"
-                              : cliente.estado === "Inactivo"
-                              ? "bg-red-100 text-red-800"
                               : "bg-green-100 text-green-800"
                           }`}
                         >
-                          {cliente.tipo || cliente.estado || "Cliente"}
+                          {cliente.tipo || "Cliente"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                         <div className="flex justify-end gap-2">
                           <Boton
-                            onClick={() => handleVerCliente(cliente.id_cliente)}
-                            label="Ver"
-                            size="small"
-                          />
-                          <Boton
                             onClick={() => handleEditarCliente(cliente)}
                             label="Editar"
                             size="small"
                           />
-                          <Boton 
-                            tipo="cancelar" 
-                            label="Eliminar" 
-                            size="small"
-                            onClick={() => handleEliminarCliente(cliente.id_cliente)}
-                          />
+                          <Boton tipo="cancelar" label="Eliminar" size="small" />
                         </div>
                       </td>
                     </tr>
@@ -454,6 +398,22 @@ const GestionClientes = () => {
                     </span>{" "}
                     resultados
                   </p>
+                </div>
+                <div>
+                  <nav
+                    className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                    aria-label="Pagination"
+                  >
+                    <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                      Anterior
+                    </button>
+                    <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                      1
+                    </button>
+                    <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                      Siguiente
+                    </button>
+                  </nav>
                 </div>
               </div>
             </div>
