@@ -9,6 +9,7 @@ import Encabezado from "../../../components/molecules/Encabezado";
 import Boton from "../../atoms/Botones";
 import SidebarAdm from "../../organisms/SidebarAdm";
 import Loading from "../../Loading/Loading";
+import UsuarioAvatar from "../../atoms/AvatarUsuario";
 
 const Profile = () => {
   const { user, token } = useAuth();
@@ -146,7 +147,7 @@ const Profile = () => {
             </div>
           )}
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-5">
+            <div className="bg-indigo-400  p-5">
               <div className="flex justify-center mb-6">
                 <AvatarTexto
                   nombre={userData.nombreCompleto || "Usuario"}

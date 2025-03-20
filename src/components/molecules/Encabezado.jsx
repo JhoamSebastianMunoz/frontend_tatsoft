@@ -12,7 +12,7 @@ const Encabezado = ({ mensaje = "", icono = "volver", onClick, ruta = "", classN
   };
 
   return (
-    <div className={`flex items-center bg-gradient-to-r from-purple-900 to-purple-600 p-3 shadow-md ${className}`}>
+    <div className={`flex items-center bg-indigo-500 p-3 shadow-md ${className}`}>
       <Tipografia variant="h1" size="2xl" className="ml-auto m-1 text-white font-semibold">
         {mensaje}
       </Tipografia>

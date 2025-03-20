@@ -8,6 +8,7 @@ import FiltroOpciones from "../../../components/molecules/FiltroOpciones";
 import Card from "../../../components/organisms/Card";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Loading from "../../../components/Loading/Loading";
+import SidebarAdm from "../../organisms/SidebarAdm";
 
 const GestionUsuarios = () => {
   const navigate = useNavigate();
@@ -17,6 +18,27 @@ const GestionUsuarios = () => {
   const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileView, setMobileView] = useState(false);
+
+  // Detectar el tamaño de la pantalla para modo responsive
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setMobileView(true);
+        setSidebarOpen(false);
+      } else {
+        setMobileView(false);
+        setSidebarOpen(true); // En escritorio, mantener abierto por defecto
+      }
+    };
+    handleResize(); // Verificar tamaño inicial
+    window.addEventListener("resize", handleResize);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   // Cargar usuarios al iniciar
   useEffect(() => {
@@ -58,6 +80,10 @@ const GestionUsuarios = () => {
     setFilteredUsuarios(results);
   }, [usuarios, filtro, busqueda]);
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   const handleBusquedaChange = (e) => {
     setBusqueda(e.target.value);
   };
@@ -75,51 +101,60 @@ const GestionUsuarios = () => {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="mb-2">
-        <Encabezado mensaje="Gestión de usuario" />
-      </div>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 mb-4">
-          {error}
-        </div>
-      )}
-      <div className="px-4">
-        <Buscador
-          placeholder="Buscar Usuario"
-          onChange={handleBusquedaChange}
-        />
-      </div>
-      <div className="m-1 p-2 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mx-4">
-        <FiltroOpciones
-          opciones={["Todos", "COLABORADOR", "ADMINISTRADOR"]}
-          onChange={handleFiltroChange}
-          className="w-full sm:w-auto"
-        />
-        <Boton
-          label="Registrar Usuario"
-          tipo="primario"
-          onClick={handleRegistrarUsuario}
-          size="medium"
-        />
-      </div>
-
-      <div className="flex justify-center mt-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-3 px-4 md:px-10 lg:px-20 w-full justify-items-center">
-          {filteredUsuarios.length > 0 ? (
-            filteredUsuarios.map((usuario) => (
-              <Card
-                key={usuario.id_usuario}
-                nombre={usuario.nombreCompleto}
-                celular={usuario.celular}
-                Rol={usuario.rol}
-              />
-            ))
-          ) : (
-            <p className="text-gray-500 col-span-full text-center">
-              No se encontraron usuarios.
-            </p>
+    <div className="">
+      <div>
+        <Encabezado mensaje="Gestión de usuario" toggleSidebar={toggleSidebar} />
+        
+        {/* Sidebar */}
+        <SidebarAdm />
+        
+        {/* Contenido principal */}
+        <div className="w-full">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 mb-4">
+              {error}
+            </div>
           )}
+          
+          <div className="px-4">
+            <Buscador
+              placeholder="Buscar Usuario"
+              onChange={handleBusquedaChange}
+            />
+          </div>
+          
+          <div className="m-1 p-2 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mx-4">
+            <FiltroOpciones
+              opciones={["Todos", "COLABORADOR", "ADMINISTRADOR"]}
+              onChange={handleFiltroChange}
+              className="w-full sm:w-auto"
+            />
+            <Boton
+              label="Registrar Usuario"
+              tipo="primario"
+              onClick={handleRegistrarUsuario}
+              size="medium"
+            />
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-3 px-4 md:px-10 lg:px-20 w-full justify-items-center">
+              {filteredUsuarios.length > 0 ? (
+                filteredUsuarios.map((usuario) => (
+                  <Card
+                    key={usuario.id_usuario}
+                    nombre={usuario.nombreCompleto}
+                    celular={usuario.celular}
+                    Rol={usuario.rol}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-500 col-span-full text-center">
+                  No se encontraron usuarios.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

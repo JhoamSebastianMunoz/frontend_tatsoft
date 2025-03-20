@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { productService } from "../../../context/services/ApiService";
 import { imageService } from "../../../context/services/ImageService";
 import { useAuth } from "../../../context/AuthContext";
@@ -7,10 +7,10 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Buscador from "../../molecules/Buscador";
+import SidebarAdm from "../../organisms/SidebarAdm";
 import Loading from "../../Loading/Loading";
-import NavegacionAdministrador from "../../organisms/NavegacionAdm";
-import NavegacionUsuario from "../../organisms/NavegacionUsuario";
 import ProductoItem from "../../molecules/ProductoItem";
+import Encabezado from "../../molecules/Encabezado";
 
 const GestionProductos = () => {
   const navigate = useNavigate();
@@ -41,14 +41,14 @@ const GestionProductos = () => {
         setSidebarOpen(false);
       } else {
         setMobileView(false);
-        setSidebarOpen(true); // En escritorio, mantener abierto por defecto
+        setSidebarOpen(true); 
       }
     };
     handleResize(); // Verificar tamaño inicial
     window.addEventListener("resize", handleResize);
     
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.addEventListener("resize", handleResize);
     };
   }, []);
 
@@ -119,7 +119,6 @@ const GestionProductos = () => {
   };
 
   const handleVerProducto = (id) => {
-    // En una implementación futura, podría redirigir a una vista de detalle
     console.log(`Ver producto con ID ${id}`);
   };
 
@@ -173,160 +172,125 @@ const GestionProductos = () => {
     return <Loading message="Cargando productos..." />;
   }
 
+  // Clases consistentes
+  const containerClass = "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8";
+  const cardClass = "bg-white rounded-lg shadow-sm p-6"; 
+  const flexRowClass = "flex flex-row items-center";
+  const flexColClass = "flex flex-col";
+  const buttonContainerClass = "flex items-center gap-2";
+  const selectClass = "w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
+  const gridClass = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
+  const modalBgClass = "fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50";
+  const modalClass = "bg-white rounded-lg p-6 shadow-lg w-80";
+  const emptyStateClass = "text-center py-12";
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Botón para abrir/cerrar sidebar */}
-      <button
-        className="fixed top-3 left-4 z-30 p-2 bg-purple-900 text-white rounded-md hover:bg-purple-800 transition-colors duration-200"
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-7 w-7"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d={
-              sidebarOpen
-                ? "M6 18L18 6M6 6l12 12"
-                : "M4 6h16M4 12h16M4 18h16"
-            }
-          />
-        </svg>
-      </button>
+    <div className="min-h-screen bg-gray-50">  
+      <Encabezado mensaje="Gestión de productos" toggleSidebar={toggleSidebar} />
       
-      {/* Overlay para el fondo cuando el sidebar está abierto en móvil */}
-      {sidebarOpen && mobileView && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300"
-          onClick={toggleSidebar}
-          aria-hidden="true"
-        />
-      )}
-      
-      {/* Sidebar con navegación condicional según rol */}
-      <div
-        className={`fixed left-0 top-0 z-20 h-full bg-white border-r shadow-lg border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {user && user.rol === "ADMINISTRADOR" ? (
-          <NavegacionAdministrador />
-        ) : (
-          <NavegacionUsuario />
-        )}
-      </div>
-     
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarOpen ? "md:ml-64" : "ml-0"
-      }`}>
-        {/* Header */}
-        <div className="bg-purple-600 text-white p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-white font-medium pl-10 md:pl-0">
-            Gestión de Productos
-          </Tipografia>
-        </div>
-       
-        {/* Herramientas de búsqueda y filtrado */}
-        <div className="bg-white p-4 shadow-sm">
-          <div className="container mx-auto">
-            <div className="flex flex-col md:flex-row items-center md:justify-between gap-4">
-              <div className="w-full md:w-1/2">
-                <Buscador
-                  placeholder="Buscar productos..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
-             
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <div className="flex-1 md:flex-none">
-                  <select
-                    className="w-full md:w-40 p-2 border rounded-md"
-                    value={categoriaSeleccionada}
-                    onChange={handleCategoriaChange}
-                  >
-                    <option value="Todas">Todas las categorías</option>
-                    {categorias.map(cat => (
-                      <option
-                        key={cat.id_categoria}
-                        value={cat.id_categoria}
+      <div className={flexRowClass}>
+        {sidebarOpen && <SidebarAdm />}
+        
+        <div className="w-full">
+          {/* Filtros y controles */}
+          <div className="bg-white shadow-sm w-full mb-6">
+            <div className={containerClass}>
+              <div className="py-4">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-4">
+                  <div className="w-full md:w-1/2">
+                    <Buscador
+                      placeholder="Buscar productos"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                  </div>
+                
+                  <div className={buttonContainerClass}>
+                    <div className="flex-1 md:flex-none">
+                      <select
+                        className={selectClass}
+                        value={categoriaSeleccionada}
+                        onChange={handleCategoriaChange}
                       >
-                        {cat.nombre_categoria}
-                      </option>
-                    ))}
-                  </select>
+                        <option value="Todas">Todas las categorías</option>
+                        {categorias.map(cat => (
+                          <option
+                            key={cat.id_categoria}
+                            value={cat.id_categoria}
+                          >
+                            {cat.nombre_categoria}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  
+                    {user && user.rol === "ADMINISTRADOR" && (
+                      <Boton
+                        tipo="primario"
+                        label="Agregar Producto"
+                        onClick={handleAgregarProducto}
+                        className="whitespace-nowrap"
+                      />
+                    )}
+                  </div>
                 </div>
-               
-                {user && user.rol === "ADMINISTRADOR" && (
-                  <Boton
-                    tipo="primario"
-                    label="Agregar Producto"
-                    onClick={handleAgregarProducto}
-                    className="whitespace-nowrap"
-                  />
-                )}
               </div>
             </div>
           </div>
-        </div>
-       
-        {/* Mensajes de error */}
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4 rounded">
-            <p className="font-medium">Error</p>
-            <p>{error}</p>
-          </div>
-        )}
-       
-        {/* Lista de productos */}
-        <div className="flex-grow p-4 md:p-6">
-          <div className="container mx-auto">
-            {productosFiltrados.length === 0 ? (
-              <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-                <Icono name="gest-productos" size={60} className="mx-auto text-gray-400 mb-4" />
-                <Tipografia size="lg" className="text-gray-600 mb-2">
-                  No se encontraron productos
-                </Tipografia>
-                <Tipografia className="text-gray-500 mb-6">
-                  {searchTerm || categoriaSeleccionada !== 'Todas'
-                    ? "No hay productos que coincidan con tu búsqueda. Intenta con otros filtros."
-                    : "Aún no hay productos registrados. Comienza agregando un nuevo producto."}
-                </Tipografia>
-                {user && user.rol === "ADMINISTRADOR" && (
-                  <Boton
-                    tipo="primario"
-                    label="Agregar Producto"
-                    onClick={handleAgregarProducto}
-                  />
-                )}
+          
+          {/* Mensajes de error */}
+          {error && (
+            <div className={containerClass}>
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded">
+                <p className="font-medium">Error</p>
+                <p>{error}</p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {productosFiltrados.map(producto => (
-                  <ProductoItem
-                    key={producto.id_producto}
-                    producto={producto}
-                    onView={handleVerProducto}
-                    onDelete={user && user.rol === "ADMINISTRADOR" ? handleEliminarProducto : null}
-                  />
-                ))}
-              </div>
-            )}
+            </div>
+          )}
+          
+          {/* Lista de productos */}
+          <div className={containerClass}>
+            <div className="mb-8">
+              {productosFiltrados.length === 0 ? (
+                <div className={`${cardClass} ${emptyStateClass}`}>
+                  <Icono name="gest-productos" size={60} className="mx-auto text-gray-400 mb-4" />
+                  <Tipografia size="lg" className="text-gray-600 mb-2">
+                    No se encontraron productos
+                  </Tipografia>
+                  <Tipografia className="text-gray-500 mb-6">
+                    {searchTerm || categoriaSeleccionada !== 'Todas'
+                      ? "No hay productos que coincidan con tu búsqueda. Intenta con otros filtros."
+                      : "Aún no hay productos registrados. Comienza agregando un nuevo producto."}
+                  </Tipografia>
+                  {user && user.rol === "ADMINISTRADOR" && (
+                    <Boton
+                      tipo="primario"
+                      label="Agregar Producto"
+                      onClick={handleAgregarProducto}
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className={gridClass}>
+                  {productosFiltrados.map(producto => (
+                    <ProductoItem
+                      key={producto.id_producto}
+                      producto={producto}
+                      onView={handleVerProducto}
+                      onDelete={user && user.rol === "ADMINISTRADOR" ? handleEliminarProducto : null}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-     
+      
       {/* Modal de confirmación para eliminar producto */}
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+        <div className={modalBgClass}>
+          <div className={modalClass}>
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
             </div>
@@ -336,7 +300,7 @@ const GestionProductos = () => {
             <Tipografia className="text-center text-gray-500 text-sm mb-4">
               Esta acción no se puede deshacer.
             </Tipografia>
-            <div className="flex justify-center space-x-2">
+            <div className="flex justify-center space-x-3">
               <Boton
                 tipo="cancelar"
                 label="Cancelar"

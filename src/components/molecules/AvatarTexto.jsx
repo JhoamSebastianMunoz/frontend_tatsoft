@@ -71,32 +71,7 @@ const AvatarTexto = ({
           <UsuarioAvatar />
         </div>
         
-        {/* Overlay de edición al hacer hover */}
-        {showEditButton && onEditClick && (
-          <>
-            {isHovered ? (
-              <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center transition-opacity duration-300 z-10">
-                <button
-                  className="text-white hover:text-purple-300 focus:outline-none transition-colors duration-200"
-                  onClick={onEditClick}
-                  aria-label="Editar avatar"
-                >
-                  <FiCamera className={iconSizeClasses[size]} />
-                </button>
-              </div>
-            ) : (
-              <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4 z-20">
-                <button
-                  className="flex items-center justify-center bg-white rounded-full shadow-md hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300 ease-in-out p-1"
-                  onClick={onEditClick}
-                  aria-label="Editar avatar"
-                >
-                  <FiEdit className={`text-purple-600 ${iconSizeClasses[size]}`} />
-                </button>
-              </div>
-            )}
-          </>
-        )}
+  
         
         {/* Badge (si se provee) */}
         {badge && (
