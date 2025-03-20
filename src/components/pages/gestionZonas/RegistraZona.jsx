@@ -4,6 +4,8 @@ import { areaService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
+import SidebarAdm from "../../organisms/SidebarAdm";
+import Encabezado from "../../molecules/Encabezado";
 
 const RegistrarZona = () => {
   const navigate = useNavigate();
@@ -72,94 +74,138 @@ const RegistrarZona = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg">
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 text-xl font-bold flex items-center">
-          <button onClick={() => navigate("/gestion-zonas")} className="text-white text-2xl mr-4">
-            &#8592;
-          </button>
-          Registrar Zona
-        </div>
-        
-        {error && (
-          <div className="mx-6 mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleGuardarClick} className="p-6 space-y-4">
-          <div>
-            <label className="font-bold">Nombre:</label>
-            <input
-              type="text"
-              name="nombre_zona_trabajo"
-              value={zona.nombre_zona_trabajo}
-              onChange={handleChange}
-              className="w-full p-2 border rounded mt-1"
-              required
-            />
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
+      {/* Encabezado fijo */}
+      <div className="fixed top-0 w-full z-10">
+        <Encabezado mensaje="Registrar zona" />
+      </div>
+      
+      {/* Sidebar fijo */}
+      <div className="fixed top-0 left-0 h-full z-10">
+        <SidebarAdm />
+      </div>
+      
+      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
+      <div className="w-full pt-16 m-1 p-4">
+        <Tipografia>
+          {/* Header con botón de retorno */}
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4 p-4 flex justify-between items-center m-1">
+            <div className="flex items-center ">
+              {/* <button 
+                onClick={() => navigate("/gestion-zonas")} 
+                className="text-purple-600 mr-2 hover:text-purple-800 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button> */}
+              <span className="font-medium text-lg">Registrar Nueva Zona</span>
+            </div>
           </div>
           
-          <div>
-            <label className="font-bold">Ubicación:</label>
-            <div className="text-sm mt-1 mb-2">
-              Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
-            </div>
-            
-            {/* Simulación de mapa */}
-            <div
-              className="w-full h-48 bg-gray-200 rounded flex items-center justify-center cursor-pointer"
-              onClick={handleMapClick}
-            >
-              <div className="text-center text-gray-600">
-                <div className="text-3xl mb-2">📍</div>
-                <div>Haz clic para simular selección de ubicación</div>
-                <div className="text-xs mt-1">(Se requiere API key de Google Maps para mostrar el mapa real)</div>
+          {/* Formulario */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+                <p className="font-medium">Error</p>
+                <p>{error}</p>
               </div>
-            </div>
+            )}
+            
+            <form onSubmit={handleGuardarClick} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre de la zona:
+                </label>
+                <input
+                  type="text"
+                  name="nombre_zona_trabajo"
+                  value={zona.nombre_zona_trabajo}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                  required
+                  placeholder="Ingrese el nombre de la zona"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ubicación:
+                </label>
+                <div className="text-sm mb-2 text-gray-600">
+                  Coordenadas: {zona.ubicacion.lat.toFixed(4)}, {zona.ubicacion.lng.toFixed(4)}
+                </div>
+                
+                {/* Simulación de mapa */}
+                <div
+                  className="w-full h-56 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={handleMapClick}
+                >
+                  <div className="text-center text-gray-600">
+                    <div className="text-3xl mb-2">📍</div>
+                    <div>Haz clic para simular selección de ubicación</div>
+                    <div className="text-xs mt-1 text-gray-500">(Se requiere API key de Google Maps para mostrar el mapa real)</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción:
+                </label>
+                <textarea
+                  name="descripcion"
+                  value={zona.descripcion}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                  required
+                  rows="4"
+                  placeholder="Descripción de la zona y detalles relevantes"
+                />
+              </div>
+              
+              <div className="flex justify-center pt-4">
+                <Boton
+                  type="button"
+                  label="Cancelar"
+                  onClick={() => navigate("/gestion-zonas")}
+                  tipo="cancelar"
+                  className="mr-2"
+                />
+                <Boton
+                  type="submit"
+                  label={loading ? "Guardando..." : "Guardar"}
+                  disabled={loading}
+                  tipo="primario"
+                />
+              </div>
+            </form>
           </div>
-          
-          <div>
-            <label className="font-bold">Descripción:</label>
-            <textarea
-              name="descripcion"
-              value={zona.descripcion}
-              onChange={handleChange}
-              className="w-full p-2 border rounded mt-1"
-              required
-              rows="4"
-            />
-          </div>
-          
-          <div className="flex justify-center">
-            <Boton
-              type="submit"
-              label={loading ? "Guardando..." : "Guardar"}
-              disabled={loading}
-              tipo="secundario"
-            />
-          </div>
-        </form>
+        </Tipografia>
       </div>
       
       {/* Alerta de Confirmación */}
       {mostrarAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-semibold">¿Desea registrar esta zona?</p>
-            <div className="flex justify-center mt-4">
-              <button
+            <Icono name="pregunta" size={50} className="mx-auto mb-4 text-purple-600" />
+            <Tipografia className="text-lg font-semibold mb-2">
+              ¿Desea registrar esta zona?
+            </Tipografia>
+            <Tipografia className="text-sm text-gray-500 mb-4">
+              Confirme para guardar la información de la zona.
+            </Tipografia>
+            <div className="flex justify-center mt-4 gap-2">
+              <Boton
                 onClick={() => setMostrarAlerta(false)}
-                className="bg-red-400 text-white px-4 py-2 rounded-lg mx-2"
-              >
-                Cancelar
-              </button>
-              <button
+                label="Cancelar"
+                tipo="cancelar"
+              />
+              <Boton
                 onClick={handleConfirmarGuardar}
-                className="bg-green-400 text-white px-4 py-2 rounded-lg mx-2"
-              >
-                Confirmar
-              </button>
+                label="Confirmar"
+                tipo="primario"
+              />
             </div>
           </div>
         </div>
@@ -167,10 +213,12 @@ const RegistrarZona = () => {
       
       {/* Alerta de Registro Exitoso */}
       {guardado && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <Icono name="confirmar" size={50} className="mx-auto mb-4" />
-            <p className="text-lg font-semibold">Zona registrada con éxito</p>
+            <Icono name="confirmar" size={50} className="mx-auto mb-4 text-green-500" />
+            <Tipografia className="text-lg font-semibold">
+              Zona registrada con éxito
+            </Tipografia>
           </div>
         </div>
       )}

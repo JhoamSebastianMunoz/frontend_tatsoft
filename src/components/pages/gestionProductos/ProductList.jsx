@@ -9,8 +9,7 @@ import Botones from '../../../components/atoms/Botones';
 import Encabezado from '../../../components/molecules/Encabezado';
 import Buscador from '../../../components/molecules/Buscador';
 import Loading from '../../../components/Loading/Loading';
-import NavegacionAdministrador from '../../organisms/NavegacionAdm';
-import NavegacionUsuario from '../../organisms/NavegacionUsuario';
+import SidebarAdm from '../../organisms/SidebarAdm';
 
 const ProductList = () => {
   const navigate = useNavigate();
@@ -24,29 +23,6 @@ const ProductList = () => {
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
   const [productImages, setProductImages] = useState({});
-  
-  // Estado para el control de la barra de navegación
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mobileView, setMobileView] = useState(false);
-
-  // Detectar el tamaño de la pantalla para modo responsive
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setMobileView(true);
-        setSidebarOpen(false);
-      } else {
-        setMobileView(false);
-        setSidebarOpen(true); // En escritorio, mantener abierto por defecto
-      }
-    };
-    handleResize(); // Verificar tamaño inicial
-    window.addEventListener("resize", handleResize);
-    
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   // Obtener la lista de productos al cargar el componente
   useEffect(() => {
@@ -120,10 +96,6 @@ const ProductList = () => {
     setFilteredProducts(filtered);
   }, [searchTerm, categoriaSeleccionada, products]);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -141,184 +113,243 @@ const ProductList = () => {
     console.log('Ver producto', productId);
   };
 
+  if (loading && products.length === 0) {
+    return <Loading message="Cargando productos..." />;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Botón para abrir/cerrar sidebar */}
-      <button
-        className="fixed top-3 left-4 z-30 p-2 bg-purple-900 text-white rounded-md hover:bg-purple-800 transition-colors duration-200"
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-7 w-7"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d={
-              sidebarOpen
-                ? "M6 18L18 6M6 6l12 12"
-                : "M4 6h16M4 12h16M4 18h16"
-            }
-          />
-        </svg>
-      </button>
-      
-      {/* Overlay para el fondo cuando el sidebar está abierto en móvil */}
-      {sidebarOpen && mobileView && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300"
-          onClick={toggleSidebar}
-          aria-hidden="true"
-        />
-      )}
-      
-      {/* Sidebar con navegación condicional según rol */}
-      <div
-        className={`fixed left-0 top-0 z-20 h-full bg-white border-r shadow-lg border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {user && user.rol === "ADMINISTRADOR" ? (
-          <NavegacionAdministrador />
-        ) : (
-          <NavegacionUsuario />
-        )}
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
+      {/* Encabezado fijo */}
+      <div className="fixed top-0 w-full z-10">
+        <Encabezado mensaje="Catálogo de Productos" />
       </div>
-     
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarOpen ? "md:ml-64" : "ml-0"
-      }`}>
-        {/* Header */}
-        <div className="bg-purple-600 text-white p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-white font-medium pl-10 md:pl-0">
-            Catálogo de Productos
-          </Tipografia>
-        </div>
-     
-        <div className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <Tipografia variant="h2" size="lg" className="mb-4 sm:mb-0 text-gray-800">
-              Productos Disponibles
-            </Tipografia>
-           
-            {user && user.rol === "ADMINISTRADOR" && (
-              <Botones
-                label="Agregar Producto"
-                tipo="primario"
-                onClick={handleAddProduct}
-              />
+      
+      {/* Sidebar fijo */}
+      <div className="fixed top-0 left-0 h-full z-10">
+        <SidebarAdm />
+      </div>
+      
+      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
+      <div className="w-full pt-16 m-1 p-4">
+        <Tipografia>
+          {/* Contador de productos */}
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4">
+            <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
+              <div>
+                <div className="flex items-center mt-1">
+                  <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
+                    {products.length} Total
+                  </span>
+                  <span className="bg-purple-200 text-purple-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                    {filteredProducts.length} Filtrados
+                  </span>
+                </div>
+              </div>
+              
+              {user && user.rol === "ADMINISTRADOR" && (
+                <Botones
+                  label="Agregar Producto"
+                  tipo="primario"
+                  onClick={handleAddProduct}
+                  className="mt-3 sm:mt-0"
+                />
+              )}
+            </div>
+          </div>
+          
+          {/* Filtros */}
+          <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+            <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Buscar:
+                </label>
+                <Buscador
+                  placeholder="Buscar producto"
+                  onChange={handleSearchChange}
+                  value={searchTerm}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Categoría:
+                </label>
+                <select
+                  className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                  value={categoriaSeleccionada}
+                  onChange={handleCategoriaChange}
+                >
+                  <option value="Todas">Todas las categorías</option>
+                  {categorias.map(cat => (
+                    <option
+                      key={cat.id_categoria}
+                      value={cat.id_categoria}
+                    >
+                      {cat.nombre_categoria}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            {(searchTerm || categoriaSeleccionada !== 'Todas') && (
+              <div className="mt-3 flex justify-end">
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setCategoriaSeleccionada("Todas");
+                  }}
+                  className="text-sm text-purple-600 hover:text-purple-800 flex items-center transition-colors duration-150"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Limpiar filtros
+                </button>
+              </div>
             )}
           </div>
-         
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="md:col-span-8">
-              <Buscador
-                placeholder="Buscar producto..."
-                onChange={handleSearchChange}
-                value={searchTerm}
-              />
-            </div>
-           
-            <div className="md:col-span-4">
-              <select
-                className="w-full p-2 border rounded-md"
-                value={categoriaSeleccionada}
-                onChange={handleCategoriaChange}
-              >
-                <option value="Todas">Todas las categorías</option>
-                {categorias.map(cat => (
-                  <option
-                    key={cat.id_categoria}
-                    value={cat.id_categoria}
-                  >
-                    {cat.nombre_categoria}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-         
+          
+          {/* Mensaje de error */}
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+              <p className="font-medium">Error</p>
+              <p>{error}</p>
             </div>
           )}
-         
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loading message="Cargando productos..." />
+          
+          {/* Lista de productos */}
+          <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="border-b pb-3 mb-4 flex justify-between items-center">
+              <h3 className="font-medium text-black-900">
+                Productos Disponibles
+                <span className="ml-2 text-sm font-normal text-black-700">
+                  Mostrando {filteredProducts.length} de {products.length}
+                </span>
+              </h3>
             </div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id_producto}
-                  className="border rounded-lg p-4 shadow-md bg-white flex flex-col"
-                >
-                  <div className="relative h-48 mb-4 bg-gray-200 rounded-lg overflow-hidden">
-                    {productImages[product.id_producto] ? (
-                      <img
-                        src={productImages[product.id_producto]}
-                        alt={product.nombre_producto}
-                        className="w-full h-full object-contain p-2"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          const imgMap = {...productImages};
-                          imgMap[product.id_producto] = null;
-                          setProductImages(imgMap);
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        <Iconos name="gest-productos" size={48} />
-                      </div>
-                    )}
-                  </div>
-                 
-                  <Tipografia variant="h2" size="lg" className="mb-2 font-bold text-purple-900 line-clamp-2 h-14">
-                    {product.nombre_producto}
-                  </Tipografia>
-                 
-                  <Tipografia className="text-lg font-semibold text-purple-700 mb-2">
-                    ${parseFloat(product.precio || 0).toLocaleString('es-CO')}
-                  </Tipografia>
-                 
-                  <Tipografia className="text-gray-600 mb-4 flex-grow line-clamp-3">
-                    {product.descripcion?.length > 100
-                      ? `${product.descripcion.substring(0, 100)}...`
-                      : product.descripcion || "Sin descripción disponible"}
-                  </Tipografia>
-                 
-                  <div className="flex justify-between items-center mt-auto">
-                    <Tipografia className="text-sm font-semibold text-gray-500">
-                      Stock: {product.cantidad_ingreso || 0}
-                    </Tipografia>
+            
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loading message="Cargando productos..." />
+              </div>
+            ) : filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id_producto}
+                    className="border rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition-shadow flex flex-col"
+                  >
+                    <div className="relative h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden">
+                      {productImages[product.id_producto] ? (
+                        <img
+                          src={productImages[product.id_producto]}
+                          alt={product.nombre_producto}
+                          className="w-full h-full object-contain p-2"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            const imgMap = {...productImages};
+                            imgMap[product.id_producto] = null;
+                            setProductImages(imgMap);
+                          }}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          <Iconos name="gest-productos" size={48} />
+                        </div>
+                      )}
+                    </div>
                    
-                    <Botones
-                      label="Ver Detalles"
-                      tipo="secundario"
-                      size="small"
-                      onClick={() => handleViewProduct(product.id_producto)}
-                    />
+                    <h3 className="mb-2 font-bold text-purple-900 line-clamp-2 h-14 text-lg">
+                      {product.nombre_producto}
+                    </h3>
+                   
+                    <p className="text-lg font-semibold text-purple-700 mb-2">
+                      ${parseFloat(product.precio || 0).toLocaleString('es-CO')}
+                    </p>
+                   
+                    <p className="text-gray-600 mb-4 flex-grow line-clamp-3">
+                      {product.descripcion?.length > 100
+                        ? `${product.descripcion.substring(0, 100)}...`
+                        : product.descripcion || "Sin descripción disponible"}
+                    </p>
+                   
+                    <div className="flex justify-between items-center mt-auto">
+                      <span className="text-sm font-semibold text-gray-500">
+                        Stock: {product.cantidad_ingreso || 0}
+                      </span>
+                     
+                      <Botones
+                        label="Ver Detalles"
+                        tipo="secundario"
+                        size="small"
+                        onClick={() => handleViewProduct(product.id_producto)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 flex flex-col items-center justify-center text-center">
+                <div className="bg-gray-100 p-4 rounded-full mb-3">
+                  <Iconos name="gest-productos" size={40} className="text-gray-400" />
+                </div>
+                <p className="text-gray-500">
+                  No se encontraron productos{searchTerm || categoriaSeleccionada !== 'Todas' ? ' con los filtros actuales' : ''}.
+                  {searchTerm || categoriaSeleccionada !== 'Todas' ? ' Intenta con otros filtros.' : ' Agrega nuevos productos al catálogo.'}
+                </p>
+              </div>
+            )}
+            
+            {/* Paginación */}
+            {filteredProducts.length > 0 && (
+              <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between mt-4">
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Mostrando <span className="font-medium">1</span> a{" "}
+                      <span className="font-medium">
+                        {filteredProducts.length > 10 ? 10 : filteredProducts.length}
+                      </span>{" "}
+                      de{" "}
+                      <span className="font-medium">
+                        {filteredProducts.length}
+                      </span>{" "}
+                      resultados
+                    </p>
+                  </div>
+                  <div>
+                    <nav
+                      className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                      aria-label="Pagination"
+                    >
+                      <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        Anterior
+                      </button>
+                      <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        1
+                      </button>
+                      <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        Siguiente
+                      </button>
+                    </nav>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow p-6">
-              <Tipografia size="lg" className="text-gray-500">
-                No se encontraron productos{searchTerm ? ' con la búsqueda actual' : ''}.
-                {searchTerm ? ' Intenta con otros términos.' : ' Agrega nuevos productos al catálogo.'}
-              </Tipografia>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        </Tipografia>
       </div>
     </div>
   );

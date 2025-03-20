@@ -4,6 +4,7 @@ import Encabezado from "../../molecules/Encabezado";
 import Boton from "../../atoms/Botones";
 import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
+import SidebarAdm from "../../organisms/SidebarAdm";
 
 const RegistroCliente = () => {
   const navigate = useNavigate();
@@ -158,8 +159,9 @@ const RegistroCliente = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
-      <div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
+      {/* Encabezado fijo */}
+      <div className="fixed top-0 w-full z-10">
         <Encabezado
           mensaje="Registro de Cliente"
           onClick={() => {
@@ -167,8 +169,17 @@ const RegistroCliente = () => {
             sessionStorage.removeItem("returnPath");
           }}
         />
+      </div>
+      
+      {/* Sidebar fijo */}
+      <div className="fixed top-0 left-0 h-full z-10">
+        <SidebarAdm />
+      </div>
+      
+      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
+      <div className="w-full pt-16 m-1 p-4">
         <Tipografia>
-          <div className="container mx-auto px-3 py-5 max-w-2xl">
+          <div className="container mx-auto px-3 py-5 max-w-2xl md:ml-64">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="p-6">
                 <div className="bg-purple-50 rounded-lg p-3 mb-5">
@@ -347,21 +358,8 @@ const RegistroCliente = () => {
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-3">
-                    <style jsx>{`
-                      @media (max-width: 640px) {
-                        .form-buttons-container {
-                          flex-direction: column;
-                          align-items: center;
-                          gap: 16px;
-                          margin: 0;
-                        }
-                        .form-buttons-container > * {
-                          margin: 0 !important;
-                        }
-                      }
-                    `}</style>
-                    <div className="form-buttons-container flex justify-center space-x-10">
+                  <div className="border-t border-gray-200 pt-6">
+                    <div className="flex justify-center space-x-4 md:space-x-10">
                       <Boton
                         tipo="cancelar"
                         label="Cancelar"
@@ -380,19 +378,21 @@ const RegistroCliente = () => {
           </div>
         </Tipografia>
       </div>
+      
+      {/* Modal de registro exitoso */}
       {showAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center justify-center mb-4">
-                <Icono name="confirmar" size="65" />
+                <Icono name="confirmar" size="65" className="text-green-500" />
               </div>
-              <Tipografia size="lg" className="font-bold mb-2">
+              <Tipografia size="lg" className="font-bold mb-4">
                 ¡Cliente registrado exitosamente!
               </Tipografia>
               <div className="w-full flex justify-center">
                 <Boton
-                  tipo="secundario"
+                  tipo="primario"
                   label="Aceptar"
                   onClick={handleCloseAlert}
                 />
@@ -401,12 +401,14 @@ const RegistroCliente = () => {
           </div>
         </div>
       )}
+      
+      {/* Modal de confirmación de cancelación */}
       {showCancelAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg p-5 max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Icono name="eliminarAlert" size="80" />
+              <div className="flex items-center justify-center mb-4">
+                <Icono name="eliminarAlert" size="65" />
               </div>
               <Tipografia size="lg" className="font-bold mb-2">
                 ¿Desea cancelar el registro?
@@ -414,18 +416,16 @@ const RegistroCliente = () => {
               <Tipografia className="mb-6 text-gray-600">
                 Si cancela, perderá toda la información ingresada.
               </Tipografia>
-              <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-3">
+              <div className="w-full flex flex-wrap justify-center gap-4">
                 <Boton
                   tipo="cancelar"
                   label="No"
                   onClick={cancelarCancelacion}
-                  
                 />
                 <Boton
                   tipo="secundario"
                   label="Sí, cancelar"
                   onClick={confirmarCancelacion}
-
                 />
               </div>
             </div>

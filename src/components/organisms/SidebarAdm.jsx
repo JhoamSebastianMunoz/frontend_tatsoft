@@ -91,8 +91,8 @@ const SidebarAdm = ({ activeMenuItem = null }) => {
         name: "preventa",
         label: "Gestión de Preventa",
         path: "/preventa/historial",
-        subItems: ["Nueva Preventa", "Historial de Preventas"],
-        subPaths: ["/preventa/nueva", "/preventa/historial"]
+        subItems: ["Historial de Preventas"],
+        subPaths: ["/preventa/historial"]
       },
       {
         name: "catalogo",
