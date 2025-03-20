@@ -2,7 +2,6 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
-
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
 import RecuperarPassword from "./components/pages/loginPage/RecuperarPassword";
@@ -47,11 +46,13 @@ import Preventa from "./components/pages/preventa/preventas";
 import HistorialVentas from "./components/pages/ventas/HistorialVentas";
 import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 
-//página de ventas y devoluciones
-import VentasDevoluciones from "./components/pages/ventasDevoluciones/VentasDevoluciones"
+// Páginas de devoluciones
+import HistorialDevoluciones from "./components/pages/devoluciones/HistorialDevoluciones";
+import DetallesDevolucion from "./components/pages/devoluciones/detalleDevoluciones"; 
+import ComparativaVentasDevoluciones from "./components/pages/devoluciones/ComparativaVentasDevoluciones"; 
+import ResumenDevoluciones from "./components/pages/devoluciones/ResumenDevoluciones";
+ 
 
-//página de devoluciones
-import Devoluciones from "./components/pages/devoluciones/devoluciones"
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
 
@@ -63,19 +64,15 @@ import Pagina404 from "./components/pages/alert/page404";
 // Componente de rutas protegidas
 const ProtectedRoute = ({ element, allowedRoles }) => {
   const { user, isAuthenticated, loading } = useAuth();
-
   if (loading) {
     return <Loading message="Verificando credenciales..." />;
   }
-
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-
   if (allowedRoles && !allowedRoles.includes(user?.rol)) {
     return <Navigate to="/unauthorized" replace />;
   }
-
   return element;
 };
 
@@ -88,7 +85,7 @@ const App = () => {
       <Route path="/codigo-verificacion" element={<CodigoVerificacion />} />
       <Route path="/restablecer" element={<Restablecer />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
-
+      
       {/* Rutas de perfil */}
       <Route
         path="/perfil"
@@ -99,7 +96,7 @@ const App = () => {
           />
         }
       />
-     
+      
       {/* Rutas de administrador - Gestión de usuarios */}
       <Route
         path="/admin"
@@ -146,7 +143,7 @@ const App = () => {
           />
         }
       />
-     
+      
       {/* Rutas de gestión de zonas */}
       <Route
         path="/zonas"
@@ -184,7 +181,7 @@ const App = () => {
           />
         }
       />
-     
+      
       {/* Nuevas rutas de gestión de zonas y colaboradores */}
       <Route
         path="/gestion-zonas/colaboradores/:id"
@@ -213,7 +210,7 @@ const App = () => {
           />
         }
       />
-     
+      
       {/* Rutas de productos */}
       <Route
         path="/productos"
@@ -289,12 +286,12 @@ const App = () => {
           />
         }
       />
-
+      
       {/* Rutas de preventas */}
       <Route
       path="/preventa"
       element={
-        <ProtectedRoute 
+        <ProtectedRoute
         element={<Preventa />}
         allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
         />
@@ -345,7 +342,7 @@ const App = () => {
           />
         }
       />
-
+      
       {/* Rutas de ventas */}
       <Route
         path="/ventas/historial"
@@ -365,28 +362,45 @@ const App = () => {
           />
         }
       />
-
-      {/* Ruta de ventas y devoluciones */}
-        <Route
+      
+      {/* Rutas de devoluciones */}
+      <Route
+        path="/devoluciones/historial"
+        element={
+          <ProtectedRoute
+            element={<HistorialDevoluciones />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/devoluciones/detalles/:id"
+        element={
+          <ProtectedRoute
+            element={<DetallesDevolucion />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/devoluciones/resumen"
+        element={
+          <ProtectedRoute
+            element={<ResumenDevoluciones />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
         path="/ventas/devoluciones"
         element={
           <ProtectedRoute
-          element={<VentasDevoluciones/>}
-          allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+            element={<ComparativaVentasDevoluciones />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
-          }
-        />
-      {/* Ruta de devoluciones */}
-      <Route
-      path="/devoluciones"
-      element={
-        <ProtectedRoute
-        element={<Devoluciones/>}
-        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
+        }
       />
-
+      
       {/* Ruta por defecto - Redirige a página de error 404 */}
       <Route path="*" element={<Pagina404 />} />
     </Routes>
