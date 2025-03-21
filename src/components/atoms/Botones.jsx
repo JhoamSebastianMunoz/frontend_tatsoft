@@ -1,4 +1,5 @@
 import React from 'react';
+import Tipografia from './Tipografia';
 
 const Boton = ({
   label,
@@ -14,7 +15,7 @@ const Boton = ({
  
   const tipos = {
     primario: "bg-[#F78220] hover:bg-orange-600 text-white",
-    secundario: "bg-[#842AF3] hover:bg-purple-800 text-white",
+    secundario: "bg-transparent border border-orange-100 text-orange-600 hover:bg-orange-50",
     alerta: "bg-[#63FF63] hover:bg-green-300 text-gray-700",
     cancelar: "bg-[#F48783] hover:bg-red-400 text-white",
     outline: "bg-transparent border border-[#B06AFF] text-[#B06AFF] hover:bg-purple-50",
@@ -140,6 +141,7 @@ const Botones = ({
 
   // De lo contrario, muestra ejemplos de botones
   return (
+    <Tipografia>
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <h2 className="text-xl font-semibold text-gray-800 mb-6">Ejemplos de Botones</h2>
       
@@ -211,6 +213,7 @@ const Botones = ({
         </div>
       </div>
     </div>
+  </Tipografia>
   );
 };
 

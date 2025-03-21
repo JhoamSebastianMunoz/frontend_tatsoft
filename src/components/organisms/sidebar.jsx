@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Tipografia from "../atoms/Tipografia";
+import Botones from "../atoms/Botones";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
@@ -388,7 +389,7 @@ const Sidebar = () => {
   return (
     <div
       className={`bg-white transition-all duration-300 ease-in-out h-screen ${
-        collapsed ? "w-16" : "w-72"
+        collapsed ? "w-16" : "w-70"
       } fixed left-0 top-0 z-50 shadow-md`}
     >
       <Tipografia>
