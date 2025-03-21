@@ -286,3 +286,4 @@ const VerCliente = () => {
 };
 
 export default VerCliente;
+
