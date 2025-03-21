@@ -35,6 +35,10 @@ import ProductList from "./components/pages/gestionProductos/ProductList";
 import GestionProductos from "./components/pages/gestionProductos/GestionProductos";
 import EditarProducto from "./components/pages/gestionProductos/EditarProducto";
 
+// Páginas de inventario
+import IngresoStock from "./components/pages/stock/IngresoStock";
+import HistorialIngresos from "./components/pages/stock/HistorialIngresos";
+
 // Páginas de preventa
 import NuevaPreventa from "./components/pages/preventa/NuevaPreventa";
 import HistorialPreventas from "./components/pages/preventa/HistorialPreventas";
@@ -248,7 +252,35 @@ const App = () => {
           />
         }
       />
-         
+        
+        {/* Rutas de Inventario */}
+<Route
+  path="/inventario"
+  element={
+    <ProtectedRoute
+      element={<HistorialIngresos />}
+      allowedRoles={["ADMINISTRADOR"]}
+    />
+  }
+/>
+<Route
+  path="/ingreso-stock"
+  element={
+    <ProtectedRoute
+      element={<IngresoStock />}
+      allowedRoles={["ADMINISTRADOR"]}
+    />
+  }
+/>
+<Route
+  path="/historial-ingresos"
+  element={
+    <ProtectedRoute
+      element={<HistorialIngresos />}
+      allowedRoles={["ADMINISTRADOR"]}
+    />
+  }
+/>  
       {/* Rutas de clientes */}
       <Route
         path="/ver/cliente/:id"
