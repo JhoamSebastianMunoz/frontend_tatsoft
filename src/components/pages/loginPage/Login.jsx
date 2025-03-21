@@ -193,7 +193,7 @@ const Login = () => {
                 </div>
               </form>
               <p className="mt-4 text-center text-xs text-gray-500">
-                &copy; 2024 Tatsoft. Todos los derechos reservados.
+                &copy; 2025 Tatsoft. Todos los derechos reservados.
               </p>
             </div>
           </div>

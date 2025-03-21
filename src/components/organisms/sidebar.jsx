@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
-import Tipografia from "../../atoms/Tipografia";
+import { useAuth } from "../../context/AuthContext";
+import Tipografia from "../atoms/Tipografia";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
