@@ -3,67 +3,69 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { userService } from "../../../context/services/ApiService";
 import AvatarTexto from "../../../components/molecules/AvatarTexto";
-import CampoTextoProfile from "../../../components/atoms/CamposTextoProfile";
+import CamposTexto from "../../../components/atoms/CamposTexto";
 import Tipografia from "../../../components/atoms/Tipografia";
-import Encabezado from "../../../components/molecules/Encabezado";
-import Boton from "../../atoms/Botones";
-// import SidebarAdm from "../../organisms/SidebarAdm";
+import Botones from "../../atoms/Botones";
 import Loading from "../../Loading/Loading";
-import Sidebar from "./sidebarPrueba";
-
+import Sidebar from "../../organisms/sidebar";
 
 const Profile = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
-  
+
   const [userData, setUserData] = useState({
     nombreCompleto: "",
     cedula: "",
     celular: "",
     correo: "",
-    rol: ""
+    rol: "",
   });
-  
+
   const [userZonas, setUserZonas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-       
-        // Verificamos si tenemos datos de usuario en el contexto
+
         if (user && Object.keys(user).length > 0) {
           setUserData(user);
-          
-          // Si es un colaborador, obtener sus zonas asignadas
+
           if (user.rol === "COLABORADOR") {
             try {
               const zonasResponse = await userService.getUserOwnZonas();
-              if (zonasResponse && zonasResponse.data && zonasResponse.data.zonas) {
+              if (
+                zonasResponse &&
+                zonasResponse.data &&
+                zonasResponse.data.zonas
+              ) {
                 setUserZonas(zonasResponse.data.zonas);
               }
             } catch (zonasError) {
               console.error("Error al cargar zonas del usuario:", zonasError);
             }
           }
-          
+
           setLoading(false);
           return;
         }
-       
-        // Si no hay datos en contexto pero hay token, consultamos la API
+
         if (token) {
           const response = await userService.getUserProfile();
           if (response && response.data) {
             setUserData(response.data);
-            
-            // Si es un colaborador, obtener sus zonas asignadas
+
             if (response.data.rol === "COLABORADOR") {
               try {
                 const zonasResponse = await userService.getUserOwnZonas();
-                if (zonasResponse && zonasResponse.data && zonasResponse.data.zonas) {
+                if (
+                  zonasResponse &&
+                  zonasResponse.data &&
+                  zonasResponse.data.zonas
+                ) {
                   setUserZonas(zonasResponse.data.zonas);
                 }
               } catch (zonasError) {
@@ -74,166 +76,174 @@ const Profile = () => {
             throw new Error("No se pudo obtener la información del perfil");
           }
         } else {
-          // Redirección a login si no hay token
           navigate("/", { replace: true });
           return;
         }
       } catch (error) {
         console.error("Error al cargar datos del perfil:", error);
-        setError("Error al cargar información del perfil. Por favor, intenta de nuevo más tarde.");
+        setError(
+          "Error al cargar información del perfil. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, [user, token, navigate]);
 
-  // Función para dividir el nombre correctamente
   const parseFullName = (fullName) => {
     if (!fullName) return { nombre: "", apellido: "" };
-   
     const parts = fullName.trim().split(" ");
     if (parts.length === 1) return { nombre: parts[0], apellido: "" };
-   
-    // Asumimos que el primer nombre es el primer elemento y el resto son apellidos
     const nombre = parts[0];
     const apellido = parts.slice(1).join(" ");
-   
     return { nombre, apellido };
   };
 
   const { nombre, apellido } = parseFullName(userData.nombreCompleto);
-  
-  // Estados para la funcionalidad de edición (preparación para futuras implementaciones)
   const [isEditing, setIsEditing] = useState(false);
- 
-  // Función para manejar el click en el avatar - este es un placeholder
-  const handleEditAvatar = () => {
-    console.log("Editar avatar");
-    // Implementar lógica para editar avatar
-  };
 
   const handleZonasClick = () => {
     navigate("/zonas");
   };
 
-  // Componente de carga
+  const handleActualizarClick = () => {
+    // Aquí puedes agregar la lógica para actualizar el perfil
+    alert("Actualizar información del perfil");
+  };
+
   if (loading) {
     return <Loading message="Cargando información del perfil..." />;
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
-      <div className="fixed top-0 left-0 z-50 h-full">
-        <Sidebar/>
-      </div>
-      <div className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md">
-        <Encabezado
-          className="py-4 md:py-3"
-          mensaje="Mi Perfil"
-        />
-      </div>
-      {/* Contenedor principal centrado sin respetar el sidebar */}
-      <div className="flex justify-center px-4 py-6 pt-20 transition-all duration-300">
-        <div className="w-full max-w-3xl">
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
-              <div className="flex items-center">
-                <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                <p>{error}</p>
+    <div className="min-h-screen bg-slate-100 overflow-x-hidden">
+      <Tipografia>
+        <div className="fixed top-0 left-0 z-50 h-full ml-64" >
+          <Sidebar />
+        </div>
+        <div className="flex justify-center px-4 py-6 pt-5 transition-all duration-300 ml-16">
+          <div className="w-full max-w-4xl">
+            {error && (
+              <div
+                className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 rounded mb-6"
+                role="alert"
+              >
+                <div className="flex items-center">
+                  <svg
+                    className="h-5 w-5 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p>{error}</p>
+                </div>
               </div>
-            </div>
-          )}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-indigo-400  p-5">
-              <div className="flex justify-center mb-6">
-                <AvatarTexto
-                  nombre={userData.nombreCompleto || "Usuario"}
-                  size="large"
-                  showEditButton={true}
-                  onEditClick={handleEditAvatar}
-                />
-              </div>
-           
-              <div className="flex flex-col md:flex-row justify-between items-center">
-                <div className="text-center md:text-left mb-4 md:mb-0">
-                  <div className="inline-flex items-center bg-purple-800 bg-opacity-50 px-4 py-2 rounded-full">
-                    <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                    <Tipografia className="text-white">{userData.rol || "Sin rol asignado"}</Tipografia>
+            )}
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm mb-6">
+              <div className="p-4 md:p-6 flex flex-col md:flex-row items-center">
+                <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
+                  <AvatarTexto
+                    nombre={userData.nombreCompleto || "Usuario"}
+                    size="large"
+                    showEditButton={true}
+                  />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-lg md:text-xl font-semibold text-gray-800">
+                    {userData.nombreCompleto || "Usuario"}
+                  </h1>
+                  <p className="text-sm md:text-base text-gray-500 mb-2">
+                    {userData.correo || "Sin correo"}
+                  </p>
+                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs md:text-sm font-medium bg-blue-100 text-blue-800">
+                    {userData.rol || "Sin rol asignado"}
                   </div>
                 </div>
-               
                 <div className="mt-4 md:mt-0">
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center"
-                    disabled={true} // Deshabilitado temporalmente hasta implementar la funcionalidad de edición
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                    disabled={true}
                   >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    <svg
+                      className="-ml-0.5 mr-2 h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
                     </svg>
                     Editar Perfil
                   </button>
                 </div>
               </div>
             </div>
-            <div className="p-4 md:p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                <div>
-                  <div className="bg-purple-50 p-4 md:p-5 rounded-lg">
-                    <Tipografia className="text-purple-800 font-semibold mb-4 flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+
+            <div className="grid grid-cols-1 gap-4 md:gap-6">
+              <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                <div className="border-b border-gray-200">
+                  <div className="px-4 md:px-6 py-3 md:py-4">
+                    <h2 className="text-base md:text-lg font-medium text-gray-800">
                       Información Personal
-                    </Tipografia>
-                    <div className="space-y-4">
-                      <CampoTextoProfile
+                    </h2>
+                  </div>
+                </div>
+                <div className="p-4 md:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div>
+                      <CamposTexto
                         label="Nombre"
                         value={nombre}
                         readOnly={!isEditing}
                         icon="user"
                       />
-                      <CampoTextoProfile
+                    </div>
+                    <div>
+                      <CamposTexto
                         label="Apellido"
                         value={apellido}
                         readOnly={!isEditing}
                         icon="user"
                       />
-                      <CampoTextoProfile
+                    </div>
+                    <div>
+                      <CamposTexto
                         label="Documento de Identidad"
                         value={userData.cedula || "No disponible"}
                         readOnly={!isEditing}
                         icon="id-card"
                       />
                     </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="bg-gray-100 p-4 md:p-5 rounded-lg">
-                    <Tipografia className="text-indigo-800 font-semibold mb-4 flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      Información de Contacto
-                    </Tipografia>
-                    <div className="space-y-4">
-                      <CampoTextoProfile
+                    <div>
+                      <CamposTexto
                         label="Teléfono Móvil"
                         value={userData.celular || "No disponible"}
                         readOnly={!isEditing}
                         icon="phone"
                       />
-                      <CampoTextoProfile
+                    </div>
+                    <div>
+                      <CamposTexto
                         label="Correo Electrónico"
                         value={userData.correo || "No disponible"}
                         readOnly={!isEditing}
                         icon="mail"
                       />
-                      <CampoTextoProfile
+                    </div>
+                    <div>
+                      <CamposTexto
                         label="Rol en el Sistema"
                         value={userData.rol || "No disponible"}
                         readOnly={true}
@@ -241,44 +251,70 @@ const Profile = () => {
                       />
                     </div>
                   </div>
+                  <div className="mt-4 md:mt-6 flex flex-col items-center justify-center">
+                    <div className="w-full sm:w-64">
+                      <Botones
+                        onClick={handleZonasClick}
+                        tipo="primario"
+                        label="Ir a Zonas de Trabajo"
+                        size="medium"
+                        iconName="location"
+                        fullWidth={true}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              {/* Mostrar información de zonas si es un colaborador */}
+
               {userData.rol === "COLABORADOR" && userZonas.length > 0 && (
-                <div className="mt-8">
-                  <div className="bg-blue-50 p-4 md:p-5 rounded-lg">
-                    <Tipografia className="text-blue-800 font-semibold mb-4 flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Zonas Asignadas
-                    </Tipografia>
-                    <div className="flex flex-wrap gap-2">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                  <div className="border-b border-gray-200">
+                    <div className="px-4 md:px-6 py-3 md:py-4">
+                      <h2 className="text-base md:text-lg font-medium text-gray-800">
+                        Zonas Asignadas
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="p-4 md:p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {userZonas.map((zona, index) => (
-                        <div key={index} className="bg-blue-100 px-3 py-1 rounded-md text-blue-800">
-                          <Tipografia>{zona.nombre_zona_trabajo}</Tipografia>
+                        <div
+                          key={index}
+                          className="flex items-center p-2 md:p-3 border border-gray-200 rounded-lg bg-gray-50"
+                        >
+                          <svg
+                            className="h-4 w-4 md:h-5 md:w-5 text-[#F78220] mr-2 flex-shrink-0"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          <span className="text-sm md:text-base text-gray-700 truncate">
+                            {zona.nombre_zona_trabajo}
+                          </span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
               )}
-              
-              <div className="flex flex-wrap justify-center gap-4 mt-8">
-                <Boton
-                  onClick={handleZonasClick}
-                  tipo="secundario"
-                  label="Ir a Zonas de Trabajo"
-                  size="large"
-                  iconName="location"
-                />
-              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Tipografia>
     </div>
   );
 };
