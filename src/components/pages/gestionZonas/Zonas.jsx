@@ -5,7 +5,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
 import Sidebar from "../../organisms/sidebar"
 
-// Añadir regla CSS para ocultar la barra de scroll pero mantener la funcionalidad
+
 const scrollStyle = `
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -113,23 +113,23 @@ const Zonas = () => {
                       label="Nuevo cliente"
                       tipo="primario"
                       onClick={handleAsignarZona}
-                      size="medium"
-                      iconName="map-pin"
+                      size="small"
+                      iconName="user-plus"
                       className="w-full sm:w-auto"
                     />
                     <Boton
                       label="Asignar Zonas"
                       tipo="primario"
                       onClick={handleNuevoCliente}
-                      size="medium"
-                      iconName="user-plus"
+                      size="small"
+                      iconName="map-pin"
                       className="w-full sm:w-auto"
                     />
                     <Boton
                       label="Eliminar Zona"
                       tipo="cancelar"
                       onClick={() => zonaSeleccionada && handleEliminarZona(zonaSeleccionada.id_zona_de_trabajo)}
-                      size="medium"
+                      size="small"
                       iconName="trash-2"
                       className="w-full sm:w-auto"
                     />
