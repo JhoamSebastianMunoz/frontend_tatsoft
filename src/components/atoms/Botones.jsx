@@ -15,7 +15,7 @@ const Boton = ({
 }) => {
  
   const tipos = {
-    primario: "bg-[#F78220] hover:bg-orange-600 text-white",
+    primario: "bg-orange-400 hover:bg-orange-600 text-white",
     secundario: "bg-transparent border border-orange-100 text-orange-600 hover:bg-orange-50",
     alerta: "bg-[#63FF63] hover:bg-green-300 text-gray-700",
     cancelar: "bg-[#F48783] hover:bg-red-400 text-white",
@@ -27,9 +27,8 @@ const Boton = ({
   // Tamaños predefinidos
   const tamaños = {
     small: "px-3 py-1.5 text-xs",
-    medium: "px-4 py-2 text-sm",
-    large: "px-5 py-2.5 text-base",
-    xlarge: "px-6 py-3 text-lg",
+    medium: "px-10 py-1.5 text-sm",
+    large: "px-28 py-1.5 text-base",
   };
 
   // Definición de iconos

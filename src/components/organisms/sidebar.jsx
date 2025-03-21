@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Tipografia from "../atoms/Tipografia";
-import Botones from "../atoms/Botones";
+
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
@@ -426,7 +426,7 @@ const Sidebar = () => {
                     w-full
                     ${
                       isActive
-                        ? "bg-gray-700 text-white"
+                        ? "bg-orange-400 text-white"
                         : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
                     } 
                     group flex items-center py-2.5 px-3 text-sm font-medium rounded-md transition-colors duration-200
@@ -514,7 +514,7 @@ const Sidebar = () => {
           : "w-full justify-start space-x-3"
       } 
       flex items-center py-2.5 px-5 text-sm font-medium rounded-md 
-      bg-[#F78220] hover:bg-orange-600 text-white transition-colors duration-200
+      bg-orange-500 hover:bg-orange-600 text-white transition-colors duration-200
       focus:outline-none focus:ring-2 focus:ring-orange-700 focus:ring-offset-1 focus:ring-offset-white
     `}
             aria-label="Cerrar sesión"

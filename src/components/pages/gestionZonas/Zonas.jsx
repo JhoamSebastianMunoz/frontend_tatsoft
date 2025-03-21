@@ -114,7 +114,6 @@ const Zonas = () => {
                       tipo="primario"
                       onClick={handleAsignarZona}
                       size="small"
-                      iconName="user-plus"
                       className="w-full sm:w-auto"
                     />
                     <Boton
@@ -122,7 +121,6 @@ const Zonas = () => {
                       tipo="primario"
                       onClick={handleNuevoCliente}
                       size="small"
-                      iconName="map-pin"
                       className="w-full sm:w-auto"
                     />
                     <Boton
@@ -130,7 +128,6 @@ const Zonas = () => {
                       tipo="cancelar"
                       onClick={() => zonaSeleccionada && handleEliminarZona(zonaSeleccionada.id_zona_de_trabajo)}
                       size="small"
-                      iconName="trash-2"
                       className="w-full sm:w-auto"
                     />
                   </div>
