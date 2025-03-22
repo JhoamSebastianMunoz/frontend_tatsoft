@@ -8,7 +8,7 @@ import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 import Loading from "../../Loading/Loading";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 
 const DetallesDevolucion = () => {
   const { id } = useParams();
