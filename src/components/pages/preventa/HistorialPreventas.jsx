@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { presaleService } from "../../../context/services/ApiService";
+import { presaleService, userService } from "../../../context/services/ApiService";
 import { useAuth } from "../../../context/AuthContext";
 
 // Componentes
@@ -20,6 +20,25 @@ const HistorialPreventas = () => {
   const [error, setError] = useState("");
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("Todos");
+  const [filtroColaborador, setFiltroColaborador] = useState("Todos");
+  const [colaboradores, setColaboradores] = useState([]);
+
+  // Cargar colaboradores si el usuario es administrador
+  useEffect(() => {
+    const fetchColaboradores = async () => {
+      if (user.rol === "ADMINISTRADOR") {
+        try {
+          const response = await userService.getAllUsers();
+          const colaboradoresData = response.data.filter(u => u.rol === "COLABORADOR");
+          setColaboradores(colaboradoresData);
+        } catch (err) {
+          console.error("Error al cargar colaboradores:", err);
+        }
+      }
+    };
+
+    fetchColaboradores();
+  }, [user.rol]);
 
   useEffect(() => {
     const fetchPreventas = async () => {
@@ -27,7 +46,14 @@ const HistorialPreventas = () => {
         setLoading(true);
         const response = await presaleService.getAllPresales();
         const data = Array.isArray(response.data) ? response.data : response.data?.message || [];
-        setPreventas(data);
+        
+        // Filtrar preventas según el rol del usuario
+        let preventasFiltradas = data;
+        if (user.rol !== "ADMINISTRADOR") {
+          preventasFiltradas = data.filter(preventa => preventa.id_usuario === user.id);
+        }
+        
+        setPreventas(preventasFiltradas);
       } catch (err) {
         console.error("Error al cargar preventas:", err);
         if (err.response) {
@@ -53,21 +79,26 @@ const HistorialPreventas = () => {
     };
 
     fetchPreventas();
-  }, []);
+  }, [user]);
 
   // Aplicar filtros
   const preventasFiltradas = preventas.filter(preventa => {
     // Filtro por estado
     const cumpleFiltroEstado = filtroEstado === "Todos" || preventa.estado === filtroEstado;
     
+    // Filtro por colaborador (solo para administradores)
+    const cumpleFiltroColaborador = filtroColaborador === "Todos" || 
+      (user.rol === "ADMINISTRADOR" && preventa.id_usuario === parseInt(filtroColaborador));
+    
     // Filtro por búsqueda
     const terminoBusqueda = filtroBusqueda.toLowerCase();
     const cumpleBusqueda = filtroBusqueda === "" || 
       (preventa.id_preventa && preventa.id_preventa.toString().includes(terminoBusqueda)) ||
       (preventa.fecha_creacion && new Date(preventa.fecha_creacion).toLocaleDateString().includes(terminoBusqueda)) ||
-      (preventa.total && preventa.total.toString().includes(terminoBusqueda));
+      (preventa.total && preventa.total.toString().includes(terminoBusqueda)) ||
+      (preventa.nombre_colaborador && preventa.nombre_colaborador.toLowerCase().includes(terminoBusqueda));
     
-    return cumpleFiltroEstado && cumpleBusqueda;
+    return cumpleFiltroEstado && cumpleFiltroColaborador && cumpleBusqueda;
   });
 
   // Formatear fecha para mostrar
@@ -161,7 +192,7 @@ const HistorialPreventas = () => {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
             <div className="w-full sm:w-1/2">
               <CampoTexto 
-                placeholder="Buscar por ID, fecha o total..." 
+                placeholder="Buscar por ID, fecha, total o colaborador..." 
                 value={filtroBusqueda}
                 onChange={(e) => setFiltroBusqueda(e.target.value)}
                 className="w-full"
@@ -216,6 +247,11 @@ const HistorialPreventas = () => {
                   <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total
                   </div>
+                  {user.rol === "ADMINISTRADOR" && (
+                    <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Colaborador
+                    </div>
+                  )}
                   <div className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </div>
@@ -235,6 +271,11 @@ const HistorialPreventas = () => {
                             <div className="text-xs sm:text-sm text-gray-500">
                               {formatearFecha(preventa.fecha_creacion)}
                             </div>
+                            {user.rol === "ADMINISTRADOR" && (
+                              <div className="text-sm text-gray-500">
+                                Colaborador: {preventa.nombre_colaborador}
+                              </div>
+                            )}
                           </div>
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                             ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
@@ -295,6 +336,11 @@ const HistorialPreventas = () => {
                         <div className="text-sm text-gray-500">
                           ${Number(preventa.total).toLocaleString('es-CO')}
                         </div>
+                        {user.rol === "ADMINISTRADOR" && (
+                          <div className="text-sm text-gray-500">
+                            {preventa.nombre_colaborador}
+                          </div>
+                        )}
                         <div className="text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
                             <button
