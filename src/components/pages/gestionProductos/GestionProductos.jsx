@@ -7,7 +7,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Buscador from "../../molecules/Buscador";
-import Sidebar from "../../organisms/sidebar";
+import Sidebar from "../../organisms/Sidebar";
 import Loading from "../../Loading/Loading";
 import ProductoItem from "../../molecules/ProductoItem";
 

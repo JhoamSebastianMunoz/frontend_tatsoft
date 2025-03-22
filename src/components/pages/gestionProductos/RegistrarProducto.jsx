@@ -7,7 +7,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Loading from "../../../components/Loading/Loading";
-import Sidebar from "../../organisms/sidebar";
+import Sidebar from "../../organisms/Sidebar";
 
 const RegistrarProducto = () => {
   const navigate = useNavigate();
