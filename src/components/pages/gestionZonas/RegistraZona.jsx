@@ -171,7 +171,6 @@ const RegistrarZona = () => {
                   label={loading ? "Guardando..." : "Guardar"}
                   disabled={loading}
                   tipo="primario"
-                  className="w-full sm:w-auto"
                 />
               </div>
             </form>
@@ -194,18 +193,16 @@ const RegistrarZona = () => {
             <Tipografia className="text-sm text-gray-500 mb-4">
               Confirme para guardar la información de la zona.
             </Tipografia>
-            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+            <div className="flex justify-center mt-4 gap-2">
               <Boton
                 onClick={() => setMostrarAlerta(false)}
                 label="Cancelar"
                 tipo="cancelar"
-                className="w-full sm:w-auto"
               />
               <Boton
                 onClick={handleConfirmarGuardar}
                 label="Confirmar"
                 tipo="primario"
-                className="w-full sm:w-auto"
               />
             </div>
           </div>

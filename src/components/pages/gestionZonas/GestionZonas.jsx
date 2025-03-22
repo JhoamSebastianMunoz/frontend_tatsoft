@@ -248,7 +248,7 @@ const GestionZonas = () => {
                           : "bg-gray-100"
                       }`}
                     ></div>
-                    <div className="absolute top-3 right-3 z-10">
+                    <div className="absolute top-3 right-3 z-10 mr-3">
                       <button
                         onClick={() => setMenuAbierto(menuAbierto === zona.id_zona_de_trabajo ? null : zona.id_zona_de_trabajo)}
                         className="text-gray-500 hover:text-gray-700 focus:outline-none"

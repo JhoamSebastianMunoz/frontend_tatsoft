@@ -31,7 +31,23 @@ const HistorialPreventas = () => {
         setPreventas(data);
       } catch (err) {
         console.error("Error al cargar preventas:", err);
-        setError("Error al cargar el historial de preventas. Por favor, intente nuevamente.");
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+              break;
+            case 403:
+              setError("No tiene permisos para ver el historial de preventas.");
+              break;
+            case 500:
+              setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+              break;
+            default:
+              setError(err.response.data?.message || "Error al cargar el historial de preventas.");
+          }
+        } else {
+          setError("Error de conexión. Por favor, verifique su conexión a internet.");
+        }
       } finally {
         setLoading(false);
       }
@@ -45,11 +61,12 @@ const HistorialPreventas = () => {
     // Filtro por estado
     const cumpleFiltroEstado = filtroEstado === "Todos" || preventa.estado === filtroEstado;
     
-    // Filtro por búsqueda - aquí depende de la estructura de datos, ajustar según corresponda
+    // Filtro por búsqueda
     const terminoBusqueda = filtroBusqueda.toLowerCase();
     const cumpleBusqueda = filtroBusqueda === "" || 
       (preventa.id_preventa && preventa.id_preventa.toString().includes(terminoBusqueda)) ||
-      (preventa.fecha_creacion && new Date(preventa.fecha_creacion).toLocaleDateString().includes(terminoBusqueda));
+      (preventa.fecha_creacion && new Date(preventa.fecha_creacion).toLocaleDateString().includes(terminoBusqueda)) ||
+      (preventa.total && preventa.total.toString().includes(terminoBusqueda));
     
     return cumpleFiltroEstado && cumpleBusqueda;
   });
@@ -91,7 +108,26 @@ const HistorialPreventas = () => {
         
       } catch (err) {
         console.error("Error al cancelar preventa:", err);
-        setError("Error al cancelar la preventa. Por favor, intente nuevamente.");
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+              break;
+            case 403:
+              setError("No tiene permisos para cancelar preventas.");
+              break;
+            case 404:
+              setError("La preventa no fue encontrada.");
+              break;
+            case 500:
+              setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+              break;
+            default:
+              setError(err.response.data?.message || "Error al cancelar la preventa.");
+          }
+        } else {
+          setError("Error de conexión. Por favor, verifique su conexión a internet.");
+        }
       } finally {
         setLoading(false);
       }
@@ -125,16 +161,16 @@ const HistorialPreventas = () => {
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="w-full md:w-1/2">
               <CampoTexto 
-                placeholder="Buscar por ID o fecha..." 
+                placeholder="Buscar por ID, fecha o total..." 
                 value={filtroBusqueda}
                 onChange={(e) => setFiltroBusqueda(e.target.value)}
               />
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <Tipografia className="whitespace-nowrap">Estado:</Tipografia>
               <select 
-                className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
                 value={filtroEstado}
                 onChange={(e) => setFiltroEstado(e.target.value)}
               >
@@ -148,6 +184,7 @@ const HistorialPreventas = () => {
                 tipo="primario" 
                 label="Nueva Preventa" 
                 onClick={() => navigate("/preventa/nueva")}
+                className="w-full sm:w-auto"
               />
             </div>
           </div>
@@ -161,55 +198,55 @@ const HistorialPreventas = () => {
 
           {preventasFiltradas.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha de Creación
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+              <div className="min-w-full divide-y divide-gray-200">
+                {/* Encabezados de tabla */}
+                <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-6 py-3">
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID
+                  </div>
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha de Creación
+                  </div>
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estado
+                  </div>
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </div>
+                  <div className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </div>
+                </div>
+
+                {/* Lista de preventas */}
+                <div className="divide-y divide-gray-200">
                   {preventasFiltradas.map((preventa) => (
-                    <tr key={preventa.id_preventa} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          #{preventa.id_preventa}
+                    <div key={preventa.id_preventa} className="hover:bg-gray-50">
+                      {/* Vista móvil */}
+                      <div className="md:hidden p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="text-sm font-medium text-gray-900">
+                              #{preventa.id_preventa}
+                            </span>
+                            <div className="text-sm text-gray-500">
+                              {formatearFecha(preventa.fecha_creacion)}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                              preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
+                              'bg-red-100 text-red-800'}`}>
+                            {preventa.estado}
+                          </span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {formatearFecha(preventa.fecha_creacion)}
+                        <div className="text-sm text-gray-500 mb-2">
+                          Total: ${Number(preventa.total).toLocaleString('es-CO')}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
-                            preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
-                            'bg-red-100 text-red-800'}`}>
-                          {preventa.estado}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${Number(preventa.total).toLocaleString('es-CO')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
                           <button
                             onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                            className="text-indigo-600 hover:text-indigo-900"
+                            className="text-indigo-600 hover:text-indigo-900 text-sm"
                           >
                             Ver
                           </button>
@@ -219,7 +256,7 @@ const HistorialPreventas = () => {
                               {user.rol === 'ADMINISTRADOR' && (
                                 <button
                                   onClick={() => confirmarPreventa(preventa.id_preventa)}
-                                  className="text-green-600 hover:text-green-900"
+                                  className="text-green-600 hover:text-green-900 text-sm"
                                 >
                                   Confirmar
                                 </button>
@@ -227,18 +264,69 @@ const HistorialPreventas = () => {
                               
                               <button
                                 onClick={() => handleCancelarPreventa(preventa.id_preventa)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 text-sm"
                               >
                                 Cancelar
                               </button>
                             </>
                           )}
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+
+                      {/* Vista desktop */}
+                      <div className="hidden md:grid md:grid-cols-5 px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          #{preventa.id_preventa}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {formatearFecha(preventa.fecha_creacion)}
+                        </div>
+                        <div>
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                              preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
+                              'bg-red-100 text-red-800'}`}>
+                            {preventa.estado}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          ${Number(preventa.total).toLocaleString('es-CO')}
+                        </div>
+                        <div className="text-right text-sm font-medium">
+                          <div className="flex justify-end space-x-2">
+                            <button
+                              onClick={() => verDetallesPreventa(preventa.id_preventa)}
+                              className="text-indigo-600 hover:text-indigo-900"
+                            >
+                              Ver
+                            </button>
+                            
+                            {preventa.estado === 'Pendiente' && (
+                              <>
+                                {user.rol === 'ADMINISTRADOR' && (
+                                  <button
+                                    onClick={() => confirmarPreventa(preventa.id_preventa)}
+                                    className="text-green-600 hover:text-green-900"
+                                  >
+                                    Confirmar
+                                  </button>
+                                )}
+                                
+                                <button
+                                  onClick={() => handleCancelarPreventa(preventa.id_preventa)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Cancelar
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="text-center py-10 text-gray-500">

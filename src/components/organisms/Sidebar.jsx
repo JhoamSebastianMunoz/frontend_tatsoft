@@ -113,7 +113,7 @@ const Sidebar = () => {
       label: "Gestión de Zonas",
       path: "/gestion-zonas",
       icon: "zones",
-      subItems: ["Zonas Activas", "Añadir Zona"],
+      subItems: ["Lista de Zonas", "Registrar Zona"],
       subPaths: ["/gestion-zonas", "/registrar-zona"],
     },
     {

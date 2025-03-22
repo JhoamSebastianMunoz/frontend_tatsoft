@@ -113,10 +113,13 @@ const HistorialIngresos = () => {
       
       {/* Contenido principal */}
       <div className="flex-1 pl-20">
-        {/* Header */}
-        <div className="text-black p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-black font-medium">
-            Historial de Ingresos
+      <div className="text-black p-4 mb-4 ">
+          <Tipografia 
+            variant="h1" 
+            size="2xl" 
+            className="text-black font-medium pl-2 md:pl-4"
+          >
+            Historial Ingresos
           </Tipografia>
         </div>
 
