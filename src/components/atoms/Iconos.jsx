@@ -42,7 +42,7 @@ const iconos = {
   candado:IoIosLock
 };
 
-const Icono = ({ name, size = 25, color = "#52307C", className = "", customColor, onClick }) => {
+const Icono = ({ name, size = 25, color = "#c2c2c2", className = "", customColor, onClick }) => {
   const finalColor = customColor ?? (() => {
     switch (name) {
       case "cerrar-sesion":

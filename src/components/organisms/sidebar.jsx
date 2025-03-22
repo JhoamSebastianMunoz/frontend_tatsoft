@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Tipografia from "../atoms/Tipografia";
 
+
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
     const savedState = localStorage.getItem("sidebarCollapsed");
@@ -388,7 +389,7 @@ const Sidebar = () => {
   return (
     <div
       className={`bg-white transition-all duration-300 ease-in-out h-screen ${
-        collapsed ? "w-16" : "w-72"
+        collapsed ? "w-16" : "w-70"
       } fixed left-0 top-0 z-50 shadow-md`}
     >
       <Tipografia>
@@ -425,7 +426,7 @@ const Sidebar = () => {
                     w-full
                     ${
                       isActive
-                        ? "bg-gray-700 text-white"
+                        ? "bg-orange-400 text-white"
                         : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
                     } 
                     group flex items-center py-2.5 px-3 text-sm font-medium rounded-md transition-colors duration-200
@@ -513,7 +514,7 @@ const Sidebar = () => {
           : "w-full justify-start space-x-3"
       } 
       flex items-center py-2.5 px-5 text-sm font-medium rounded-md 
-      bg-[#F78220] hover:bg-orange-600 text-white transition-colors duration-200
+      bg-orange-500 hover:bg-orange-600 text-white transition-colors duration-200
       focus:outline-none focus:ring-2 focus:ring-orange-700 focus:ring-offset-1 focus:ring-offset-white
     `}
             aria-label="Cerrar sesión"

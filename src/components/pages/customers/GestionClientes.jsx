@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { clientService } from "../../../context/services/ApiService";
-import Encabezado from "../../molecules/Encabezado";
 import Boton from "../../atoms/Botones";
 import Buscador from "../../molecules/Buscador";
 import Tipografia from "../../atoms/Tipografia";
 import Loading from "../../Loading/Loading";
-import SidebarAdm from "../../organisms/SidebarAdm"
+import Sidebar from "../../organisms/Sidebar"
 
 const GestionClientes = () => {
   const navigate = useNavigate();
@@ -64,31 +63,24 @@ const GestionClientes = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
-      {/* Encabezado fijo */}
-      <div className="fixed top-0 w-full z-10">
-        <Encabezado
-          mensaje="Gestión de clientes"
-          onClick={() => navigate("/")}
-        />
-      </div>
-      
-      {/* Sidebar fijo */}
+    <div className="min-h-screen overflow-x-hidden">
       <div className="fixed top-0 left-0 h-full z-10">
-        <SidebarAdm />
+        <Sidebar/>
       </div>
       
-      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
-      <div className="w-full pt-16 m-1 p-4">
+      <div className="w-full md:ml-20 pl-2 pr-4 sm:pr-8 md:pr-16 lg:pr-20">
         <Tipografia>
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4">
+          <div className="mt-4 mb-5">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Gestión de clientes</h1>
+          </div>
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
                   <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {clientes.length} Total
                   </span>
-                  <span className="bg-purple-200 text-purple-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full">
                     {clientesFiltrados.length} Filtrados
                   </span>
                 </div>
@@ -148,13 +140,13 @@ const GestionClientes = () => {
               </div>
               
               {(busqueda || filtro !== "Todos") && (
-                <div className="mt-3 flex justify-end">
+                <div className="mt-1 flex justify-end">
                   <button
                     onClick={() => {
                       setBusqueda("");
                       setFiltro("Todos");
                     }}
-                    className="text-sm text-purple-600 hover:text-purple-800 flex items-center transition-colors duration-150"
+                    className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -175,11 +167,11 @@ const GestionClientes = () => {
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg mb-4">
+          <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg mb-4 overflow-x-auto">
             <button
               className={`px-4 py-2 whitespace-nowrap rounded-md ${
                 filtro === "Todos"
-                  ? "bg-purple-100 text-purple-700 font-medium"
+                  ? "bg-orange-100 text-orange-700 font-medium"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
               onClick={() => setFiltro("Todos")}
@@ -189,7 +181,7 @@ const GestionClientes = () => {
             <button
               className={`px-4 py-2 whitespace-nowrap rounded-md ${
                 filtro === "Mayorista"
-                  ? "bg-purple-100 text-purple-700 font-medium"
+                  ? "bg-orange-100 text-orange-700 font-medium"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
               onClick={() => setFiltro("Mayorista")}
@@ -199,7 +191,7 @@ const GestionClientes = () => {
             <button
               className={`px-4 py-2 whitespace-nowrap rounded-md ${
                 filtro === "Minorista"
-                  ? "bg-purple-100 text-purple-700 font-medium"
+                  ? "bg-orange-100 text-orange-700 font-medium"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
               onClick={() => setFiltro("Minorista")}
@@ -254,7 +246,7 @@ const GestionClientes = () => {
                     <div
                       className={`h-2 ${
                         cliente.tipo === "Mayorista"
-                          ? "bg-purple-500"
+                          ? "bg-orange-500"
                           : "bg-green-500"
                       }`}
                     ></div>
@@ -278,7 +270,7 @@ const GestionClientes = () => {
                         <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
                           <ul className="py-1 text-sm text-gray-600">
                             <li
-                              className="px-3 py-2 hover:bg-purple-100 cursor-pointer"
+                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
                               onClick={() => {
                                 handleVerCliente(cliente.id_cliente);
                                 setMenuAbierto(null);
@@ -303,7 +295,7 @@ const GestionClientes = () => {
                         <span
                           className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                             cliente.tipo === "Mayorista"
-                              ? "bg-purple-100 text-purple-800"
+                              ? "bg-orange-100 text-orange-800"
                               : "bg-green-100 text-green-800"
                           }`}
                         >
@@ -366,7 +358,7 @@ const GestionClientes = () => {
                           <span
                             className={`px-2 py-1 text-xs font-medium rounded-full ${
                               cliente.tipo === "Mayorista"
-                                ? "bg-purple-100 text-purple-800"
+                                ? "bg-orange-100 text-orange-800"
                                 : "bg-green-100 text-green-800"
                             }`}
                           >

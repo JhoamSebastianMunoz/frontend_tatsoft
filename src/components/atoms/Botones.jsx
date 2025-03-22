@@ -1,4 +1,5 @@
 import React from 'react';
+import Tipografia from './Tipografia';
 
 const Boton = ({
   label,
@@ -9,12 +10,13 @@ const Boton = ({
   iconPosition = "left",
   disabled = false,
   fullWidth = false,
-  loading = false
+  loading = false,
+  className = ""
 }) => {
  
   const tipos = {
-    primario: "bg-[#F78220] hover:bg-orange-600 text-white",
-    secundario: "bg-[#842AF3] hover:bg-purple-800 text-white",
+    primario: "bg-orange-400 hover:bg-orange-600 text-white",
+    secundario: "bg-transparent border border-orange-300 text-orange-600 hover:bg-orange-200",
     alerta: "bg-[#63FF63] hover:bg-green-300 text-gray-700",
     cancelar: "bg-[#F48783] hover:bg-red-400 text-white",
     outline: "bg-transparent border border-[#B06AFF] text-[#B06AFF] hover:bg-purple-50",
@@ -25,9 +27,8 @@ const Boton = ({
   // Tamaños predefinidos
   const tamaños = {
     small: "px-3 py-1.5 text-xs",
-    medium: "px-4 py-2 text-sm",
-    large: "px-5 py-2.5 text-base",
-    xlarge: "px-6 py-3 text-lg",
+    medium: "px-10 py-1.5 text-sm",
+    large: "px-28 py-1.5 text-base",
   };
 
   // Definición de iconos
@@ -63,6 +64,22 @@ const Boton = ({
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
       </svg>
     ),
+    "map-pin": (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    "user-plus": (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+      </svg>
+    ),
+    "trash-2": (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+    ),
   };
 
   // Spinner para el estado de carga
@@ -73,21 +90,25 @@ const Boton = ({
     </svg>
   );
 
+  // Determinar clases CSS en base a las propiedades
+  const buttonClasses = `
+    font-medium
+    rounded-lg
+    transition-all
+    duration-200
+    flex
+    items-center
+    justify-center
+    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+    ${fullWidth ? 'w-full' : ''}
+    ${tipo !== 'link' ? tamaños[size] : ''}
+    ${tipos[tipo]}
+    ${className}
+  `;
+
   return (
     <button
-      className={`
-        font-medium
-        rounded-lg
-        transition-all
-        duration-200
-        flex
-        items-center
-        justify-center
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        ${fullWidth ? 'w-full' : ''}
-        ${tipo !== 'link' ? tamaños[size] : ''}
-        ${tipos[tipo]}
-      `}
+      className={buttonClasses}
       onClick={onClick}
       disabled={disabled || loading}
     >
@@ -99,7 +120,11 @@ const Boton = ({
         </span>
       )}
       
-      {label}
+      {label && (
+        <Tipografia className={`inherit`}>
+          {label}
+        </Tipografia>
+      )}
       
       {iconName && iconPosition === 'right' && !loading && (
         <span className={`${label ? 'ml-2' : ''}`}>
@@ -119,7 +144,8 @@ const Botones = ({
   iconPosition = "left",
   disabled = false,
   fullWidth = false,
-  loading = false
+  loading = false,
+  className = ""
 }) => {
   // Si se utiliza como componente individual, devuelve un botón con los props proporcionados
   if (onClick !== undefined || label !== undefined) {
@@ -134,6 +160,7 @@ const Botones = ({
         disabled={disabled}
         fullWidth={fullWidth}
         loading={loading}
+        className={className}
       />
     );
   }
@@ -141,10 +168,10 @@ const Botones = ({
   // De lo contrario, muestra ejemplos de botones
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">Ejemplos de Botones</h2>
+      <Tipografia variant="title" className="mb-6">Ejemplos de Botones</Tipografia>
       
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Tipos de botones</h3>
+        <Tipografia variant="subtitle" className="mb-3">Tipos de botones</Tipografia>
         <div className="flex flex-wrap gap-3">
           <Boton label="Primario" tipo="primario" />
           <Boton label="Secundario" tipo="secundario" />
@@ -157,7 +184,7 @@ const Botones = ({
       </div>
       
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Tamaños</h3>
+        <Tipografia variant="subtitle" className="mb-3">Tamaños</Tipografia>
         <div className="flex flex-wrap items-center gap-3">
           <Boton label="Small" tipo="primario" size="small" />
           <Boton label="Medium" tipo="primario" size="medium" />
@@ -167,7 +194,7 @@ const Botones = ({
       </div>
       
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Con iconos</h3>
+        <Tipografia variant="subtitle" className="mb-3">Con iconos</Tipografia>
         <div className="flex flex-wrap gap-3">
           <Boton label="Agregar" tipo="primario" iconName="add" iconPosition="left" />
           <Boton label="Editar" tipo="secundario" iconName="edit" iconPosition="left" />
@@ -178,7 +205,7 @@ const Botones = ({
       </div>
       
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Estados</h3>
+        <Tipografia variant="subtitle" className="mb-3">Estados</Tipografia>
         <div className="flex flex-wrap gap-3">
           <Boton label="Deshabilitado" tipo="primario" disabled />
           <Boton label="Cargando..." tipo="primario" loading />
@@ -187,7 +214,7 @@ const Botones = ({
       </div>
       
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-700 mb-3">Combinaciones</h3>
+        <Tipografia variant="subtitle" className="mb-3">Combinaciones</Tipografia>
         <div className="flex flex-wrap gap-3">
           <Boton 
             label="Guardar cambios" 

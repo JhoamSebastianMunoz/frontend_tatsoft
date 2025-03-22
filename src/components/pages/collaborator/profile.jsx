@@ -7,7 +7,7 @@ import CamposTexto from "../../../components/atoms/CamposTexto";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Botones from "../../atoms/Botones";
 import Loading from "../../Loading/Loading";
-import Sidebar from "../../organisms/sidebar";
+import Sidebar from "../../organisms/Sidebar";
 
 const Profile = () => {
   const { user, token } = useAuth();
@@ -257,8 +257,7 @@ const Profile = () => {
                         onClick={handleZonasClick}
                         tipo="primario"
                         label="Ir a Zonas de Trabajo"
-                        size="medium"
-                        iconName="location"
+                        size="small"
                         fullWidth={true}
                       />
                     </div>
