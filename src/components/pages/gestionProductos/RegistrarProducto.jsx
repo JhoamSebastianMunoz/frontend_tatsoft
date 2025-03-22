@@ -26,10 +26,7 @@ const RegistrarProducto = () => {
   // Estados para manejo de UI
   const [showCategorias, setShowCategorias] = useState(false);
   const [showNuevaCategoriaModal, setShowNuevaCategoriaModal] = useState(false);
-  const [nuevaCategoriaForm, setNuevaCategoriaForm] = useState({
-    nombre_categoria: "",
-    descripcion: ""
-  });
+  const [nuevaCategoria, setNuevaCategoria] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -94,14 +91,6 @@ const RegistrarProducto = () => {
       id_categoria: categoria.id_categoria
     });
     setShowCategorias(false);
-  };
-
-  const handleNuevaCategoriaInputChange = (e) => {
-    const { name, value } = e.target;
-    setNuevaCategoriaForm({
-      ...nuevaCategoriaForm,
-      [name]: value
-    });
   };
 
   const handleImageChange = (e) => {
@@ -210,17 +199,14 @@ const RegistrarProducto = () => {
   };
 
   const abrirModalNuevaCategoria = () => {
-    setNuevaCategoriaForm({
-      nombre_categoria: "",
-      descripcion: "Categoría para productos"
-    });
+    setNuevaCategoria("");
     setCategoriaError("");
     setShowNuevaCategoriaModal(true);
     setShowCategorias(false);
   };
 
   const cerrarModalNuevaCategoria = () => {
-    if (nuevaCategoriaForm.nombre_categoria.trim() !== "") {
+    if (nuevaCategoria.trim() !== "") {
       // Si hay datos, mostrar alerta de confirmación
       setShowCancelarCategoriaAlerta(true);
     } else {
@@ -232,10 +218,7 @@ const RegistrarProducto = () => {
   const confirmarCancelarCategoria = () => {
     setShowCancelarCategoriaAlerta(false);
     setShowNuevaCategoriaModal(false);
-    setNuevaCategoriaForm({
-      nombre_categoria: "",
-      descripcion: "Categoría para productos"
-    });
+    setNuevaCategoria("");
   };
 
   const cancelarCancelarCategoria = () => {
@@ -244,7 +227,7 @@ const RegistrarProducto = () => {
 
   const agregarNuevaCategoria = async () => {
     // Validar que haya un nombre de categoría
-    if (nuevaCategoriaForm.nombre_categoria.trim() === "") {
+    if (nuevaCategoria.trim() === "") {
       setCategoriaError("El nombre de la categoría es obligatorio");
       return;
     }
@@ -252,8 +235,8 @@ const RegistrarProducto = () => {
     try {
       setLoading(true);
       const response = await productService.createCategory({
-        nombre_categoria: nuevaCategoriaForm.nombre_categoria,
-        descripcion: nuevaCategoriaForm.descripcion || "Categoría para productos"
+        nombre_categoria: nuevaCategoria,
+        descripcion: `Categoría para productos` // Descripción genérica predeterminada
       });
      
       // Actualizar lista de categorías
@@ -262,7 +245,7 @@ const RegistrarProducto = () => {
      
       // Seleccionar la nueva categoría
       const nuevaCategoriaObj = categoriasResponse.data.find(
-        c => c.nombre_categoria === nuevaCategoriaForm.nombre_categoria
+        c => c.nombre_categoria === nuevaCategoria
       );
      
       if (nuevaCategoriaObj) {
@@ -501,7 +484,7 @@ const RegistrarProducto = () => {
         </div>
       </div>
       
-      {/* Modal para agregar nueva categoría */}
+      {/* Modal para agregar nueva categoría (Simplificado) */}
       {showNuevaCategoriaModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
@@ -521,26 +504,11 @@ const RegistrarProducto = () => {
               </label>
               <input
                 type="text"
-                name="nombre_categoria"
-                value={nuevaCategoriaForm.nombre_categoria}
-                onChange={handleNuevaCategoriaInputChange}
+                value={nuevaCategoria}
+                onChange={(e) => setNuevaCategoria(e.target.value)}
                 className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
                 placeholder="Ingrese el nombre de la categoría"
               />
-            </div>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción
-              </label>
-              <textarea
-                name="descripcion"
-                value={nuevaCategoriaForm.descripcion}
-                onChange={handleNuevaCategoriaInputChange}
-                className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
-                rows="3"
-                placeholder="Describa la categoría"
-              ></textarea>
             </div>
             
             <div className="flex justify-end space-x-2 mt-6">
