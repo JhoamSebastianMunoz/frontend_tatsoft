@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { presaleService } from "../../../context/services/ApiService";
@@ -25,7 +26,7 @@ const ConfirmarPreventa = () => {
 
   // Verificar si el usuario es administrador
   useEffect(() => {
-    if (user?.rol !== 'ADMINISTRADOR') {
+    if (user.rol !== 'ADMINISTRADOR') {
       navigate("/unauthorized");
     }
   }, [user, navigate]);
@@ -75,7 +76,6 @@ const ConfirmarPreventa = () => {
       setEnviando(true);
       setError("");
       
-      // Llamada a la API para confirmar la preventa
       await presaleService.confirmPresale(id, { returnedProductos: productosDevueltos });
       
       setSuccess(true);
@@ -95,32 +95,18 @@ const ConfirmarPreventa = () => {
     navigate(`/preventa/detalles/${id}`);
   };
 
-  // Calcular total con productos seleccionados
-  const calculateTotalConfirmado = () => {
-    if (!detalles || !detalles.productos) return 0;
-    
-    const total = detalles.productos.reduce((sum, producto) => {
-      if (productosDevueltos.includes(producto.id_producto)) {
-        return sum;
-      }
-      return sum + parseFloat(producto.subtotal || (producto.precio * producto.cantidad) || 0);
-    }, 0);
-    
-    return total.toLocaleString('es-CO');
-  };
-
   if (loading) {
     return <Loading message="Cargando detalles de la preventa..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Encabezado
-        mensaje="Confirmar Preventa"
+      <Encabezado 
+        mensaje="Confirmar Preventa" 
         onClick={handleVolver}
       />
       <SidebarAdm/>
-      <div className="container mx-auto px-4 py-6 pt-20 md:ml-64">
+      <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -145,7 +131,7 @@ const ConfirmarPreventa = () => {
             <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
               Confirmar Preventa #{detalles.id_preventa}
             </Tipografia>
-           
+            
             <div className="mb-6">
               <Tipografia className="text-gray-700 mb-2">
                 Seleccione los productos que serán devueltos (si aplica):
@@ -197,7 +183,7 @@ const ConfirmarPreventa = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="text-sm text-gray-500">
-                          ${parseFloat(producto.precio).toLocaleString('es-CO')}
+                          ${Number(producto.precio).toLocaleString('es-CO')}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -207,7 +193,7 @@ const ConfirmarPreventa = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className={`text-sm font-medium ${productosDevueltos.includes(producto.id_producto) ? 'line-through text-red-500' : 'text-gray-900'}`}>
-                          ${parseFloat(producto.subtotal || (producto.precio * producto.cantidad)).toLocaleString('es-CO')}
+                          ${Number(producto.subtotal).toLocaleString('es-CO')}
                         </div>
                       </td>
                     </tr>
@@ -230,23 +216,23 @@ const ConfirmarPreventa = () => {
             <div className="mt-6 flex flex-col space-y-6">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <Tipografia className="text-blue-700">
-                  <strong>Resumen:</strong> De un total de {detalles.productos.length} productos,
-                  {productosDevueltos.length > 0
-                    ? ` se devolverán ${productosDevueltos.length} y se confirmarán ${detalles.productos.length - productosDevueltos.length}.`
+                  <strong>Resumen:</strong> De un total de {detalles.productos.length} productos, 
+                  {productosDevueltos.length > 0 
+                    ? ` se devolverán ${productosDevueltos.length} y se confirmarán ${detalles.productos.length - productosDevueltos.length}.` 
                     : ` se confirmarán todos los productos.`}
                 </Tipografia>
               </div>
 
               <div className="flex justify-end space-x-4">
-                <Boton
-                  tipo="cancelar"
-                  label="Cancelar"
+                <Boton 
+                  tipo="cancelar" 
+                  label="Cancelar" 
                   onClick={handleVolver}
                   disabled={enviando || success}
                 />
-                <Boton
-                  tipo="primario"
-                  label={enviando ? "Confirmando..." : "Confirmar Venta"}
+                <Boton 
+                  tipo="primario" 
+                  label={enviando ? "Confirmando..." : "Confirmar Venta"} 
                   onClick={handleConfirmar}
                   disabled={enviando || success}
                 />
@@ -257,6 +243,20 @@ const ConfirmarPreventa = () => {
       </div>
     </div>
   );
+
+  // Función para calcular el total a confirmar (excluyendo productos devueltos)
+  function calculateTotalConfirmado() {
+    if (!detalles || !detalles.productos) return 0;
+    
+    const total = detalles.productos.reduce((sum, producto) => {
+      if (productosDevueltos.includes(producto.id_producto)) {
+        return sum;
+      }
+      return sum + Number(producto.subtotal);
+    }, 0);
+    
+    return total.toLocaleString('es-CO');
+  }
 };
 
 export default ConfirmarPreventa;
