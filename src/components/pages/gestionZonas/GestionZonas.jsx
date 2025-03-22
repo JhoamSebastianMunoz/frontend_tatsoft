@@ -269,7 +269,7 @@ const GestionZonas = () => {
                               className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
                               onClick={() => {
                                 navigate(`/ver/zona/${zona.id_zona_de_trabajo}`);
-                                setMenuAbierto(null);
+                                setMenuAbierto(null);pa
                               }}
                             >
                               Ver
