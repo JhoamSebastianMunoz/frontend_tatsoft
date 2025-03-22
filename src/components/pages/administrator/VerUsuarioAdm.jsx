@@ -85,239 +85,125 @@ const VerUsuarioAdm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
+    <div className="min-h-screen bg-slate-50">
+      <div className="w-full bg-white shadow-sm border-b border-[#F78220]/20">
+        <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
+      </div>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 mx-4">
-          {error}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <Tipografia className="text-sm text-red-700">{error}</Tipografia>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       
-      <div className="container mx-auto p-4">
-        <div className="flex flex-col md:flex-row md:gap-6">
-          {/* Vista móvil */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-4 relative">
-              <div className="flex flex-col items-center pt-5 pb-4">
-                <div className="bg-gray-200 rounded-full w-24 h-24 flex items-center justify-center overflow-hidden mb-2">
-                  {userData.foto ? (
-                    <img
-                      src={userData.foto}
-                      alt="Foto de perfil"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center text-gray-500 text-sm">
-                      <AvatarUsuario size="100" />
-                    </div>
-                  )}
-                </div>
-                
-                <Tipografia
-                  variant="h2"
-                  className="text-white text-center font-semibold my-2"
-                >
-                  {userData.nombreCompleto}
-                </Tipografia>
-                
-                <div className="mt-2 w-full flex flex-col sm:flex-row gap-2">
-                  <Botones
-                    tipo={userStatus === "activo" ? "cancelar" : "alerta"}
-                    label={buttonText}
-                    onClick={handleShowAlert}
-                    className="w-full py-2"
-                  />
-                  <Botones
-                    variant="primary"
-                    label="Editar Usuario"
-                    onClick={handleEditarUsuario}
-                    className="w-full py-2"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 space-y-4">
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Nombre:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.nombreCompleto}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  CC:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">{userData.cedula}</Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Celular:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.celular}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Correo:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.correo}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Rol:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.rol}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Estado:
-                </Tipografia>
-                <Tipografia className={`font-medium p-1 ${userData.estado === "activo" ? "text-green-600" : "text-red-600"}`}>
-                  {userData.estado === "activo" ? "Activo" : "Inactivo"}
-                </Tipografia>
-              </div>
-            </div>
-          </div>
-          
-          {/* Vista desktop */}
-          <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden md:w-1/3 lg:w-1/4">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Tarjeta de perfil */}
+          <div className="w-full lg:w-1/3 bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-[#F78220] p-8">
               <div className="flex flex-col items-center">
-                <div className="rounded-full mb-3 flex items-center justify-center">
+                <div className="w-32 h-32 rounded-full bg-white/10 backdrop-blur-sm p-1">
                   {userData.foto ? (
                     <img
                       src={userData.foto}
                       alt="Foto de perfil"
-                      className="w-32 h-32 object-cover rounded-full"
+                      className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <AvatarUsuario size="130" />
+                    <AvatarUsuario size="120" />
                   )}
                 </div>
                 <Tipografia
                   variant="h2"
-                  className="text-white text-center text-xl lg:text-2xl font-semibold"
+                  className="mt-4 text-white text-xl font-semibold text-center"
                 >
                   {userData.nombreCompleto}
                 </Tipografia>
-                <Tipografia
-                  variant="body"
-                  className="text-purple-200 mt-1 text-center"
-                >
+                <span className="mt-2 px-4 py-1 bg-white/20 rounded-full text-white text-sm">
                   {userData.rol}
-                </Tipografia>
+                </span>
               </div>
             </div>
             
-            <div className="p-5 space-y-3">
-              <Botones
-                label="Editar Usuario"
-                onClick={handleEditarUsuario}
-                className="w-full py-2"
-              />
-              <Botones
-                label={buttonText}
-                tipo={userStatus === "activo" ? "cancelar" : "alerta"}
-                className="w-full py-2"
-                onClick={handleShowAlert}
-              />
+            <div className="p-6 space-y-4">
+              <div className={`text-sm inline-flex items-center rounded-full px-3 py-1 font-medium
+                ${userData.estado === "activo" 
+                  ? "bg-green-50 text-green-700" 
+                  : "bg-red-50 text-red-700"}`}>
+                <span className={`w-2 h-2 rounded-full mr-2
+                  ${userData.estado === "activo" 
+                    ? "bg-green-400" 
+                    : "bg-red-400"}`}
+                />
+                {userData.estado === "activo" ? "Usuario Activo" : "Usuario Inactivo"}
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <Botones
+                  label="Editar Usuario"
+                  onClick={handleEditarUsuario}
+                  className="w-full bg-[#F78220] hover:bg-[#F78220]/90 text-white"
+                />
+                <Botones
+                  label={buttonText}
+                  tipo={userStatus === "activo" ? "cancelar" : "alerta"}
+                  onClick={handleShowAlert}
+                  className="w-full border border-[#F78220] text-[#F78220] hover:bg-[#F78220]/5"
+                />
+              </div>
             </div>
           </div>
-          
-          <div className="hidden md:block md:w-2/3 lg:w-3/4 bg-white rounded-xl shadow-lg p-6 lg:p-7">
-            <Tipografia
-              variant="h2"
-              className="text-xl font-semibold mb-5 text-purple-900"
-            >
+
+          {/* Información detallada */}
+          <div className="w-full lg:w-2/3 bg-white rounded-lg shadow-sm p-8">
+            <Tipografia variant="h2" className="text-xl font-semibold mb-6 text-gray-900">
               Información Personal
             </Tipografia>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Nombre Completo
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.nombreCompleto}
-                  </Tipografia>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <Tipografia className="text-sm text-gray-500 mb-1">Nombre Completo</Tipografia>
+                  <Tipografia className="text-base font-medium text-gray-900">{userData.nombreCompleto}</Tipografia>
+                </div>
+                
+                <div>
+                  <Tipografia className="text-sm text-gray-500 mb-1">Número de Documento</Tipografia>
+                  <Tipografia className="text-base font-medium text-gray-900">{userData.cedula}</Tipografia>
+                </div>
+                
+                <div>
+                  <Tipografia className="text-sm text-gray-500 mb-1">Teléfono</Tipografia>
+                  <Tipografia className="text-base font-medium text-gray-900">{userData.celular}</Tipografia>
                 </div>
               </div>
               
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Número de Identificación
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">{userData.cedula}</Tipografia>
+              <div className="space-y-6">
+                <div>
+                  <Tipografia className="text-sm text-gray-500 mb-1">Correo Electrónico</Tipografia>
+                  <Tipografia className="text-base font-medium text-gray-900">{userData.correo}</Tipografia>
                 </div>
-              </div>
-              
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Teléfono Celular
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.celular}
-                  </Tipografia>
+                
+                <div>
+                  <Tipografia className="text-sm text-gray-500 mb-1">Rol del Usuario</Tipografia>
+                  <Tipografia className="text-base font-medium text-gray-900">{userData.rol}</Tipografia>
                 </div>
-              </div>
-              
-              <div className="lg:col-span-2">
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Correo Electrónico
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.correo}
-                  </Tipografia>
-                </div>
-              </div>
-              
-              <div className="lg:col-span-2">
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Estado
-                </Tipografia>
-                <div
-                  className={`border rounded-lg p-2 lg:p-3 ${
-                    userData.estado === "activo"
-                      ? "border-green-400 bg-green-100"
-                      : "border-red-300 bg-red-50"
-                  }`}
-                >
-                  <Tipografia
-                    className={`font-medium ${
-                      userData.estado === "activo"
-                        ? "text-gray-800"
-                        : "text-red-700"
-                    }`}
-                  >
-                    {userData.estado === "activo" ? "Activo" : "Inactivo"}
+                
+                <div>
+                  <Tipografia className="text-sm text-gray-500 mb-1">Fecha de Registro</Tipografia>
+                  <Tipografia className="text-base font-medium text-gray-900">
+                    {userData.fechaRegistro || "No disponible"}
                   </Tipografia>
                 </div>
               </div>
@@ -325,15 +211,15 @@ const VerUsuarioAdm = () => {
           </div>
         </div>
       </div>
-      
-      {showAlert && (
-        <AlertaInhabilitar
-          onClose={handleCloseAlert}
-          onConfirm={handleConfirmStatusChange}
-          alertText={alertText}
-          isEnabling={userStatus !== "activo"}
-        />
-      )}
+
+      <AlertaInhabilitar
+        isOpen={showAlert}
+        onClose={handleCloseAlert}
+        onConfirm={handleConfirmStatusChange}
+        message={alertText}
+      />
+
+      {loading && <Loading message="Cargando información del usuario..." />}
     </div>
   );
 };

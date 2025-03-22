@@ -50,7 +50,7 @@ const Icono = ({ name, size = 25, color = "#c2c2c2", className = "", customColor
       case "eliminar":
         return "#F48783";
       case "volver":
-        return "white";
+        return "#F78220";
       case "confirmar":
         return "#A5F6A5";
       case "eliminarAlert":
