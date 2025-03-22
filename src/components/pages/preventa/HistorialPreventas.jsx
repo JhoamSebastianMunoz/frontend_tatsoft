@@ -45,19 +45,96 @@ const HistorialPreventas = () => {
     const fetchPreventas = async () => {
       try {
         setLoading(true);
-        const response = await presaleService.getAllPresales();
-        const data = Array.isArray(response.data) ? response.data : response.data?.message || [];
+        setError("");
+        console.log("Iniciando carga de preventas...");
+        console.log("Rol del usuario:", user.rol);
+        console.log("Datos completos del usuario:", user);
         
-        // Filtrar preventas según el rol del usuario
-        let preventasFiltradas = data;
-        if (user.rol !== "ADMINISTRADOR") {
-          preventasFiltradas = data.filter(preventa => preventa.id_usuario === user.id);
+        // Validación más robusta del usuario
+        if (!user) {
+          throw new Error("No se encontró información del usuario");
+        }
+
+        if (!user.rol) {
+          throw new Error("El usuario no tiene un rol definido");
+        }
+
+        // Obtener el ID del usuario de manera más robusta
+        const userId = user.id || user.id_usuario;
+        if (!userId && user.rol !== "ADMINISTRADOR") {
+          throw new Error("No se pudo obtener el ID del usuario");
+        }
+
+        let response;
+        if (user.rol === "ADMINISTRADOR") {
+          console.log("Intentando cargar todas las preventas...");
+          response = await presaleService.getAllPresales();
+        } else {
+          console.log("Intentando cargar preventas del usuario:", userId);
+          response = await presaleService.getPresalesByUser(userId);
         }
         
-        setPreventas(preventasFiltradas);
+        console.log("Respuesta completa del backend:", response);
+        console.log("Tipo de respuesta:", typeof response);
+        console.log("Tipo de response.data:", typeof response.data);
+        console.log("Estructura de response.data:", JSON.stringify(response.data, null, 2));
+        
+        // Validación más robusta de la respuesta
+        if (!response || !response.data) {
+          throw new Error("La respuesta del servidor no tiene el formato esperado");
+        }
+
+        // Procesar los datos de manera más estructurada
+        let data = [];
+        const responseData = response.data;
+
+        // Intentar obtener el array de datos de diferentes estructuras posibles
+        if (Array.isArray(responseData)) {
+          data = responseData;
+        } else if (Array.isArray(responseData.message)) {
+          data = responseData.message;
+        } else if (Array.isArray(responseData.data)) {
+          data = responseData.data;
+        } else if (Array.isArray(responseData.preventas)) {
+          data = responseData.preventas;
+        } else if (Array.isArray(responseData.presales)) {
+          data = responseData.presales;
+        } else if (typeof responseData === 'object' && responseData !== null) {
+          // Si es un objeto, intentar extraer el array de datos
+          const possibleArrays = Object.values(responseData).filter(value => Array.isArray(value));
+          if (possibleArrays.length > 0) {
+            data = possibleArrays[0];
+          } else {
+            console.warn("Estructura de respuesta inesperada:", responseData);
+            throw new Error("No se encontró un array de datos en la respuesta");
+          }
+        } else {
+          console.warn("Estructura de respuesta inesperada:", responseData);
+          throw new Error("El formato de la respuesta no es válido");
+        }
+
+        console.log("Datos extraídos:", data);
+
+        // Validar que los datos tienen la estructura esperada
+        if (!data.every(preventa => 
+          typeof preventa.id_preventa !== 'undefined' && 
+          typeof preventa.estado !== 'undefined'
+        )) {
+          console.warn("Datos de preventas incompletos:", data);
+          throw new Error("Los datos de las preventas están incompletos");
+        }
+
+        console.log("Datos procesados:", data);
+        setPreventas(data);
+        
       } catch (err) {
-        console.error("Error al cargar preventas:", err);
+        console.error("Error completo al cargar preventas:", err);
+        console.error("Respuesta de error:", err.response);
+        
         if (err.response) {
+          console.error("Estado del error:", err.response.status);
+          console.error("Datos del error:", err.response.data);
+          
           switch (err.response.status) {
             case 401:
               setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
@@ -65,14 +142,21 @@ const HistorialPreventas = () => {
             case 403:
               setError("No tiene permisos para ver el historial de preventas.");
               break;
+            case 404:
+              setError("No se encontraron preventas para este usuario.");
+              break;
             case 500:
               setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
               break;
             default:
               setError(err.response.data?.message || "Error al cargar el historial de preventas.");
           }
-        } else {
+        } else if (err.request) {
+          console.error("Error de red:", err.request);
           setError("Error de conexión. Por favor, verifique su conexión a internet.");
+        } else {
+          console.error("Error en la configuración de la petición:", err.message);
+          setError(err.message || "Error al procesar la solicitud. Por favor, intente nuevamente.");
         }
       } finally {
         setLoading(false);
@@ -85,22 +169,47 @@ const HistorialPreventas = () => {
   // Aplicar filtros
   const preventasFiltradas = preventas.filter(preventa => {
     // Filtro por estado
-    const cumpleFiltroEstado = filtroEstado === "Todos" || preventa.estado === filtroEstado;
+    const cumpleFiltroEstado = filtroEstado === "Todos" || 
+      (preventa.estado && preventa.estado.toLowerCase() === filtroEstado.toLowerCase());
     
     // Filtro por colaborador (solo para administradores)
     const cumpleFiltroColaborador = filtroColaborador === "Todos" || 
-      (user.rol === "ADMINISTRADOR" && preventa.id_usuario === parseInt(filtroColaborador));
+      (user.rol === "ADMINISTRADOR" && 
+       preventa.id_usuario && 
+       preventa.id_usuario.toString() === filtroColaborador);
     
     // Filtro por búsqueda
-    const terminoBusqueda = filtroBusqueda.toLowerCase();
-    const cumpleBusqueda = filtroBusqueda === "" || 
+    const terminoBusqueda = filtroBusqueda.toLowerCase().trim();
+    const cumpleBusqueda = terminoBusqueda === "" || 
       (preventa.id_preventa && preventa.id_preventa.toString().includes(terminoBusqueda)) ||
-      (preventa.fecha_creacion && new Date(preventa.fecha_creacion).toLocaleDateString().includes(terminoBusqueda)) ||
+      (preventa.fecha_creacion && formatearFecha(preventa.fecha_creacion).toLowerCase().includes(terminoBusqueda)) ||
       (preventa.total && preventa.total.toString().includes(terminoBusqueda)) ||
-      (preventa.nombre_colaborador && preventa.nombre_colaborador.toLowerCase().includes(terminoBusqueda));
+      (preventa.nombre_colaborador && preventa.nombre_colaborador.toLowerCase().includes(terminoBusqueda)) ||
+      (preventa.estado && preventa.estado.toLowerCase().includes(terminoBusqueda));
+
+    // Log para debugging
+    console.log('Filtrado preventa:', {
+      id: preventa.id_preventa,
+      estado: preventa.estado,
+      cumpleFiltroEstado,
+      cumpleFiltroColaborador,
+      cumpleBusqueda,
+      terminoBusqueda
+    });
     
     return cumpleFiltroEstado && cumpleFiltroColaborador && cumpleBusqueda;
   });
+
+  // Log para debugging de filtros
+  useEffect(() => {
+    console.log('Estado de los filtros:', {
+      filtroEstado,
+      filtroColaborador,
+      filtroBusqueda,
+      totalPreventas: preventas.length,
+      totalFiltradas: preventasFiltradas.length
+    });
+  }, [filtroEstado, filtroColaborador, filtroBusqueda, preventas]);
 
   // Formatear fecha para mostrar
   const formatearFecha = (fechaString) => {
@@ -229,12 +338,14 @@ const HistorialPreventas = () => {
                 </>
               )}
               
-              <Boton 
-                tipo="primario" 
-                label="Nueva Preventa" 
-                onClick={() => navigate("/preventa/nueva")}
-                className="w-full sm:w-auto"
-              />
+              {user.rol === "COLABORADOR" && (
+                <Boton 
+                  tipo="primario" 
+                  label="Nueva Preventa" 
+                  onClick={() => navigate("/preventa/nueva")}
+                  className="w-full sm:w-auto"
+                />
+              )}
             </div>
           </div>
         </div>

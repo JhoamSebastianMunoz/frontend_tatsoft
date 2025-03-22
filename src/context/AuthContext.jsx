@@ -17,7 +17,25 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await userService.getUserProfile();
-          setUser(response.data);
+          console.log("Respuesta del perfil de usuario:", response);
+          if (response.data) {
+            // Buscar el ID del usuario en diferentes campos posibles
+            const userId = response.data.id || response.data.id_usuario || response.data.userId;
+            if (!userId) {
+              console.error("El perfil de usuario no tiene ID");
+              logout();
+              return;
+            }
+            // Asegurarse de que el ID esté presente en el objeto user
+            setUser({
+              ...response.data,
+              id: userId,
+              id_usuario: userId // Mantener también id_usuario para compatibilidad
+            });
+          } else {
+            console.error("No se recibieron datos del perfil de usuario");
+            logout();
+          }
         } catch (error) {
           console.error('Error validando token:', error);
           logout();
@@ -48,8 +66,26 @@ export const AuthProvider = ({ children }) => {
         // Obtener datos del usuario
         try {
           const userResponse = await userService.getUserProfile();
-          setUser(userResponse.data);
-          return true;
+          console.log("Respuesta del perfil de usuario:", userResponse);
+          
+          if (userResponse.data) {
+            // Buscar el ID del usuario en diferentes campos posibles
+            const userId = userResponse.data.id || userResponse.data.id_usuario || userResponse.data.userId;
+            if (!userId) {
+              console.error("El perfil de usuario no tiene ID");
+              return false;
+            }
+            // Asegurarse de que el ID esté presente en el objeto user
+            setUser({
+              ...userResponse.data,
+              id: userId,
+              id_usuario: userId // Mantener también id_usuario para compatibilidad
+            });
+            return true;
+          } else {
+            console.error("No se recibieron datos del perfil de usuario");
+            return false;
+          }
         } catch (userError) {
           console.error('Error obteniendo perfil de usuario:', userError);
           return false;
