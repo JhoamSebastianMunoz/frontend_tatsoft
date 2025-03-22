@@ -279,9 +279,13 @@ const EditarProducto = () => {
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
         !collapsed ? "md:ml-70" : "md:ml-16"
       }`}>
-        {/* Header */}
-        <div className="orange-500 text-black p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-black font-medium">
+        {/* Header  */}
+        <div className="text-black p-4 ">
+          <Tipografia 
+            variant="h1" 
+            size="xl" 
+            className="text-black font-medium ml-4 md:ml-6"
+          >
             Editar Producto
           </Tipografia>
         </div>

@@ -126,10 +126,13 @@ const IngresoStock = () => {
       <div className={`flex-1 transition-all duration-300 ${
         !collapsed ? "md:ml-70" : "md:ml-16"
       }`}>
-        {/* Header */}
-        <div className="text-black p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-black font-medium pl-8">
-            Ingreso de Stock
+    <div className="text-black p-4 mb-4 ">
+          <Tipografia 
+            variant="h1" 
+            size="2xl" 
+            className="text-black font-medium pl-2 md:pl-4"
+          >
+            Ingreso Stock
           </Tipografia>
         </div>
 
