@@ -87,7 +87,7 @@ const GestionUsuarios = () => {
         <Sidebar />
       </div>
       
-      <div className="w-full flex-1 ml-3 md:ml-2 sm:p-3 md:p-4 lg:pl-24 p-4">
+      <div className="w-full flex-1 ml-3 md:ml-2 sm:p-8 md:p-2 lg:pl-20 p-4">
       <Tipografia>
         <div className="w-full pr-2">
           <div className="mt-4 mb-5">
