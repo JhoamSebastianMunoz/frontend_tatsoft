@@ -280,8 +280,8 @@ const EditarProducto = () => {
         !collapsed ? "md:ml-70" : "md:ml-16"
       }`}>
         {/* Header */}
-        <div className="bg-purple-600 text-white p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-white font-medium">
+        <div className="orange-500 text-black p-4 shadow-md">
+          <Tipografia variant="h1" size="xl" className="text-black font-medium">
             Editar Producto
           </Tipografia>
         </div>
@@ -305,7 +305,7 @@ const EditarProducto = () => {
                     name="nombre_producto"
                     value={formData.nombre_producto}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     required
                   />
                 </div>
@@ -328,14 +328,14 @@ const EditarProducto = () => {
                         {categorias.map((categoria) => (
                           <div
                             key={categoria.id_categoria}
-                            className="p-2 hover:bg-purple-100 cursor-pointer"
+                            className="p-2 hover:bg-orange-100 cursor-pointer"
                             onClick={() => handleCategoriaChange(categoria)}
                           >
                             {categoria.nombre_categoria}
                           </div>
                         ))}
                         <div
-                          className="p-2 bg-purple-200 text-center hover:bg-purple-300 cursor-pointer"
+                          className="p-2 bg-orange-200 text-center hover:bg-orange-300 cursor-pointer"
                           onClick={() => {
                             setShowNuevaCategoriaModal(true);
                             setShowCategorias(false);
@@ -355,7 +355,7 @@ const EditarProducto = () => {
                     name="precio"
                     value={formData.precio}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     required
                     min="0"
                     step="0.01"
@@ -369,7 +369,7 @@ const EditarProducto = () => {
                     name="cantidad_ingreso"
                     value={formData.cantidad_ingreso}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     min="0"
                   />
                 </div>
@@ -380,7 +380,7 @@ const EditarProducto = () => {
                     name="descripcion"
                     value={formData.descripcion}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 h-20"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500 h-20"
                   ></textarea>
                 </div>
               </div>
@@ -418,7 +418,7 @@ const EditarProducto = () => {
                     />
                     <label
                       htmlFor="imageInput"
-                      className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md cursor-pointer hover:bg-purple-600 transition-colors"
+                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-md cursor-pointer hover:bg-orange-600 transition-colors"
                     >
                       <Icono name="subir-archivo" customColor="white" size={20} />
                       <span className="ml-2">Cambiar imagen</span>
@@ -464,7 +464,7 @@ const EditarProducto = () => {
               type="text"
               value={nuevaCategoria}
               onChange={(e) => setNuevaCategoria(e.target.value)}
-              className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Nombre de la categoría"
             />
            

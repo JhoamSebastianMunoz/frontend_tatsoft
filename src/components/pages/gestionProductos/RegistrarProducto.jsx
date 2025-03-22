@@ -26,7 +26,10 @@ const RegistrarProducto = () => {
   // Estados para manejo de UI
   const [showCategorias, setShowCategorias] = useState(false);
   const [showNuevaCategoriaModal, setShowNuevaCategoriaModal] = useState(false);
-  const [nuevaCategoria, setNuevaCategoria] = useState("");
+  const [nuevaCategoriaForm, setNuevaCategoriaForm] = useState({
+    nombre_categoria: "",
+    descripcion: ""
+  });
   const [categorias, setCategorias] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -36,8 +39,11 @@ const RegistrarProducto = () => {
   const [showCancelarAlerta, setShowCancelarAlerta] = useState(false);
   const [showRegistroExitosoAlerta, setShowRegistroExitosoAlerta] = useState(false);
   const [showSeleccionadoAlerta, setShowSeleccionadoAlerta] = useState(false);
+  const [showCancelarCategoriaAlerta, setShowCancelarCategoriaAlerta] = useState(false);
+  const [showCategoriaCreadaAlerta, setShowCategoriaCreadaAlerta] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [categoriaError, setCategoriaError] = useState("");
 
   // Estado para el control de la barra de navegación
   const [collapsed, setCollapsed] = useState(() => {
@@ -88,6 +94,14 @@ const RegistrarProducto = () => {
       id_categoria: categoria.id_categoria
     });
     setShowCategorias(false);
+  };
+
+  const handleNuevaCategoriaInputChange = (e) => {
+    const { name, value } = e.target;
+    setNuevaCategoriaForm({
+      ...nuevaCategoriaForm,
+      [name]: value
+    });
   };
 
   const handleImageChange = (e) => {
@@ -195,14 +209,51 @@ const RegistrarProducto = () => {
     setShowCancelarAlerta(false);
   };
 
+  const abrirModalNuevaCategoria = () => {
+    setNuevaCategoriaForm({
+      nombre_categoria: "",
+      descripcion: "Categoría para productos"
+    });
+    setCategoriaError("");
+    setShowNuevaCategoriaModal(true);
+    setShowCategorias(false);
+  };
+
+  const cerrarModalNuevaCategoria = () => {
+    if (nuevaCategoriaForm.nombre_categoria.trim() !== "") {
+      // Si hay datos, mostrar alerta de confirmación
+      setShowCancelarCategoriaAlerta(true);
+    } else {
+      // Si no hay datos, cerrar directamente
+      setShowNuevaCategoriaModal(false);
+    }
+  };
+
+  const confirmarCancelarCategoria = () => {
+    setShowCancelarCategoriaAlerta(false);
+    setShowNuevaCategoriaModal(false);
+    setNuevaCategoriaForm({
+      nombre_categoria: "",
+      descripcion: "Categoría para productos"
+    });
+  };
+
+  const cancelarCancelarCategoria = () => {
+    setShowCancelarCategoriaAlerta(false);
+  };
+
   const agregarNuevaCategoria = async () => {
-    if (nuevaCategoria.trim() === "") return;
+    // Validar que haya un nombre de categoría
+    if (nuevaCategoriaForm.nombre_categoria.trim() === "") {
+      setCategoriaError("El nombre de la categoría es obligatorio");
+      return;
+    }
    
     try {
       setLoading(true);
       const response = await productService.createCategory({
-        nombre_categoria: nuevaCategoria,
-        descripcion: `Categoría ${nuevaCategoria} para productos`
+        nombre_categoria: nuevaCategoriaForm.nombre_categoria,
+        descripcion: nuevaCategoriaForm.descripcion || "Categoría para productos"
       });
      
       // Actualizar lista de categorías
@@ -211,25 +262,29 @@ const RegistrarProducto = () => {
      
       // Seleccionar la nueva categoría
       const nuevaCategoriaObj = categoriasResponse.data.find(
-        c => c.nombre_categoria === nuevaCategoria
+        c => c.nombre_categoria === nuevaCategoriaForm.nombre_categoria
       );
      
       if (nuevaCategoriaObj) {
         handleCategoriaChange(nuevaCategoriaObj);
       }
      
-      setNuevaCategoria("");
+      // Cerrar el modal y mostrar alerta de éxito
       setShowNuevaCategoriaModal(false);
+      setShowCategoriaCreadaAlerta(true);
+      setTimeout(() => {
+        setShowCategoriaCreadaAlerta(false);
+      }, 2000);
      
     } catch (error) {
       console.error("Error creando categoría:", error);
-      setError("No se pudo crear la categoría. Por favor, intenta de nuevo.");
+      setCategoriaError("No se pudo crear la categoría. Por favor, intenta de nuevo.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && !showNuevaCategoriaModal) {
+  if (loading && !showNuevaCategoriaModal && !showCancelarCategoriaAlerta) {
     return <Loading message="Procesando operación..." />;
   }
 
@@ -369,10 +424,7 @@ const RegistrarProducto = () => {
                           ))}
                           <div
                             className="p-2 bg-orange-100 text-center hover:bg-orange-200 cursor-pointer text-orange-700 font-medium"
-                            onClick={() => {
-                              setShowNuevaCategoriaModal(true);
-                              setShowCategorias(false);
-                            }}
+                            onClick={abrirModalNuevaCategoria}
                           >
                             + Agregar nueva categoría
                           </div>
@@ -457,25 +509,52 @@ const RegistrarProducto = () => {
               Agregar nueva categoría
             </h3>
             
-            <input
-              type="text"
-              value={nuevaCategoria}
-              onChange={(e) => setNuevaCategoria(e.target.value)}
-              className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg mb-4"
-              placeholder="Nombre de la categoría"
-            />
+            {categoriaError && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm">
+                <p>{categoriaError}</p>
+              </div>
+            )}
             
-            <div className="flex justify-end space-x-2">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre de la categoría*
+              </label>
+              <input
+                type="text"
+                name="nombre_categoria"
+                value={nuevaCategoriaForm.nombre_categoria}
+                onChange={handleNuevaCategoriaInputChange}
+                className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
+                placeholder="Ingrese el nombre de la categoría"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción
+              </label>
+              <textarea
+                name="descripcion"
+                value={nuevaCategoriaForm.descripcion}
+                onChange={handleNuevaCategoriaInputChange}
+                className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
+                rows="3"
+                placeholder="Describa la categoría"
+              ></textarea>
+            </div>
+            
+            <div className="flex justify-end space-x-2 mt-6">
               <Boton
                 label="Cancelar"
                 tipo="cancelar"
-                onClick={() => setShowNuevaCategoriaModal(false)}
+                onClick={cerrarModalNuevaCategoria}
               />
               
               <Boton
-                label="Agregar"
+                label={loading ? "Agregando..." : "Agregar"}
                 tipo="primario"
                 onClick={agregarNuevaCategoria}
+                disabled={loading}
               />
             </div>
           </div>
@@ -511,6 +590,35 @@ const RegistrarProducto = () => {
         </div>
       )}
       
+      {/* Alerta de cancelar creación de categoría */}
+      {showCancelarCategoriaAlerta && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+            <div className="flex justify-center mb-4">
+              <Icono name="eliminarAlert" size={65} />
+            </div>
+            <p className="text-center mb-4">
+              ¿Desea cancelar la creación de la categoría?
+            </p>
+            <p className="text-center text-gray-500 text-sm mb-4">
+              Los datos ingresados se perderán.
+            </p>
+            <div className="flex justify-center space-x-2">
+              <Boton
+                tipo="cancelar"
+                label="No"
+                onClick={cancelarCancelarCategoria}
+              />
+              <Boton
+                tipo="primario"
+                label="Sí, cancelar"
+                onClick={confirmarCancelarCategoria}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Alerta de registro exitoso */}
       {showRegistroExitosoAlerta && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
@@ -520,6 +628,20 @@ const RegistrarProducto = () => {
             </div>
             <p className="text-center mb-4">
               Producto registrado exitosamente
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* Alerta de categoría creada exitosamente */}
+      {showCategoriaCreadaAlerta && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+            <div className="flex justify-center mb-4">
+              <Icono name="confirmar" size={65} />
+            </div>
+            <p className="text-center mb-4">
+              Categoría creada exitosamente
             </p>
           </div>
         </div>
