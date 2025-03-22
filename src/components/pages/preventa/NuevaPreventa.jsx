@@ -9,7 +9,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
 import CampoTexto from "../../../components/atoms/CamposTexto";
 import Icono from "../../../components/atoms/Iconos";
-import SidebarAdm from "../../../components/organisms/SidebarAdm";
+import SidebarAdm from "../../../components/organisms/Sidebar";
 import Loading from "../../../components/Loading/Loading";
 
 const NuevaPreventa = () => {

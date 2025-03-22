@@ -4,7 +4,7 @@ import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
 import Botones from "../../atoms/Botones";
 import Buscador from "../../molecules/Buscador";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
 
 const HistorialIngresos = () => {

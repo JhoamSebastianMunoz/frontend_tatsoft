@@ -7,7 +7,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Loading from "../../../components/Loading/Loading";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import Encabezado from "../../molecules/Encabezado";
 
 const RegistrarProducto = () => {

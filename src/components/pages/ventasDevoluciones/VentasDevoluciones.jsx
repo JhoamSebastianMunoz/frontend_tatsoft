@@ -3,7 +3,7 @@ import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Loading from "../../Loading/Loading";
 import Buscador from "../../molecules/Buscador";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import { useNavigate } from "react-router-dom";
 
 const VentasDevoluciones = () => {

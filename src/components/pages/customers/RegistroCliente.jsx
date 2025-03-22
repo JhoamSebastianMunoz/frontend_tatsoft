@@ -4,7 +4,7 @@ import Encabezado from "../../molecules/Encabezado";
 import Boton from "../../atoms/Botones";
 import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 
 const RegistroCliente = () => {
   const navigate = useNavigate();
