@@ -112,10 +112,10 @@ const HistorialIngresos = () => {
       <Sidebar />
       
       {/* Contenido principal */}
-      <div className="flex-1">
+      <div className="flex-1 pl-20">
         {/* Header */}
         <div className="text-black p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-black font-medium pl-8">
+          <Tipografia variant="h1" size="xl" className="text-black font-medium">
             Historial de Ingresos
           </Tipografia>
         </div>
