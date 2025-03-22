@@ -234,9 +234,9 @@ const RegistroUsuario = () => {
       <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar/>
       </div>
-      <div className="w-full m-1 ">
+      <div className="w-full m-1 p-4">
         <Tipografia>
-          <div className="container mx-auto px-3 py-5 max-w-2xl md:ml-64">
+          <div className="container mx-auto px-3 py-5 max-w-2xl ml-6  md:ml-96">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="p-6 pb-0">
                 <div className="flex justify-between mb-2">

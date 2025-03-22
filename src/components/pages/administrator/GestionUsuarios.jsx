@@ -83,19 +83,24 @@ const GestionUsuarios = () => {
   return (
     <div className="min-h-screen flex bg-slate-100">
       <style>{scrollStyle}</style>
-      <div className="w-20 flex-shrink-0">
+      <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar />
       </div>
+      
+      <div className="w-full flex-1 ml-3 md:ml-2 sm:p-3 md:p-4 lg:pl-24 p-4">
+      <Tipografia>
+        <div className="w-full pr-2">
+          <div className="mt-4 mb-5">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Gestión de usuarios</h1>
+          </div>
 
-      <div className="flex-1 overflow-auto">
-        <div className="flex flex-col px-4 pt-5 pb-6 w-full">
           {error && (
             <div className="mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md">
               <Tipografia className="text-red-700">{error}</Tipografia>
             </div>
           )}
           
-          <div className="flex flex-col space-y-4 w-full">
+          <div className="flex flex-col space-y-4 w-full ml-0">
             <div className="bg-white rounded-lg shadow-md p-4 w-full">
               <div className="flex flex-col space-y-1">
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-1">
@@ -252,6 +257,7 @@ const GestionUsuarios = () => {
             </div>
           </div>
         </div>
+      </Tipografia>
       </div>
     </div>
   );

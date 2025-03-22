@@ -20,6 +20,7 @@ const AlertaRegistro = ({ onClose }) => {
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 justify-center w-full">
             <Boton
               label="Confirmar"
+              tipo="alerta"
               onClick={onClose}
               className="w-full sm:flex-1 text-sm sm:text-base py-2"
             />
