@@ -6,7 +6,7 @@ import Icono from "../../atoms/Iconos";
 import CampoTexto from "../../atoms/CamposTexto";
 import Buscador from "../../molecules/Buscador";
 import Alerta from "../../molecules/Alertas";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
 
 const IngresoStock = () => {
