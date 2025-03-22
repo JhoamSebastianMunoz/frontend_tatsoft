@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { productService } from "../../../context/services/ApiService";
 import { imageService } from "../../../context/services/ImageService";
@@ -28,12 +28,30 @@ const GestionProductos = () => {
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
   
   // Estado para el control de la barra de navegación
   const [collapsed, setCollapsed] = useState(() => {
     const savedState = localStorage.getItem("sidebarCollapsed");
     return savedState ? JSON.parse(savedState) : true;
   });
+  
+  // Ref para cerrar el menú al hacer clic fuera
+  const menuRef = useRef(null);
+
+  // Cerrar el menú cuando se hace clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Guardar estado del sidebar en localStorage
   useEffect(() => {
@@ -132,15 +150,23 @@ const GestionProductos = () => {
 
   const handleVerProducto = (id) => {
     console.log(`Ver producto con ID ${id}`);
+    setOpenMenuId(null);
   };
 
   const handleEditarProducto = (id) => {
     navigate(`/editar-producto/${id}`);
+    setOpenMenuId(null);
   };
 
   const handleEliminarProducto = (id) => {
     setProductoAEliminar(id);
     setShowDeleteModal(true);
+    setOpenMenuId(null);
+  };
+  
+  const toggleMenu = (id, e) => {
+    e.stopPropagation(); // Evitar que el evento se propague
+    setOpenMenuId(openMenuId === id ? null : id);
   };
 
   const confirmarEliminacion = async () => {
@@ -188,29 +214,84 @@ const GestionProductos = () => {
     return <Loading message="Cargando productos..." />;
   }
 
-  // Renderizamos un ProductoItem personalizado con los colores ajustados y sin iconos
+  // Renderizamos un ProductoItem personalizado con menú desplegable
   const renderProductoItem = (producto) => {
     return (
-      <div key={producto.id_producto} className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {producto.id_imagen && productImages[producto.id_producto] ? (
-          <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-            <img
-              src={productImages[producto.id_producto]}
-              alt={producto.nombre_producto}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "ruta-a-imagen-placeholder";
-              }}
-            />
-          </div>
-        ) : (
-          <div className="h-48 bg-gray-100 flex items-center justify-center">
-            <Icono name="gest-productos" size={50} className="text-gray-400" />
-          </div>
-        )}
+      <div key={producto.id_producto} className="bg-white rounded-lg shadow-sm overflow-hidden relative">
+        {/* Menú desplegable de opciones */}
+        <div className="absolute top-2 right-2 z-10">
+          <button 
+            onClick={(e) => toggleMenu(producto.id_producto, e)}
+            className="w-8 h-8 rounded-full bg-white bg-opacity-70 hover:bg-opacity-100 flex items-center justify-center shadow-sm transition-all duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+            </svg>
+          </button>
+          
+          {/* Menú desplegable */}
+          {openMenuId === producto.id_producto && (
+            <div 
+              ref={menuRef}
+              className="absolute right-0 mt-1 w-36 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200"
+            >
+              <button
+                onClick={() => handleVerProducto(producto.id_producto)}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Ver detalle
+              </button>
+              
+              {user && user.rol === "ADMINISTRADOR" && (
+                <>
+                  <button
+                    onClick={() => handleEditarProducto(producto.id_producto)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Editar
+                  </button>
+                  
+                  <button
+                    onClick={() => handleEliminarProducto(producto.id_producto)}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  >
+                    Eliminar
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
         
-        <div className="p-4">
+        {/* Imagen del producto */}
+        <div 
+          className="cursor-pointer" 
+          onClick={() => handleVerProducto(producto.id_producto)}
+        >
+          {producto.id_imagen && productImages[producto.id_producto] ? (
+            <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
+              <img
+                src={productImages[producto.id_producto]}
+                alt={producto.nombre_producto}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "ruta-a-imagen-placeholder";
+                }}
+              />
+            </div>
+          ) : (
+            <div className="h-48 bg-gray-100 flex items-center justify-center">
+              <Icono name="gest-productos" size={50} className="text-gray-400" />
+            </div>
+          )}
+        </div>
+        
+        {/* Información del producto */}
+        <div 
+          className="p-4 cursor-pointer" 
+          onClick={() => handleVerProducto(producto.id_producto)}
+        >
           <h3 className="font-semibold text-gray-800 mb-1 truncate">
             {producto.nombre_producto}
           </h3>
@@ -222,33 +303,6 @@ const GestionProductos = () => {
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
             {producto.descripcion || "Sin descripción"}
           </p>
-          
-          <div className="flex justify-between">
-            <button
-              onClick={() => handleVerProducto(producto.id_producto)}
-              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              Ver
-            </button>
-            
-            {user && user.rol === "ADMINISTRADOR" && (
-              <div className="flex space-x-1">
-                <button
-                  onClick={() => handleEditarProducto(producto.id_producto)}
-                  className="px-3 py-1.5 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
-                >
-                  Editar
-                </button>
-                
-                <button
-                  onClick={() => handleEliminarProducto(producto.id_producto)}
-                  className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  Eliminar
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     );
@@ -263,8 +317,12 @@ const GestionProductos = () => {
         !collapsed ? "md:ml-70" : "md:ml-16"
       }`}>
         {/* Header */}
-        <div className="text-black p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-black font-medium">
+        <div className="text-black p-4 mb-4 ">
+          <Tipografia 
+            variant="h1" 
+            size="2xl" 
+            className="text-black font-medium pl-2 md:pl-4"
+          >
             Gestión de Productos
           </Tipografia>
         </div>
