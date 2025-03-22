@@ -4,19 +4,9 @@ import { areaService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Loading from "../../../components/Loading/Loading";
-import Sidebar from "../../organisms/Sidebar";
+import SidebarAdm from "../../organisms/Sidebar";
 import Boton from "../../atoms/Botones";
-import Buscador from "../../molecules/Buscador";
-
-const scrollStyle = `
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-`;
+import Encabezado from "../../molecules/Encabezado";
 
 const GestionZonas = () => {
   const navigate = useNavigate();
@@ -27,17 +17,14 @@ const GestionZonas = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtro, setFiltro] = useState("Todos");
-  const [zonasFiltradas, setZonasFiltradas] = useState([]);
-  const [menuAbierto, setMenuAbierto] = useState(null);
 
+  // Cargar zonas al iniciar
   useEffect(() => {
     const fetchZonas = async () => {
       try {
         setLoading(true);
         const response = await areaService.getAllAreas();
         setZonas(response.data);
-        setZonasFiltradas(response.data);
       } catch (error) {
         console.error("Error al cargar zonas:", error);
         setError(
@@ -51,28 +38,6 @@ const GestionZonas = () => {
     fetchZonas();
   }, []);
 
-  // Aplicar filtros cuando cambia el término de búsqueda o el tipo de filtro
-  useEffect(() => {
-    let resultados = zonas;
-    
-    // Aplicar filtro por estado de asignación
-    if (filtro === "Asignados") {
-      resultados = resultados.filter(zona => zona.asignado === true);
-    } else if (filtro === "Por asignar") {
-      resultados = resultados.filter(zona => !zona.asignado);
-    }
-    
-    // Aplicar filtro por término de búsqueda
-    if (searchTerm) {
-      const termino = searchTerm.toLowerCase();
-      resultados = resultados.filter(zona => 
-        zona.nombre_zona_trabajo.toLowerCase().includes(termino)
-      );
-    }
-    
-    setZonasFiltradas(resultados);
-  }, [zonas, filtro, searchTerm]);
-
   const handleEliminarClick = (zona) => {
     setZonaSeleccionada(zona);
     setMostrarAlerta(true);
@@ -82,6 +47,8 @@ const GestionZonas = () => {
     try {
       if (zonaSeleccionada) {
         await areaService.deleteArea(zonaSeleccionada.id_zona_de_trabajo);
+
+        // Actualizar la lista de zonas
         setZonas(
           zonas.filter(
             (z) => z.id_zona_de_trabajo !== zonaSeleccionada.id_zona_de_trabajo
@@ -101,122 +68,111 @@ const GestionZonas = () => {
     }
   };
 
-  const handleFiltroChange = (opcion) => {
-    setFiltro(opcion);
-  };
+  // Filtrar zonas por término de búsqueda
+  const zonasFiltradas = searchTerm
+    ? zonas.filter((zona) =>
+        zona.nombre_zona_trabajo
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : zonas;
 
   if (loading) {
     return <Loading message="Cargando zonas..." />;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden flex flex-col md:flex-row">
-      <style>{scrollStyle}</style>
-      <div className="w-full md:w-auto md:fixed md:top-0 md:left-0 md:h-full z-10">
-        <div className="block md:hidden">
-          <Sidebar />
-        </div>
-        <div className="hidden md:block">
-          <Sidebar />
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
+      <div className="fixed top-0 w-full z-10">
+        <Encabezado mensaje="Gestión de zonas" />
       </div>
-      <div className="flex-1 pl-4 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-10 pl-7">
+      
+      {/* Sidebar fijo */}
+      <div className="fixed top-0 left-0 h-full z-10">
+        <SidebarAdm />
+      </div>
+      
+      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
+      <div className="w-full pt-16 m-1 p-4">
         <Tipografia>
-          <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de Zonas</h1>
+          {/* Header con botón de retorno y registro */}
+          <div className="bg-white rounded-lg shadow-md border-l-2 mb-4 p-4 flex justify-between items-center">
+            <div className="flex items-center">
+              {/* <button 
+                onClick={() => navigate(-1)} 
+                className="text-purple-600 mr-2 hover:text-purple-800 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button> */}
+              <span className="font-medium text-lg">Gestión de Zonas</span>
+            </div>
+            <Link to="/registrar-zona">
+              <Boton
+                tipo="primario"
+                label="Registrar zona"
+              />
+            </Link>
           </div>
-          
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
-            <div className="p-4 flex flex-col md:flex-row justify-between items-center">
-              <div className="w-full md:w-auto mb-4 md:mb-0">
-                <div className="flex items-center justify-center md:justify-start">
-                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
+
+          {/* Contador de zonas */}
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4">
+            <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
+              <div>
+                <div className="flex items-center mt-1">
+                  <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {zonas.length} Total
                   </span>
-                  <span className="bg-trasparente text-orange-800 border border-orange-500 text-xs font-medium px-3 py-0.5 rounded-full">
+                  <span className="bg-purple-200 text-purple-800 text-xs font-medium px-3 py-0.5 rounded-full">
                     {zonasFiltradas.length} Filtrados
                   </span>
                 </div>
               </div>
-              
-              <div className="w-[200px] md:w-auto flex justify-end md:justify-start">
-                <Link to="/registrar-zona" className="w-full md:w-auto">
-                  <Boton
-                    tipo="primario"
-                    label="Registrar zona"
-                    className="w-full text-sm md:text-base px-4 md:px-6 py-2"
-                  />
-                </Link>
-              </div>
             </div>
           </div>
 
+          {/* Buscador */}
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
             <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
-            
-            <div className="flex flex-col md:flex-row gap-4 mb-3">
-              <div className="w-full md:w-1/2">
-                <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 mt-2">
-                  {["Todos", "Asignados", "Por asignar"].map((opcion) => (
-                    <button
-                      key={opcion}
-                      onClick={() => handleFiltroChange(opcion)}
-                      className={`flex-shrink-0 px-4 py-2 rounded-full transition-all duration-200 ${
-                        filtro === opcion
-                          ? 'bg-gradient-to-r from-orange-600 to-orange-400 text-white shadow-md'
-                          : 'bg-white border border-orange-200 hover:border-orange-400 text-black hover:shadow-sm'
-                      }`}
-                    >
-                      <Tipografia className={`${
-                        filtro === opcion
-                          ? 'text-white'
-                          : 'text-orange-700'
-                      }`}>
-                        {opcion}
-                      </Tipografia>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="w-full md:w-1/2 pl-0 md:pl-4">
-                <div className="flex flex-col items-center md:items-start">
-                  <div className="w-[200px] md:w-full">
-                    <Buscador
-                      placeholder="Buscar zona"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  {searchTerm && (
-                    <div className="mt-1 flex justify-end w-[200px] md:w-full">
-                      <button
-                        onClick={() => setSearchTerm("")}
-                        className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        Limpiar filtro
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Buscar zona:
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por nombre"
+                className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
+            
+            {searchTerm && (
+              <div className="mt-3 flex justify-end">
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="text-sm text-purple-600 hover:text-purple-800 flex items-center transition-colors duration-150"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Limpiar filtro
+                </button>
+              </div>
+            )}
           </div>
 
+          {/* Mensaje de error */}
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
               <p className="font-medium">Error</p>
@@ -224,9 +180,10 @@ const GestionZonas = () => {
             </div>
           )}
 
+          {/* Contenedor de tarjetas */}
           <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-              <h3 className="font-medium text-black-900 mb-2 sm:mb-0 text-center sm:text-left w-full sm:w-auto">
+            <div className="border-b pb-3 mb-4 flex justify-between items-center">
+              <h3 className="font-medium text-black-900">
                 Lista de zonas
                 <span className="ml-2 text-sm font-normal text-black-700">
                   Mostrando {zonasFiltradas.length} de {zonas.length}
@@ -234,101 +191,31 @@ const GestionZonas = () => {
               </h3>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-[500px] mx-auto sm:max-w-none -ml-2 sm:ml-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-1">
               {zonasFiltradas.length > 0 ? (
                 zonasFiltradas.map((zona) => (
                   <div
                     key={zona.id_zona_de_trabajo}
-                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative flex flex-col h-full"
+                    className="p-4 border rounded-lg shadow bg-gray-50 hover:shadow-md transition-shadow"
                   >
-                    <div
-                      className={`h-2 ${
-                        zona.asignado
-                          ? "bg-green-500"
-                          : ""
-                      }`}
-                    ></div>
-                    <div className="absolute top-3 right-3 z-10 mr-3">
-                      <button
-                        onClick={() => setMenuAbierto(menuAbierto === zona.id_zona_de_trabajo ? null : zona.id_zona_de_trabajo)}
-                        className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    <h3 className="font-bold text-purple-700">{zona.nombre_zona_trabajo}</h3>
+                    <p className="mt-2">
+                      <strong>Ubicación:</strong> Coordenadas:{" "}
+                      {zona.latitud || "23.6345"}, {zona.longitud || "-102.5528"}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1 mb-3">{zona.descripcion}</p>
+                    <div className="flex flex-wrap gap-2 mt-4 justify-between items-center">
+                      <Link 
+                        to={`/editar-zona/${zona.id_zona_de_trabajo}`}
                       >
-                        <svg
-                          className="w-6 h-6"
-                          fill="currentColor"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                        </svg>
-                      </button>
-                      
-                      {menuAbierto === zona.id_zona_de_trabajo && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-                          <ul className="py-1 text-sm text-gray-600">
-                            <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
-                              onClick={() => {
-                                navigate(`/ver/zona/${zona.id_zona_de_trabajo}`);
-                                setMenuAbierto(null);
-                              }}
-                            >
-                              Ver
-                            </li>
-                            <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
-                              onClick={() => {
-                                navigate(`/asignar-zona/${zona.id_zona_de_trabajo}`);
-                                setMenuAbierto(null);
-                              }}
-                            >
-                              Asignar
-                            </li>
-                            <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
-                              onClick={() => {
-                                handleEliminarClick(zona);
-                                setMenuAbierto(null);
-                              }}
-                            >
-                              Inhabilitar
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="p-4 flex-grow">
-                      <h3 className="font-medium text-lg text-gray-900 break-words mb-2">
-                        {zona.nombre_zona_trabajo}
-                      </h3>
-                      <p className="text-gray-600 break-words text-sm mb-2">
-                        <strong>Ubicación:</strong> Coordenadas: {zona.latitud || "23.6345"}, {zona.longitud || "-102.5528"}
-                      </p>
-                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                        {zona.descripcion}
-                      </p>
-                      <p className="mt-2">
-                        <span
-                          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                            zona.asignado
-                              ? "bg-slate-100 text-slate-800"
-                              : "bg-orange-200 text-orange-800"
-                          }`}
-                        >
-                          {zona.asignado ? "Asignado" : "Por asignar"}
-                        </span>
-                      </p>
-                    </div>
-                    
-                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 mt-auto">
-                      <div className="flex justify-between items-center">
-                        <Link 
-                          to={`/editar-zona/${zona.id_zona_de_trabajo}`}
-                          className="w-full"
-                        >
-                          <Boton tipo="primario" label="Editar" size="small" className="w-full" />
-                        </Link>
-                      </div>
+                        <Boton tipo="secundario" label="Editar" />
+                      </Link>
+              
+                      <Boton
+                        onClick={() => handleEliminarClick(zona)}
+                        label="Eliminar"
+                        tipo="cancelar"
+                      />
                     </div>
                   </div>
                 ))
@@ -363,43 +250,39 @@ const GestionZonas = () => {
         </Tipografia>
       </div>
 
+      {/* Alerta de Confirmación */}
       {mostrarAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-4">
-          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg text-center max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto">
-            <div className="flex items-center justify-center mb-3 md:mb-4">
-              <Icono name="eliminarAlert" size="50" className="md:text-6xl" />
-            </div>
-            <Tipografia size="lg" className="font-bold mb-1 md:mb-2 text-base md:text-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <Icono name="eliminarAlert" size={50} className="mx-auto mb-4" />
+            <Tipografia className="text-lg font-semibold mb-2">
               ¿Desea eliminar la zona?
             </Tipografia>
-            <Tipografia className="mb-3 md:mb-6 text-gray-600 text-sm md:text-base">
+            <Tipografia className="text-sm text-gray-500 mb-4">
               Esta acción no se puede deshacer.
             </Tipografia>
-            <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
+            <div className="flex justify-center mt-4 gap-2">
               <Boton
                 onClick={() => setMostrarAlerta(false)}
                 label="Cancelar"
                 tipo="cancelar"
-                className="w-full sm:w-auto text-sm md:text-base"
               />
               <Boton
                 onClick={handleConfirmarEliminar}
                 label="Confirmar"
                 tipo="secundario"
-                className="w-full sm:w-auto text-sm md:text-base"
               />
             </div>
           </div>
         </div>
       )}
 
+      {/* Alerta de Eliminación Exitosa */}
       {eliminado && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-4">
-          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg text-center max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto">
-            <div className="flex items-center justify-center mb-3 md:mb-4">
-              <Icono name="confirmar" size="50" className="text-green-500 md:text-6xl" />
-            </div>
-            <Tipografia size="lg" className="font-bold mb-3 md:mb-4 text-base md:text-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <Icono name="confirmar" size={50} className="mx-auto mb-4" />
+            <Tipografia className="text-lg font-semibold">
               Zona eliminada
             </Tipografia>
           </div>
