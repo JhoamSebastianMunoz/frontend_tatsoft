@@ -86,25 +86,17 @@ const RegistrarZona = () => {
       </div>
       
       {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
-      <div className="w-full pt-16 m-1 p-4">
+      <div className="w-full pt-16 md:pt-20 px-4 md:px-6 lg:px-8">
         <Tipografia>
           {/* Header con botón de retorno */}
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4 p-4 flex justify-between items-center m-1">
-            <div className="flex items-center ">
-              {/* <button 
-                onClick={() => navigate("/gestion-zonas")} 
-                className="text-purple-600 mr-2 hover:text-purple-800 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button> */}
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4 p-4 flex justify-between items-center">
+            <div className="flex items-center">
               <span className="font-medium text-lg">Registrar Nueva Zona</span>
             </div>
           </div>
           
           {/* Formulario */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-6 max-w-4xl mx-auto">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
                 <p className="font-medium">Error</p>
@@ -138,12 +130,12 @@ const RegistrarZona = () => {
                 
                 {/* Simulación de mapa */}
                 <div
-                  className="w-full h-56 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="w-full h-48 md:h-56 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={handleMapClick}
                 >
-                  <div className="text-center text-gray-600">
+                  <div className="text-center text-gray-600 p-4">
                     <div className="text-3xl mb-2">📍</div>
-                    <div>Haz clic para simular selección de ubicación</div>
+                    <div className="text-sm md:text-base">Haz clic para simular selección de ubicación</div>
                     <div className="text-xs mt-1 text-gray-500">(Se requiere API key de Google Maps para mostrar el mapa real)</div>
                   </div>
                 </div>
@@ -164,19 +156,20 @@ const RegistrarZona = () => {
                 />
               </div>
               
-              <div className="flex justify-center pt-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 pt-4">
                 <Boton
                   type="button"
                   label="Cancelar"
                   onClick={() => navigate("/gestion-zonas")}
                   tipo="cancelar"
-                  className="mr-2"
+                  className="w-full sm:w-auto"
                 />
                 <Boton
                   type="submit"
                   label={loading ? "Guardando..." : "Guardar"}
                   disabled={loading}
                   tipo="primario"
+                  className="w-full sm:w-auto"
                 />
               </div>
             </form>
@@ -186,8 +179,8 @@ const RegistrarZona = () => {
       
       {/* Alerta de Confirmación */}
       {mostrarAlerta && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-4">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg text-center max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto">
             <Icono name="pregunta" size={50} className="mx-auto mb-4 text-purple-600" />
             <Tipografia className="text-lg font-semibold mb-2">
               ¿Desea registrar esta zona?
@@ -195,16 +188,18 @@ const RegistrarZona = () => {
             <Tipografia className="text-sm text-gray-500 mb-4">
               Confirme para guardar la información de la zona.
             </Tipografia>
-            <div className="flex justify-center mt-4 gap-2">
+            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
               <Boton
                 onClick={() => setMostrarAlerta(false)}
                 label="Cancelar"
                 tipo="cancelar"
+                className="w-full sm:w-auto"
               />
               <Boton
                 onClick={handleConfirmarGuardar}
                 label="Confirmar"
                 tipo="primario"
+                className="w-full sm:w-auto"
               />
             </div>
           </div>
@@ -213,8 +208,8 @@ const RegistrarZona = () => {
       
       {/* Alerta de Registro Exitoso */}
       {guardado && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-4">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg text-center max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto">
             <Icono name="confirmar" size={50} className="mx-auto mb-4 text-green-500" />
             <Tipografia className="text-lg font-semibold">
               Zona registrada con éxito

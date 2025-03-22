@@ -31,7 +31,6 @@ const Boton = ({
     large: "px-28 py-1.5 text-base",
   };
 
-  // Definición de iconos
   const icons = {
     add: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +81,7 @@ const Boton = ({
     ),
   };
 
-  // Spinner para el estado de carga
+
   const LoadingSpinner = () => (
     <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

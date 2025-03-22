@@ -37,7 +37,9 @@ const GestionClientes = () => {
  
   const clientesFiltrados = clientes.filter(
     (cliente) => {
-      const tipoMatch = filtro === "Todos" || cliente.tipo === filtro;
+      const tipoMatch = filtro === "Todos" || 
+                       (filtro === "Activos" && cliente.activo) ||
+                       (filtro === "Inactivos" && !cliente.activo);
       
       const searchMatch = !busqueda ||
         cliente.razon_social?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -81,10 +83,10 @@ const GestionClientes = () => {
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
-                  <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
+                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {clientes.length} Total
                   </span>
-                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                  <span className="bg-transparent text-orange-800 border border-orange-500 text-xs font-medium px-3 py-0.5 rounded-full">
                     {clientesFiltrados.length} Filtrados
                   </span>
                 </div>
@@ -131,48 +133,23 @@ const GestionClientes = () => {
           
 
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Buscar:
-                </label>
+            <div className="flex flex-col items-center">
+              <div className="w-full max-w-md">
                 <Buscador
-                  placeholder="Buscar cliente por nombre o razón social"
+                  placeholder="Buscar cliente"
                   onChange={(e) => setBusqueda(e.target.value)}
                   value={busqueda}
                 />
               </div>
               
               {(busqueda || filtro !== "Todos") && (
-                <div className="mt-1 flex justify-end">
-                  <button
-                    onClick={() => {
-                      setBusqueda("");
-                      setFiltro("Todos");
-                    }}
-                    className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Limpiar filtros
-                  </button>
+                <div className="mt-2">
+          
                 </div>
               )}
             </div>
           </div>
           
-          {/* Botones de filtro tipo con scroll horizontal en móvil - Mejorado */}
           <div className="flex overflow-x-auto pb-1 no-scrollbar p-3 bg-white rounded-lg mb-4">
             <div className="flex gap-2 min-w-max px-1">
               <button
@@ -187,25 +164,22 @@ const GestionClientes = () => {
               </button>
               <button
                 className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                  filtro === "Mayorista"
+                  filtro === "Activos"
                     ? "bg-orange-100 text-orange-700 font-medium"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
-                onClick={() => setFiltro("Mayorista")}
+                onClick={() => setFiltro("Activos")}
               >
-                Mayoristas
+                Activos
               </button>
               <button
                 className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                  filtro === "Minorista"
+                  filtro === "Inactivos"
                     ? "bg-orange-100 text-orange-700 font-medium"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
-                onClick={() => setFiltro("Minorista")}
+                onClick={() => setFiltro("Inactivos")}
               >
-                Minoristas
-              </button>
-              <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100">
                 Inactivos
               </button>
             </div>
@@ -256,9 +230,9 @@ const GestionClientes = () => {
                   >
                     <div
                       className={`h-2 ${
-                        cliente.tipo === "Mayorista"
-                          ? "bg-orange-500"
-                          : "bg-green-500"
+                        cliente.activo
+                          ? "bg-green-500"
+                          : "bg-red-500"
                       }`}
                     ></div>
                     <div className="absolute top-3 right-3 z-10">
@@ -305,24 +279,24 @@ const GestionClientes = () => {
                       <p className="mt-2">
                         <span
                           className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                            cliente.tipo === "Mayorista"
-                              ? "bg-orange-100 text-orange-800"
-                              : "bg-green-100 text-green-800"
+                            cliente.activo
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {cliente.tipo || "Cliente"}
+                          {cliente.activo ? "Activo" : "Inactivo"}
                         </span>
                       </p>
                     </div>
                     
                     <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
                       <div className="flex justify-between items-center">
-                        <Boton tipo="cancelar" label="Eliminar" size="small" />
+                        <Boton tipo="cancelar" label="Eliminar" size="medium" />
                         <Boton
                           onClick={() => handleEditarCliente(cliente)}
                           label="Editar"
                           tipo="primario"
-                          size="small"
+                          size="medium"
                         />
                       </div>
                     </div>
@@ -346,7 +320,7 @@ const GestionClientes = () => {
                           Teléfono
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Tipo
+                          Estado
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Acciones
@@ -370,12 +344,12 @@ const GestionClientes = () => {
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                             <span
                               className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                cliente.tipo === "Mayorista"
-                                  ? "bg-orange-100 text-orange-800"
-                                  : "bg-green-100 text-green-800"
+                                cliente.activo
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {cliente.tipo || "Cliente"}
+                              {cliente.activo ? "Activo" : "Inactivo"}
                             </span>
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
@@ -397,7 +371,6 @@ const GestionClientes = () => {
               </div>
             )}
             
-            {/* Paginación - Optimizada para móvil */}
             {clientesFiltrados.length > 0 && (
               <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
                 <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
