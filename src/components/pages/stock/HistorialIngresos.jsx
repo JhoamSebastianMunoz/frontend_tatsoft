@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
 import Botones from "../../atoms/Botones";
 import Buscador from "../../molecules/Buscador";
-import SidebarAdm from "../../organisms/Sidebar";
+import Sidebar from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
 
 const HistorialIngresos = () => {
@@ -107,22 +107,22 @@ const HistorialIngresos = () => {
   };
   
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar usando el componente del organism */}
-      <SidebarAdm activeMenuItem="inventario" />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar />
       
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col ml-64">
+      <div className="flex-1 pl-20">
         {/* Header */}
-        <header className="bg-purple-600 text-white p-4 flex items-center justify-between">
-          <Tipografia variant="h1" size="xl" className="font-medium">
+        <div className="text-black p-4 shadow-md">
+          <Tipografia variant="h1" size="xl" className="text-black font-medium">
             Historial de Ingresos
           </Tipografia>
-        </header>
+        </div>
 
         {/* Contenido del historial */}
-        <div className="flex-1 p-6">
-          <div className="bg-white rounded-lg shadow-md p-6 mx-auto max-w-5xl">
+        <div className="p-6">
+          <div className="bg-white rounded-lg shadow-md p-6">
             {/* Buscador y filtros */}
             <div className="mb-6">
               <div className="flex gap-2 mb-4">
@@ -132,7 +132,7 @@ const HistorialIngresos = () => {
                     placeholder="Buscar Producto"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 pl-4 pr-10 border rounded text-sm"
+                    className="w-full p-2 pl-4 pr-10 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <Icono name="buscar" size={18} />
@@ -154,7 +154,7 @@ const HistorialIngresos = () => {
                       type="date"
                       value={fechaDesde}
                       onChange={(e) => setFechaDesde(e.target.value)}
-                      className="w-full p-2 border rounded pr-8 bg-purple-50 border-purple-300"
+                      className="w-full p-2 border rounded pr-8 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                     />
                   </div>
                 </div>
@@ -165,7 +165,7 @@ const HistorialIngresos = () => {
                       type="date"
                       value={fechaHasta}
                       onChange={(e) => setFechaHasta(e.target.value)}
-                      className="w-full p-2 border rounded pr-8 bg-purple-50 border-purple-300"
+                      className="w-full p-2 border rounded pr-8 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                     />
                   </div>
                 </div>
@@ -174,7 +174,7 @@ const HistorialIngresos = () => {
                   <select
                     value={usuarioResponsable}
                     onChange={(e) => setUsuarioResponsable(e.target.value)}
-                    className="w-full p-2 border rounded bg-purple-50 border-purple-300"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                   >
                     <option value="">Seleccionar usuario</option>
                     {usuarios.map((usuario) => (
@@ -189,23 +189,23 @@ const HistorialIngresos = () => {
             
             {/* Tabla de ingresos */}
             <div>
-              <Tipografia variant="h2" size="lg" className="mb-3 text-purple-800">Detalles del ingreso</Tipografia>
+              <Tipografia variant="h2" size="lg" className="mb-3 text-orange-500">Detalles del ingreso</Tipografia>
               
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
-                  <thead className="bg-purple-100">
+                  <thead className="bg-orange-50">
                     <tr className="text-left">
-                      <th className="py-2 px-4 font-medium text-purple-800">Fecha</th>
-                      <th className="py-2 px-4 font-medium text-purple-800">Producto</th>
-                      <th className="py-2 px-4 font-medium text-purple-800">Cantidad</th>
-                      <th className="py-2 px-4 font-medium text-purple-800">Usuario responsable</th>
-                      <th className="py-2 px-4 font-medium text-purple-800">Ver más detalle</th>
+                      <th className="py-2 px-4 font-medium text-orange-800">Fecha</th>
+                      <th className="py-2 px-4 font-medium text-orange-800">Producto</th>
+                      <th className="py-2 px-4 font-medium text-orange-800">Cantidad</th>
+                      <th className="py-2 px-4 font-medium text-orange-800">Usuario responsable</th>
+                      <th className="py-2 px-4 font-medium text-orange-800">Ver más detalle</th>
                     </tr>
                   </thead>
                   <tbody>
                     {historialIngresos.map((ingreso) => (
                       <React.Fragment key={ingreso.id}>
-                        <tr className={`border-b ${expandedRow === ingreso.id ? 'bg-purple-50' : 'hover:bg-gray-50'}`}>
+                        <tr className={`border-b ${expandedRow === ingreso.id ? 'bg-orange-50' : 'hover:bg-gray-50'}`}>
                           <td className="py-3 px-4">{ingreso.fecha}</td>
                           <td className="py-3 px-4">{ingreso.producto}</td>
                           <td className="py-3 px-4">{ingreso.cantidad}</td>
@@ -213,7 +213,7 @@ const HistorialIngresos = () => {
                           <td className="py-3 px-4">
                             <button 
                               onClick={() => toggleDetalles(ingreso.id)}
-                              className="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center"
+                              className="bg-orange-500 text-white w-8 h-8 rounded-full flex items-center justify-center"
                             >
                               <span className="text-xl">{expandedRow === ingreso.id ? '−' : '>'}</span>
                             </button>
@@ -221,21 +221,21 @@ const HistorialIngresos = () => {
                         </tr>
                         
                         {expandedRow === ingreso.id && (
-                          <tr className="bg-purple-50">
+                          <tr className="bg-orange-50">
                             <td colSpan="5" className="p-4">
                               <div className="grid grid-cols-3 gap-4 text-sm">
                                 <div>
-                                  <p className="font-medium text-purple-800">Código de ingreso: {ingreso.codigoIngreso}</p>
-                                  <p className="font-medium text-purple-800">Código factura proveedor: {ingreso.codigoFacturaProveedor}</p>
-                                  <p className="font-medium text-purple-800">Fecha de vencimiento: {ingreso.fechaVencimiento}</p>
+                                  <p className="font-medium text-orange-800">Código de ingreso: {ingreso.codigoIngreso}</p>
+                                  <p className="font-medium text-orange-800">Código factura proveedor: {ingreso.codigoFacturaProveedor}</p>
+                                  <p className="font-medium text-orange-800">Fecha de vencimiento: {ingreso.fechaVencimiento}</p>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-purple-800">Stock: {ingreso.stock}</p>
-                                  <p className="font-medium text-purple-800">Costo total: {ingreso.costoTotal}</p>
-                                  <p className="font-medium text-purple-800">Costo unitario: {ingreso.costoUnitario}</p>
+                                  <p className="font-medium text-orange-800">Stock: {ingreso.stock}</p>
+                                  <p className="font-medium text-orange-800">Costo total: {ingreso.costoTotal}</p>
+                                  <p className="font-medium text-orange-800">Costo unitario: {ingreso.costoUnitario}</p>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-purple-800">Porcentaje venta: {ingreso.porcentajeVenta}</p>
+                                  <p className="font-medium text-orange-800">Porcentaje venta: {ingreso.porcentajeVenta}</p>
                                 </div>
                               </div>
                             </td>

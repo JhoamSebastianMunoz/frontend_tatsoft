@@ -97,8 +97,8 @@ const Sidebar = () => {
       label: "Gestión de Inventario",
       path: "/inventario",
       icon: "inventory",
-      subItems: ["Ver Inventario", "Ingreso de Stock", "Historial de ingreso"],
-      subPaths: ["/inventario", "/ingreso-stock", "/historial-stock"],
+      subItems: ["Ingreso de Stock", "Historial de ingreso"],
+      subPaths: ["/ingreso-stock", "/historial-ingresos"],
     },
     {
       name: "gest-zonas",

@@ -7,8 +7,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Loading from "../../../components/Loading/Loading";
-import SidebarAdm from "../../organisms/Sidebar";
-import Encabezado from "../../molecules/Encabezado";
+import Sidebar from "../../organisms/Sidebar";
 
 const RegistrarProducto = () => {
   const navigate = useNavigate();
@@ -37,8 +36,22 @@ const RegistrarProducto = () => {
   const [showCancelarAlerta, setShowCancelarAlerta] = useState(false);
   const [showRegistroExitosoAlerta, setShowRegistroExitosoAlerta] = useState(false);
   const [showSeleccionadoAlerta, setShowSeleccionadoAlerta] = useState(false);
+  const [showCancelarCategoriaAlerta, setShowCancelarCategoriaAlerta] = useState(false);
+  const [showCategoriaCreadaAlerta, setShowCategoriaCreadaAlerta] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [categoriaError, setCategoriaError] = useState("");
+
+  // Estado para el control de la barra de navegación
+  const [collapsed, setCollapsed] = useState(() => {
+    const savedState = localStorage.getItem("sidebarCollapsed");
+    return savedState ? JSON.parse(savedState) : true;
+  });
+
+  // Guardar estado del sidebar en localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(collapsed));
+  }, [collapsed]);
 
   // Cargar categorías y verificar permisos al montar el componente
   useEffect(() => {
@@ -185,14 +198,45 @@ const RegistrarProducto = () => {
     setShowCancelarAlerta(false);
   };
 
+  const abrirModalNuevaCategoria = () => {
+    setNuevaCategoria("");
+    setCategoriaError("");
+    setShowNuevaCategoriaModal(true);
+    setShowCategorias(false);
+  };
+
+  const cerrarModalNuevaCategoria = () => {
+    if (nuevaCategoria.trim() !== "") {
+      // Si hay datos, mostrar alerta de confirmación
+      setShowCancelarCategoriaAlerta(true);
+    } else {
+      // Si no hay datos, cerrar directamente
+      setShowNuevaCategoriaModal(false);
+    }
+  };
+
+  const confirmarCancelarCategoria = () => {
+    setShowCancelarCategoriaAlerta(false);
+    setShowNuevaCategoriaModal(false);
+    setNuevaCategoria("");
+  };
+
+  const cancelarCancelarCategoria = () => {
+    setShowCancelarCategoriaAlerta(false);
+  };
+
   const agregarNuevaCategoria = async () => {
-    if (nuevaCategoria.trim() === "") return;
+    // Validar que haya un nombre de categoría
+    if (nuevaCategoria.trim() === "") {
+      setCategoriaError("El nombre de la categoría es obligatorio");
+      return;
+    }
    
     try {
       setLoading(true);
       const response = await productService.createCategory({
         nombre_categoria: nuevaCategoria,
-        descripcion: `Categoría ${nuevaCategoria} para productos`
+        descripcion: `Categoría para productos` // Descripción genérica predeterminada
       });
      
       // Actualizar lista de categorías
@@ -208,53 +252,43 @@ const RegistrarProducto = () => {
         handleCategoriaChange(nuevaCategoriaObj);
       }
      
-      setNuevaCategoria("");
+      // Cerrar el modal y mostrar alerta de éxito
       setShowNuevaCategoriaModal(false);
+      setShowCategoriaCreadaAlerta(true);
+      setTimeout(() => {
+        setShowCategoriaCreadaAlerta(false);
+      }, 2000);
      
     } catch (error) {
       console.error("Error creando categoría:", error);
-      setError("No se pudo crear la categoría. Por favor, intenta de nuevo.");
+      setCategoriaError("No se pudo crear la categoría. Por favor, intenta de nuevo.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && !showNuevaCategoriaModal) {
+  if (loading && !showNuevaCategoriaModal && !showCancelarCategoriaAlerta) {
     return <Loading message="Procesando operación..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
-      {/* Encabezado fijo */}
-      <div className="fixed top-0 w-full z-10">
-        <Encabezado mensaje="Registrar Producto" />
-      </div>
+    <div className="min-h-screen bg-gray-50 flex">  
+      {/* Sidebar */}
+      <Sidebar />
       
-      {/* Sidebar fijo */}
-      <div className="fixed top-0 left-0 h-full z-10">
-        <SidebarAdm />
-      </div>
-      
-      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
-      <div className="w-full pt-16 m-1 p-4">
-        <Tipografia>
-          {/* Header con botón de retorno */}
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4 p-4 flex justify-between items-center">
-            <div className="flex items-center">
-              {/* <button 
-                onClick={() => navigate("/gestion-productos")} 
-                className="text-purple-600 mr-2 hover:text-purple-800 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button> */}
-              <span className="font-medium text-lg">Registrar Nuevo Producto</span>
-            </div>
-          </div>
-          
-          {/* Formulario */}
-          <div className="bg-white rounded-lg shadow-md px-6 py-8 max-w-4xl mx-auto">
+      <div className={`flex-1 transition-all duration-300 ${
+        !collapsed ? "md:ml-70" : "md:ml-16"
+      }`}>
+        {/* Header */}
+        <div className="text-black p-4 shadow-md">
+          <Tipografia variant="h1" size="xl" className="text-black font-medium pl-4 md:pl-2">
+            Registrar Nuevo Producto
+          </Tipografia>
+        </div>
+        
+        {/* Contenido principal */}
+        <div className="p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 w-full">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
                 <p className="font-medium">Error</p>
@@ -263,11 +297,11 @@ const RegistrarProducto = () => {
             )}
             
             <form onSubmit={handleSubmit}>
-              <div className="flex flex-col md:flex-row gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Columna izquierda con datos principales */}
-                <div className="flex-1 space-y-6">
+                <div className="space-y-6">
                   <div className="border-b border-gray-200 pb-1 mb-4">
-                    <h2 className="text-lg font-medium text-purple-700">Información del producto</h2>
+                    <h2 className="text-lg font-medium text-orange-500">Información del producto</h2>
                   </div>
                   
                   <div>
@@ -279,7 +313,7 @@ const RegistrarProducto = () => {
                       name="nombre_producto"
                       value={formData.nombre_producto}
                       onChange={handleInputChange}
-                      className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                      className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
                       required
                       placeholder="Ingrese el nombre del producto"
                     />
@@ -299,7 +333,7 @@ const RegistrarProducto = () => {
                           name="precio"
                           value={formData.precio}
                           onChange={handleInputChange}
-                          className="w-full pl-7 p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                          className="w-full pl-7 p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
                           required
                           min="0"
                           step="0.01"
@@ -317,7 +351,7 @@ const RegistrarProducto = () => {
                         name="cantidad_ingreso"
                         value={formData.cantidad_ingreso}
                         onChange={handleInputChange}
-                        className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                        className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
                         min="0"
                         placeholder="0"
                       />
@@ -332,7 +366,7 @@ const RegistrarProducto = () => {
                       name="descripcion"
                       value={formData.descripcion}
                       onChange={handleInputChange}
-                      className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                      className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
                       rows="6"
                       placeholder="Describa las características del producto"
                     ></textarea>
@@ -340,9 +374,9 @@ const RegistrarProducto = () => {
                 </div>
                 
                 {/* Columna derecha con categoría e imagen */}
-                <div className="flex-1 space-y-6">
+                <div className="space-y-6">
                   <div className="border-b border-gray-200 pb-1 mb-4">
-                    <h2 className="text-lg font-medium text-purple-700">Categoría e imagen</h2>
+                    <h2 className="text-lg font-medium text-orange-500">Categoría e imagen</h2>
                   </div>
                   
                   <div>
@@ -351,7 +385,7 @@ const RegistrarProducto = () => {
                     </label>
                     <div className="relative">
                       <div
-                        className="w-full p-2 border border-purple-200 rounded-lg flex justify-between items-center cursor-pointer hover:border-purple-300"
+                        className="w-full p-2 border border-gray-300 rounded-lg flex justify-between items-center cursor-pointer hover:border-orange-300"
                         onClick={() => setShowCategorias(!showCategorias)}
                       >
                         <span className={formData.categoria ? "text-gray-800" : "text-gray-400"}>
@@ -365,18 +399,15 @@ const RegistrarProducto = () => {
                           {categorias.map((categoria) => (
                             <div
                               key={categoria.id_categoria}
-                              className="p-2 hover:bg-purple-100 cursor-pointer"
+                              className="p-2 hover:bg-orange-100 cursor-pointer"
                               onClick={() => handleCategoriaChange(categoria)}
                             >
                               {categoria.nombre_categoria}
                             </div>
                           ))}
                           <div
-                            className="p-2 bg-purple-100 text-center hover:bg-purple-200 cursor-pointer text-purple-700 font-medium"
-                            onClick={() => {
-                              setShowNuevaCategoriaModal(true);
-                              setShowCategorias(false);
-                            }}
+                            className="p-2 bg-orange-100 text-center hover:bg-orange-200 cursor-pointer text-orange-700 font-medium"
+                            onClick={abrirModalNuevaCategoria}
                           >
                             + Agregar nueva categoría
                           </div>
@@ -417,7 +448,7 @@ const RegistrarProducto = () => {
                         />
                         <label
                           htmlFor="imageInput"
-                          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md cursor-pointer hover:bg-purple-700 transition-colors"
+                          className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-md cursor-pointer hover:bg-orange-600 transition-colors"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
@@ -442,7 +473,7 @@ const RegistrarProducto = () => {
                 />
                 
                 <Boton
-                  tipo="secundario"
+                  tipo="primario"
                   label={loading ? "Registrando..." : "Registrar"}
                   type="submit"
                   disabled={loading || isUploading}
@@ -450,36 +481,48 @@ const RegistrarProducto = () => {
               </div>
             </form>
           </div>
-        </Tipografia>
+        </div>
       </div>
       
-      {/* Modal para agregar nueva categoría */}
+      {/* Modal para agregar nueva categoría (Simplificado) */}
       {showNuevaCategoriaModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
-            <Tipografia className="text-lg font-semibold mb-4">
+            <h3 className="text-lg font-semibold mb-4">
               Agregar nueva categoría
-            </Tipografia>
+            </h3>
             
-            <input
-              type="text"
-              value={nuevaCategoria}
-              onChange={(e) => setNuevaCategoria(e.target.value)}
-              className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg mb-4"
-              placeholder="Nombre de la categoría"
-            />
+            {categoriaError && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm">
+                <p>{categoriaError}</p>
+              </div>
+            )}
             
-            <div className="flex justify-end space-x-2">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre de la categoría*
+              </label>
+              <input
+                type="text"
+                value={nuevaCategoria}
+                onChange={(e) => setNuevaCategoria(e.target.value)}
+                className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
+                placeholder="Ingrese el nombre de la categoría"
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2 mt-6">
               <Boton
                 label="Cancelar"
                 tipo="cancelar"
-                onClick={() => setShowNuevaCategoriaModal(false)}
+                onClick={cerrarModalNuevaCategoria}
               />
               
               <Boton
-                label="Agregar"
+                label={loading ? "Agregando..." : "Agregar"}
                 tipo="primario"
                 onClick={agregarNuevaCategoria}
+                disabled={loading}
               />
             </div>
           </div>
@@ -493,12 +536,12 @@ const RegistrarProducto = () => {
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
             </div>
-            <Tipografia className="text-center mb-4">
+            <p className="text-center mb-4">
               ¿Desea cancelar el registro?
-            </Tipografia>
-            <Tipografia className="text-center text-gray-500 text-sm mb-4">
+            </p>
+            <p className="text-center text-gray-500 text-sm mb-4">
               Los cambios no guardados se perderán.
-            </Tipografia>
+            </p>
             <div className="flex justify-center space-x-2">
               <Boton
                 tipo="cancelar"
@@ -515,16 +558,59 @@ const RegistrarProducto = () => {
         </div>
       )}
       
+      {/* Alerta de cancelar creación de categoría */}
+      {showCancelarCategoriaAlerta && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+            <div className="flex justify-center mb-4">
+              <Icono name="eliminarAlert" size={65} />
+            </div>
+            <p className="text-center mb-4">
+              ¿Desea cancelar la creación de la categoría?
+            </p>
+            <p className="text-center text-gray-500 text-sm mb-4">
+              Los datos ingresados se perderán.
+            </p>
+            <div className="flex justify-center space-x-2">
+              <Boton
+                tipo="cancelar"
+                label="No"
+                onClick={cancelarCancelarCategoria}
+              />
+              <Boton
+                tipo="primario"
+                label="Sí, cancelar"
+                onClick={confirmarCancelarCategoria}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Alerta de registro exitoso */}
       {showRegistroExitosoAlerta && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
             <div className="flex justify-center mb-4">
-              <Icono name="confirmar" size={65} className="text-green-500" />
+              <Icono name="confirmar" size={65} />
             </div>
-            <Tipografia className="text-center mb-4">
+            <p className="text-center mb-4">
               Producto registrado exitosamente
-            </Tipografia>
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* Alerta de categoría creada exitosamente */}
+      {showCategoriaCreadaAlerta && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+            <div className="flex justify-center mb-4">
+              <Icono name="confirmar" size={65} />
+            </div>
+            <p className="text-center mb-4">
+              Categoría creada exitosamente
+            </p>
           </div>
         </div>
       )}
@@ -534,11 +620,11 @@ const RegistrarProducto = () => {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
             <div className="flex justify-center mb-4">
-              <Icono name="confirmar" size={60} className="text-green-500" />
+              <Icono name="confirmar" size={60} />
             </div>
-            <Tipografia className="text-center mb-4">
+            <p className="text-center mb-4">
               Imagen seleccionada correctamente
-            </Tipografia>
+            </p>
           </div>
         </div>
       )}

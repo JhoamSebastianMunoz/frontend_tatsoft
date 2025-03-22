@@ -34,6 +34,7 @@ import RegistrarProducto from "./components/pages/gestionProductos/RegistrarProd
 import ProductList from "./components/pages/gestionProductos/ProductList";
 import GestionProductos from "./components/pages/gestionProductos/GestionProductos";
 import EditarProducto from "./components/pages/gestionProductos/EditarProducto";
+import GestionCategorias from "./components/pages/gestionProductos/GestionCategorias";
 
 // Páginas de inventario
 import IngresoStock from "./components/pages/stock/IngresoStock";
@@ -248,6 +249,16 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<EditarProducto />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+
+      <Route
+        path="/gestionar-categorias"
+        element={
+          <ProtectedRoute
+            element={<GestionCategorias />}
             allowedRoles={["ADMINISTRADOR"]}
           />
         }

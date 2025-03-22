@@ -7,8 +7,7 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Loading from "../../../components/Loading/Loading";
-import NavegacionAdministrador from "../../organisms/NavegacionAdm";
-import NavegacionUsuario from "../../organisms/NavegacionUsuario";
+import Sidebar from "../../organisms/Sidebar";
 
 const EditarProducto = () => {
   const { id } = useParams();
@@ -44,27 +43,15 @@ const EditarProducto = () => {
   const [error, setError] = useState("");
   
   // Estado para el control de la barra de navegación
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mobileView, setMobileView] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    const savedState = localStorage.getItem("sidebarCollapsed");
+    return savedState ? JSON.parse(savedState) : true;
+  });
 
-  // Detectar el tamaño de la pantalla para modo responsive
+  // Guardar estado del sidebar en localStorage
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setMobileView(true);
-        setSidebarOpen(false);
-      } else {
-        setMobileView(false);
-        setSidebarOpen(true); // En escritorio, mantener abierto por defecto
-      }
-    };
-    handleResize(); // Verificar tamaño inicial
-    window.addEventListener("resize", handleResize);
-    
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(collapsed));
+  }, [collapsed]);
 
   // Cargar datos del producto y categorías
   useEffect(() => {
@@ -117,10 +104,6 @@ const EditarProducto = () => {
     };
     fetchProductAndCategories();
   }, [id]);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -290,60 +273,15 @@ const EditarProducto = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Botón para abrir/cerrar sidebar */}
-      <button
-        className="fixed top-3 left-4 z-30 p-2 bg-purple-900 text-white rounded-md hover:bg-purple-800 transition-colors duration-200"
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-7 w-7"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d={
-              sidebarOpen
-                ? "M6 18L18 6M6 6l12 12"
-                : "M4 6h16M4 12h16M4 18h16"
-            }
-          />
-        </svg>
-      </button>
+      {/* Sidebar */}
+      <Sidebar />
       
-      {/* Overlay para el fondo cuando el sidebar está abierto en móvil */}
-      {sidebarOpen && mobileView && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300"
-          onClick={toggleSidebar}
-          aria-hidden="true"
-        />
-      )}
-      
-      {/* Sidebar con navegación condicional según rol */}
-      <div
-        className={`fixed left-0 top-0 z-20 h-full bg-white border-r shadow-lg border-gray-100 flex flex-col transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {user && user.rol === "ADMINISTRADOR" ? (
-          <NavegacionAdministrador />
-        ) : (
-          <NavegacionUsuario />
-        )}
-      </div>
-     
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarOpen ? "md:ml-64" : "ml-0"
+        !collapsed ? "md:ml-70" : "md:ml-16"
       }`}>
         {/* Header */}
-        <div className="bg-purple-600 text-white p-4 shadow-md">
-          <Tipografia variant="h1" size="xl" className="text-white font-medium pl-10 md:pl-0">
+        <div className="orange-500 text-black p-4 shadow-md">
+          <Tipografia variant="h1" size="xl" className="text-black font-medium">
             Editar Producto
           </Tipografia>
         </div>
@@ -367,7 +305,7 @@ const EditarProducto = () => {
                     name="nombre_producto"
                     value={formData.nombre_producto}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     required
                   />
                 </div>
@@ -390,14 +328,14 @@ const EditarProducto = () => {
                         {categorias.map((categoria) => (
                           <div
                             key={categoria.id_categoria}
-                            className="p-2 hover:bg-purple-100 cursor-pointer"
+                            className="p-2 hover:bg-orange-100 cursor-pointer"
                             onClick={() => handleCategoriaChange(categoria)}
                           >
                             {categoria.nombre_categoria}
                           </div>
                         ))}
                         <div
-                          className="p-2 bg-purple-200 text-center hover:bg-purple-300 cursor-pointer"
+                          className="p-2 bg-orange-200 text-center hover:bg-orange-300 cursor-pointer"
                           onClick={() => {
                             setShowNuevaCategoriaModal(true);
                             setShowCategorias(false);
@@ -417,7 +355,7 @@ const EditarProducto = () => {
                     name="precio"
                     value={formData.precio}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     required
                     min="0"
                     step="0.01"
@@ -431,7 +369,7 @@ const EditarProducto = () => {
                     name="cantidad_ingreso"
                     value={formData.cantidad_ingreso}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     min="0"
                   />
                 </div>
@@ -442,7 +380,7 @@ const EditarProducto = () => {
                     name="descripcion"
                     value={formData.descripcion}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 h-20"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500 h-20"
                   ></textarea>
                 </div>
               </div>
@@ -480,7 +418,7 @@ const EditarProducto = () => {
                     />
                     <label
                       htmlFor="imageInput"
-                      className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md cursor-pointer hover:bg-purple-600 transition-colors"
+                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-md cursor-pointer hover:bg-orange-600 transition-colors"
                     >
                       <Icono name="subir-archivo" customColor="white" size={20} />
                       <span className="ml-2">Cambiar imagen</span>
@@ -526,7 +464,7 @@ const EditarProducto = () => {
               type="text"
               value={nuevaCategoria}
               onChange={(e) => setNuevaCategoria(e.target.value)}
-              className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Nombre de la categoría"
             />
            
