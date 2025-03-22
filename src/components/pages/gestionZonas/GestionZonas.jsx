@@ -245,10 +245,10 @@ const GestionZonas = () => {
                       className={`h-2 ${
                         zona.asignado
                           ? "bg-green-500"
-                          : ""
+                          : "bg-gray-100"
                       }`}
                     ></div>
-                    <div className="absolute top-3 right-3 z-10 mr-3">
+                    <div className="absolute top-3 right-3 z-10">
                       <button
                         onClick={() => setMenuAbierto(menuAbierto === zona.id_zona_de_trabajo ? null : zona.id_zona_de_trabajo)}
                         className="text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -258,7 +258,7 @@ const GestionZonas = () => {
                           fill="currentColor"
                           viewBox="0 0 16 16"
                         >
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                          <path d="M8 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                         </svg>
                       </button>
                       

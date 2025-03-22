@@ -58,6 +58,11 @@ const GestionClientes = () => {
     navigate(`/editar/cliente/${cliente.id_cliente}`);
   };
 
+  const handleEliminarClick = (cliente) => {
+    // Implementa la lógica para eliminar el cliente
+    console.log("Eliminar cliente:", cliente);
+  };
+
   if (loading) {
     return <Loading message="Cargando clientes..." />;
   }
@@ -73,7 +78,7 @@ const GestionClientes = () => {
         </div>
       </div>
     
-      <div className="flex-1 pl-8 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
+      <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de clientes</h1>
@@ -232,14 +237,12 @@ const GestionClientes = () => {
                       className={`h-2 ${
                         cliente.activo
                           ? "bg-green-500"
-                          : "bg-red-500"
+                          : "bg-gray-100"
                       }`}
                     ></div>
                     <div className="absolute top-3 right-3 z-10">
                       <button
-                        onClick={() =>
-                          setMenuAbierto(menuAbierto === cliente.id_cliente ? null : cliente.id_cliente)
-                        }
+                        onClick={() => setMenuAbierto(menuAbierto === cliente.id_cliente ? null : cliente.id_cliente)}
                         className="text-gray-500 hover:text-gray-700 focus:outline-none"
                       >
                         <svg
@@ -247,7 +250,7 @@ const GestionClientes = () => {
                           fill="currentColor"
                           viewBox="0 0 16 16"
                         >
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                          <path d="M8 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                         </svg>
                       </button>
                       
@@ -257,24 +260,50 @@ const GestionClientes = () => {
                             <li
                               className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
                               onClick={() => {
-                                handleVerCliente(cliente.id_cliente);
+                                navigate(`/ver/cliente/${cliente.id_cliente}`);
                                 setMenuAbierto(null);
                               }}
                             >
                               Ver
+                            </li>
+                            <li
+                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
+                              onClick={() => {
+                                navigate(`/editar-cliente/${cliente.id_cliente}`);
+                                setMenuAbierto(null);
+                              }}
+                            >
+                              Editar
+                            </li>
+                            <li
+                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
+                              onClick={() => {
+                                handleEliminarClick(cliente);
+                                setMenuAbierto(null);
+                              }}
+                            >
+                              Eliminar
                             </li>
                           </ul>
                         </div>
                       )}
                     </div>
                     
-                    <div className="p-4">
-                      <h3 className="font-medium text-lg text-gray-900 break-words">
+                    <div className="p-4 flex-grow">
+                      <h3 className="font-medium text-lg text-gray-900 break-words mb-2">
                         {cliente.razon_social || cliente.nombre_completo_cliente}
                       </h3>
-                      <p className="text-gray-600 break-words">Dueño: {cliente.nombre_completo_cliente}</p>
-                      <p className="text-gray-600">
-                        Teléfono: {cliente.telefono}
+                      <p className="text-gray-600 break-words text-sm mb-2">
+                        <strong>Dueño:</strong> {cliente.nombre_completo_cliente}
+                      </p>
+                      <p className="text-gray-600 break-words text-sm mb-2">
+                        <strong>Teléfono:</strong> {cliente.telefono}
+                      </p>
+                      <p className="text-gray-600 break-words text-sm mb-2">
+                        <strong>Email:</strong> {cliente.email}
+                      </p>
+                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                        {cliente.descripcion}
                       </p>
                       <p className="mt-2">
                         <span
@@ -289,15 +318,14 @@ const GestionClientes = () => {
                       </p>
                     </div>
                     
-                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 mt-auto">
                       <div className="flex justify-between items-center">
-                        <Boton tipo="cancelar" label="Eliminar" size="medium" />
-                        <Boton
-                          onClick={() => handleEditarCliente(cliente)}
-                          label="Editar"
-                          tipo="primario"
-                          size="medium"
-                        />
+                        <Link 
+                          to={`/editar-cliente/${cliente.id_cliente}`}
+                          className="w-full"
+                        >
+                          <Boton tipo="primario" label="Editar" size="small" className="w-full" />
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -353,13 +381,13 @@ const GestionClientes = () => {
                             </span>
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
-                            <div className="flex justify-end gap-2 flex-wrap">
-                              <Boton
-                                onClick={() => handleEditarCliente(cliente)}
-                                label="Editar"
-                                tipo="primario"
-                                size="small"
-                              />
+                            <div className="flex justify-end gap-2">
+                              <Link 
+                                to={`/editar-cliente/${cliente.id_cliente}`}
+                                className="inline-block"
+                              >
+                                <Boton tipo="primario" label="Editar" size="small" />
+                              </Link>
                               <Boton tipo="cancelar" label="Eliminar" size="small" />
                             </div>
                           </td>

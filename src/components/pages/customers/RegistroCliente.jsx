@@ -36,11 +36,46 @@ const RegistroCliente = () => {
   const [paso, setPaso] = useState(1);
   const pasosTotales = 2;
 
+  const [cliente, setCliente] = useState({
+    nombre_completo_cliente: "",
+    email: "",
+    telefono: "",
+    nit: "",
+    razon_social: "",
+    descripcion: "",
+    activo: true,
+    id_zona: "",
+  });
+  const [zonas, setZonas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [guardado, setGuardado] = useState(false);
+
   useEffect(() => {
     const savedReturnPath = sessionStorage.getItem("returnPath");
     if (savedReturnPath) {
       setReturnPath(savedReturnPath);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchZonas = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/zonas");
+        if (!response.ok) {
+          throw new Error("Error al cargar las zonas");
+        }
+        const data = await response.json();
+        setZonas(data);
+      } catch (err) {
+        console.error("Error al cargar las zonas:", err);
+        setError("Error al cargar la lista de zonas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchZonas();
   }, []);
 
   const manejarCambio = (e) => {
@@ -206,7 +241,7 @@ const RegistroCliente = () => {
 
       <div className="flex justify-center w-full pt-2 md:pt-0 p-8">
         <Tipografia>
-          <div className="container mx-auto px-3 py-5 max-w-2xl ml-6 md-ml-96">
+          <div className="container mx-auto px-3 py-5 max-w-2xl ml-6 md-ml-96 mt-8 md:mt-12">
             <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto md:ml-auto md:mr-auto md:pl-16 lg:pl-0 bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="p-4 md:p-6 pb-0">
                 <div className="flex justify-between mb-2">
@@ -333,6 +368,31 @@ const RegistroCliente = () => {
                       {errores.nit && (
                         <p className="mt-1 text-xs md:text-sm text-red-600">{errores.nit}</p>
                       )}
+                    </div>
+
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-600 mb-1 md:mb-2">
+                        Zona <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="id_zona"
+                        value={formData.id_zona}
+                        onChange={manejarCambio}
+                        className="block w-full bg-gray-100 rounded-md border text-gray-500 border-gray-300 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500 py-2 px-3 text-sm md:text-base"
+                        required
+                      >
+                        <option value="">Seleccione una zona</option>
+                        <option value="1">Zona Norte - Centro Comercial</option>
+                        <option value="2">Zona Sur - Parque Industrial</option>
+                        <option value="3">Zona Este - Área Residencial</option>
+                        <option value="4">Zona Oeste - Distrito Comercial</option>
+                        <option value="5">Zona Centro - Plaza Principal</option>
+                        {zonas.map((zona) => (
+                          <option key={zona.id_zona_de_trabajo} value={zona.id_zona_de_trabajo}>
+                            {zona.nombre_zona_trabajo}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 ) : (
