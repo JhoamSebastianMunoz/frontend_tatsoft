@@ -34,13 +34,11 @@ const GestionClientes = () => {
     fetchClientes();
   }, []);
 
-  // Filtrar clientes según búsqueda y filtro
+ 
   const clientesFiltrados = clientes.filter(
     (cliente) => {
-      // Filtrar por tipo (si aplicable)
       const tipoMatch = filtro === "Todos" || cliente.tipo === filtro;
       
-      // Filtrar por término de búsqueda
       const searchMatch = !busqueda ||
         cliente.razon_social?.toLowerCase().includes(busqueda.toLowerCase()) ||
         cliente.nombre_completo_cliente?.toLowerCase().includes(busqueda.toLowerCase());
@@ -63,17 +61,23 @@ const GestionClientes = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
-      <div className="fixed top-0 left-0 h-full z-10">
-        <Sidebar/>
+    <div className="min-h-screen overflow-x-hidden flex flex-col md:flex-row">
+      <div className="w-full md:w-auto md:fixed md:top-0 md:left-0 md:h-full z-10">
+        <div className="block md:hidden">
+          <Sidebar />
+        </div>
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
       </div>
-      
-      <div className="w-full md:ml-20 pl-2 pr-4 sm:pr-8 md:pr-16 lg:pr-20">
+    
+      <div className="flex-1 pl-8 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Gestión de clientes</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de clientes</h1>
           </div>
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
+          
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
@@ -86,16 +90,16 @@ const GestionClientes = () => {
                 </div>
               </div>
               
-              <div className="mt-3 sm:mt-0 flex">
+              <div className="mt-4 sm:mt-0 flex w-full sm:w-auto justify-center sm:justify-end">
                 <Boton
                   tipo="primario"
                   label="Registrar Cliente"
                   onClick={() => navigate("/registro/cliente")}
-                  className="mr-2"
+                  className="mr-2 w-full sm:w-auto"
                 />
                 <button
                   onClick={() => setVerTarjetas(!verTarjetas)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-600 p-2 rounded-lg transition-colors"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-600 p-2 rounded-lg transition-colors flex-shrink-0"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -125,6 +129,7 @@ const GestionClientes = () => {
             </div>
           )}
           
+
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
             <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -167,45 +172,49 @@ const GestionClientes = () => {
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg mb-4 overflow-x-auto">
-            <button
-              className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                filtro === "Todos"
-                  ? "bg-orange-100 text-orange-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-              onClick={() => setFiltro("Todos")}
-            >
-              Todos los clientes
-            </button>
-            <button
-              className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                filtro === "Mayorista"
-                  ? "bg-orange-100 text-orange-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-              onClick={() => setFiltro("Mayorista")}
-            >
-              Mayoristas
-            </button>
-            <button
-              className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                filtro === "Minorista"
-                  ? "bg-orange-100 text-orange-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-              onClick={() => setFiltro("Minorista")}
-            >
-              Minoristas
-            </button>
-            <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100">
-              Inactivos
-            </button>
+          {/* Botones de filtro tipo con scroll horizontal en móvil - Mejorado */}
+          <div className="flex overflow-x-auto pb-1 no-scrollbar p-3 bg-white rounded-lg mb-4">
+            <div className="flex gap-2 min-w-max px-1">
+              <button
+                className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                  filtro === "Todos"
+                    ? "bg-orange-100 text-orange-700 font-medium"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setFiltro("Todos")}
+              >
+                Todos los clientes
+              </button>
+              <button
+                className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                  filtro === "Mayorista"
+                    ? "bg-orange-100 text-orange-700 font-medium"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setFiltro("Mayorista")}
+              >
+                Mayoristas
+              </button>
+              <button
+                className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                  filtro === "Minorista"
+                    ? "bg-orange-100 text-orange-700 font-medium"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setFiltro("Minorista")}
+              >
+                Minoristas
+              </button>
+              <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100">
+                Inactivos
+              </button>
+            </div>
           </div>
           
+          {/* Lista de clientes */}
           <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="border-b pb-3 mb-4 flex justify-between items-center">
-              <h3 className="font-medium text-black-900">
+            <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <h3 className="font-medium text-black-900 mb-2 sm:mb-0">
                 Lista de clientes
                 <span className="ml-2 text-sm font-normal text-black-700">
                   Mostrando {clientesFiltrados.length} de {clientes.length}
@@ -213,6 +222,7 @@ const GestionClientes = () => {
               </h3>
             </div>
             
+            {/* Mensaje de no resultados */}
             {clientesFiltrados.length === 0 ? (
               <div className="col-span-full py-8 flex flex-col items-center justify-center text-center">
                 <div className="bg-gray-100 p-4 rounded-full mb-3">
@@ -237,6 +247,7 @@ const GestionClientes = () => {
                 </p>
               </div>
             ) : verTarjetas ? (
+              // Vista de tarjetas - Mejorado para pantallas pequeñas
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {clientesFiltrados.map((cliente, index) => (
                   <div
@@ -284,10 +295,10 @@ const GestionClientes = () => {
                     </div>
                     
                     <div className="p-4">
-                      <h3 className="font-medium text-lg text-gray-900">
+                      <h3 className="font-medium text-lg text-gray-900 break-words">
                         {cliente.razon_social || cliente.nombre_completo_cliente}
                       </h3>
-                      <p className="text-gray-600">Dueño: {cliente.nombre_completo_cliente}</p>
+                      <p className="text-gray-600 break-words">Dueño: {cliente.nombre_completo_cliente}</p>
                       <p className="text-gray-600">
                         Teléfono: {cliente.telefono}
                       </p>
@@ -310,7 +321,7 @@ const GestionClientes = () => {
                         <Boton
                           onClick={() => handleEditarCliente(cliente)}
                           label="Editar"
-                          tipo="secundario"
+                          tipo="primario"
                           size="small"
                         />
                       </div>
@@ -319,108 +330,120 @@ const GestionClientes = () => {
                 ))}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Razón Social
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Dueño
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Teléfono
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tipo
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Acciones
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {clientesFiltrados.map((cliente) => (
-                      <tr key={cliente.id_cliente} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">
-                            {cliente.razon_social || cliente.nombre_completo_cliente}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                          {cliente.nombre_completo_cliente}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                          {cliente.telefono}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              cliente.tipo === "Mayorista"
-                                ? "bg-orange-100 text-orange-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {cliente.tipo || "Cliente"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                          <div className="flex justify-end gap-2">
-                            <Boton
-                              onClick={() => handleEditarCliente(cliente)}
-                              label="Editar"
-                              tipo="secundario"
-                              size="small"
-                            />
-                            <Boton tipo="cancelar" label="Eliminar" size="small" />
-                          </div>
-                        </td>
+              // Vista de tabla con scroll horizontal - Optimizado para móvil
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Razón Social
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Dueño
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Teléfono
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Tipo
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Acciones
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {clientesFiltrados.map((cliente) => (
+                        <tr key={cliente.id_cliente} className="hover:bg-gray-50">
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900 truncate max-w-[120px] sm:max-w-xs">
+                              {cliente.razon_social || cliente.nombre_completo_cliente}
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-gray-500 truncate max-w-[120px] sm:max-w-xs">
+                            {cliente.nombre_completo_cliente}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-gray-500">
+                            {cliente.telefono}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                cliente.tipo === "Mayorista"
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {cliente.tipo || "Cliente"}
+                            </span>
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                            <div className="flex justify-end gap-2 flex-wrap">
+                              <Boton
+                                onClick={() => handleEditarCliente(cliente)}
+                                label="Editar"
+                                tipo="primario"
+                                size="small"
+                              />
+                              <Boton tipo="cancelar" label="Eliminar" size="small" />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
             
+            {/* Paginación - Optimizada para móvil */}
             {clientesFiltrados.length > 0 && (
-              <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between mt-4">
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      Mostrando <span className="font-medium">1</span> a{" "}
-                      <span className="font-medium">
-                        {clientesFiltrados.length}
-                      </span>{" "}
-                      de{" "}
-                      <span className="font-medium">
-                        {clientesFiltrados.length}
-                      </span>{" "}
-                      resultados
-                    </p>
-                  </div>
-                  <div>
-                    <nav
-                      className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                      aria-label="Pagination"
-                    >
-                      <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        Anterior
-                      </button>
-                      <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        1
-                      </button>
-                      <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        Siguiente
-                      </button>
-                    </nav>
-                  </div>
+              <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
+                <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
+                  <p>
+                    Mostrando <span className="font-medium">1</span> a{" "}
+                    <span className="font-medium">
+                      {clientesFiltrados.length}
+                    </span>{" "}
+                    de{" "}
+                    <span className="font-medium">
+                      {clientesFiltrados.length}
+                    </span>{" "}
+                    resultados
+                  </p>
+                </div>
+                <div>
+                  <nav
+                    className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                    aria-label="Pagination"
+                  >
+                    <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                      Anterior
+                    </button>
+                    <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                      1
+                    </button>
+                    <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                      Siguiente
+                    </button>
+                  </nav>
                 </div>
               </div>
             )}
           </div>
         </Tipografia>
       </div>
+      
+      <style jsx>{`
+        .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;  /* Chrome, Safari and Opera */
+        }
+      `}</style>
     </div>
   );
 };
