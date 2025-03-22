@@ -33,8 +33,7 @@ const GestionCategorias = () => {
   
   // Estado para formulario de nueva categoría
   const [nuevaCategoria, setNuevaCategoria] = useState({
-    nombre_categoria: "",
-    descripcion: ""
+    nombre_categoria: ""
   });
 
   // Cargar categorías al montar el componente
@@ -106,8 +105,7 @@ const GestionCategorias = () => {
   
   const handleAgregarCategoria = () => {
     setNuevaCategoria({
-      nombre_categoria: "",
-      descripcion: "Categoría para productos"
+      nombre_categoria: ""
     });
     setShowNuevaCategoriaModal(true);
   };
@@ -121,7 +119,7 @@ const GestionCategorias = () => {
       setCategorias(prevCategorias => 
         prevCategorias.map(cat => 
           cat.id_categoria === id 
-            ? { ...cat, editingNombre: cat.nombre_categoria, editingDescripcion: cat.descripcion || "Categoría para productos" } 
+            ? { ...cat, editingNombre: cat.nombre_categoria } 
             : cat
         )
       );
@@ -134,7 +132,7 @@ const GestionCategorias = () => {
     setCategorias(prevCategorias => 
       prevCategorias.map(cat => 
         cat.id_categoria === id 
-          ? { ...cat, [name === 'nombre_categoria' ? 'editingNombre' : 'editingDescripcion']: value } 
+          ? { ...cat, editingNombre: value } 
           : cat
       )
     );
@@ -143,7 +141,7 @@ const GestionCategorias = () => {
     setCategoriasFiltradas(prevCategorias => 
       prevCategorias.map(cat => 
         cat.id_categoria === id 
-          ? { ...cat, [name === 'nombre_categoria' ? 'editingNombre' : 'editingDescripcion']: value } 
+          ? { ...cat, editingNombre: value } 
           : cat
       )
     );
@@ -164,7 +162,7 @@ const GestionCategorias = () => {
         id, 
         { 
           nombre_categoria: categoria.editingNombre,
-          descripcion: categoria.editingDescripcion 
+          descripcion: "Categoría para productos" // Mantener descripción genérica
         }
       );
       
@@ -176,9 +174,7 @@ const GestionCategorias = () => {
               ? { 
                   ...cat, 
                   nombre_categoria: categoria.editingNombre,
-                  descripcion: categoria.editingDescripcion,
-                  editingNombre: undefined,
-                  editingDescripcion: undefined
+                  editingNombre: undefined
                 } 
               : cat
           );
@@ -205,15 +201,13 @@ const GestionCategorias = () => {
     setCategorias(prevCategorias => 
       prevCategorias.map(cat => ({
         ...cat,
-        editingNombre: undefined,
-        editingDescripcion: undefined
+        editingNombre: undefined
       }))
     );
     setCategoriasFiltradas(prevCategorias => 
       prevCategorias.map(cat => ({
         ...cat,
-        editingNombre: undefined,
-        editingDescripcion: undefined
+        editingNombre: undefined
       }))
     );
   };
@@ -264,7 +258,11 @@ const GestionCategorias = () => {
     
     try {
       setLoading(true);
-      const response = await productService.createCategory(nuevaCategoria);
+      const response = await productService.createCategory({
+        nombre_categoria: nuevaCategoria.nombre_categoria,
+        descripcion: "Categoría para productos" // Descripción genérica
+      });
+      
       if (response && response.data) {
         // Añadir la nueva categoría a la lista
         setCategorias([...categorias, response.data]);
@@ -354,7 +352,6 @@ const GestionCategorias = () => {
                     <tr className="text-left">
                       <th className="py-3 px-4 font-medium text-gray-800">Código</th>
                       <th className="py-3 px-4 font-medium text-gray-800">Nombre Categoría</th>
-                      <th className="py-3 px-4 font-medium text-gray-800">Descripción</th>
                       <th className="py-3 px-4 font-medium text-gray-800">Fecha de Creación</th>
                       <th className="py-3 px-4 font-medium text-gray-800 text-center">Acciones</th>
                     </tr>
@@ -362,7 +359,7 @@ const GestionCategorias = () => {
                   <tbody>
                     {categoriasFiltradas.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="text-center py-8 text-gray-500">
+                        <td colSpan="4" className="text-center py-8 text-gray-500">
                           No se encontraron categorías. 
                           {searchTerm ? " Prueba con otro término de búsqueda." : " Agrega una nueva categoría para comenzar."}
                         </td>
@@ -382,19 +379,6 @@ const GestionCategorias = () => {
                               />
                             ) : (
                               categoria.nombre_categoria
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            {categoriaEnEdicion === categoria.id_categoria ? (
-                              <input
-                                type="text"
-                                name="descripcion"
-                                value={categoria.editingDescripcion || ""}
-                                onChange={(e) => handleEditInputChange(e, categoria.id_categoria)}
-                                className="w-full p-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
-                              />
-                            ) : (
-                              categoria.descripcion || "-"
                             )}
                           </td>
                           <td className="py-3 px-4">
@@ -468,20 +452,6 @@ const GestionCategorias = () => {
                   placeholder="Ingrese el nombre de la categoría"
                   required
                 />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción
-                </label>
-                <textarea
-                  name="descripcion"
-                  value={nuevaCategoria.descripcion}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
-                  rows="3"
-                  placeholder="Describa la categoría"
-                ></textarea>
               </div>
               
               <div className="flex justify-end space-x-2 mt-6">

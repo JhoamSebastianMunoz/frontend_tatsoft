@@ -20,6 +20,7 @@ const GestionProductos = () => {
   const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
+  const [productImages, setProductImages] = useState({});
 
   // Estados para UI
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,11 +58,33 @@ const GestionProductos = () => {
           // Modificamos los productos para añadir color a los precios
           const productosConColorPrecio = productosResponse.data.map(producto => ({
             ...producto,
-            // Esto permitirá que ProductoItem use esta propiedad para el color
             colorPrecio: 'text-orange-500'
           }));
           setProductos(productosConColorPrecio);
           setProductosFiltrados(productosConColorPrecio);
+
+          // Cargar imágenes para los productos
+          const imagePromises = productosResponse.data.map(async (producto) => {
+            if (producto.id_imagen) {
+              try {
+                const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+                if (imageUrl) {
+                  return { id: producto.id_producto, url: imageUrl };
+                }
+              } catch (error) {
+                console.error('Error cargando imagen para producto', producto.id_producto, error);
+              }
+            }
+            return { id: producto.id_producto, url: null };
+          });
+          
+          const productImagesResults = await Promise.all(imagePromises);
+          const imagesMap = {};
+          productImagesResults.forEach(({ id, url }) => {
+            imagesMap[id] = url;
+          });
+          
+          setProductImages(imagesMap);
         }
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -169,10 +192,10 @@ const GestionProductos = () => {
   const renderProductoItem = (producto) => {
     return (
       <div key={producto.id_producto} className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {producto.id_imagen ? (
+        {producto.id_imagen && productImages[producto.id_producto] ? (
           <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
             <img
-              src={`ruta-a-la-imagen/${producto.id_imagen}`}
+              src={productImages[producto.id_producto]}
               alt={producto.nombre_producto}
               className="w-full h-full object-cover"
               onError={(e) => {
