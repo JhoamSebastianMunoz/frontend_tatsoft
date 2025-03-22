@@ -23,6 +23,19 @@ const HistorialPreventas = () => {
   const [filtroColaborador, setFiltroColaborador] = useState("Todos");
   const [colaboradores, setColaboradores] = useState([]);
 
+  // Formatear fecha para mostrar
+  const formatearFecha = (fechaString) => {
+    if (!fechaString) return "Fecha no disponible";
+    const fecha = new Date(fechaString);
+    return fecha.toLocaleString('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // Cargar colaboradores si el usuario es administrador
   useEffect(() => {
     const fetchColaboradores = async () => {
@@ -171,57 +184,29 @@ const HistorialPreventas = () => {
     const cumpleFiltroEstado = filtroEstado === "Todos" || 
       (preventa.estado && preventa.estado.toLowerCase() === filtroEstado.toLowerCase());
     
-    // Filtro por colaborador (solo para administradores)
-    const cumpleFiltroColaborador = filtroColaborador === "Todos" || 
-      (user.rol === "ADMINISTRADOR" && 
-       preventa.id_usuario && 
-       preventa.id_usuario.toString() === filtroColaborador);
-    
-    // Filtro por búsqueda
+    // Filtro por búsqueda (incluye búsqueda por colaborador)
     const terminoBusqueda = filtroBusqueda.toLowerCase().trim();
+    const fechaFormateada = formatearFecha(preventa.fecha_creacion).toLowerCase();
+    
     const cumpleBusqueda = terminoBusqueda === "" || 
       (preventa.id_preventa && preventa.id_preventa.toString().includes(terminoBusqueda)) ||
-      (preventa.fecha_creacion && formatearFecha(preventa.fecha_creacion).toLowerCase().includes(terminoBusqueda)) ||
+      (preventa.fecha_creacion && fechaFormateada.includes(terminoBusqueda)) ||
       (preventa.total && preventa.total.toString().includes(terminoBusqueda)) ||
       (preventa.nombre_colaborador && preventa.nombre_colaborador.toLowerCase().includes(terminoBusqueda)) ||
       (preventa.estado && preventa.estado.toLowerCase().includes(terminoBusqueda));
 
-    // Log para debugging
-    console.log('Filtrado preventa:', {
-      id: preventa.id_preventa,
-      estado: preventa.estado,
-      cumpleFiltroEstado,
-      cumpleFiltroColaborador,
-      cumpleBusqueda,
-      terminoBusqueda
-    });
-    
-    return cumpleFiltroEstado && cumpleFiltroColaborador && cumpleBusqueda;
+    return cumpleFiltroEstado && cumpleBusqueda;
   });
 
   // Log para debugging de filtros
   useEffect(() => {
     console.log('Estado de los filtros:', {
       filtroEstado,
-      filtroColaborador,
       filtroBusqueda,
       totalPreventas: preventas.length,
       totalFiltradas: preventasFiltradas.length
     });
-  }, [filtroEstado, filtroColaborador, filtroBusqueda, preventas]);
-
-  // Formatear fecha para mostrar
-  const formatearFecha = (fechaString) => {
-    if (!fechaString) return "Fecha no disponible";
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleString('es-CO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  }, [filtroEstado, filtroBusqueda, preventas]);
 
   // Ver detalles de preventa
   const verDetallesPreventa = (id) => {
@@ -297,11 +282,12 @@ const HistorialPreventas = () => {
           </div>
         )}
 
+        {/* Filtros y búsqueda */}
         <div className="bg-slate-50 rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
             <div className="w-full sm:w-1/2">
               <CampoTexto 
-                placeholder="Buscar por ID, fecha, total o colaborador..." 
+                placeholder="Buscar por ID, fecha, total, estado o colaborador..." 
                 value={filtroBusqueda}
                 onChange={(e) => setFiltroBusqueda(e.target.value)}
                 className="w-full"
@@ -323,12 +309,14 @@ const HistorialPreventas = () => {
                 </select>
               </div>
               
-              <Boton 
-                tipo="primario" 
-                label="Nueva Preventa" 
-                onClick={() => navigate("/preventa/nueva")}
-                className="w-full sm:w-auto"
-              />
+              {user.rol === "COLABORADOR" && (
+                <Boton 
+                  tipo="primario" 
+                  label="Nueva Preventa" 
+                  onClick={() => navigate("/preventa/nueva")}
+                  className="w-full sm:w-auto"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -343,7 +331,7 @@ const HistorialPreventas = () => {
             <div className="overflow-x-auto w-full">
               <div className="min-w-full divide-y divide-gray-200">
                 {/* Encabezados de tabla */}
-                <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-4 sm:px-6 py-3">
+                <div className="hidden md:grid md:grid-cols-6 bg-gray-50 px-4 sm:px-6 py-3">
                   <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ID
                   </div>
@@ -427,7 +415,7 @@ const HistorialPreventas = () => {
                       </div>
 
                       {/* Vista desktop */}
-                      <div className="hidden md:grid md:grid-cols-5 px-4 sm:px-6 py-3 sm:py-4">
+                      <div className="hidden md:grid md:grid-cols-6 px-4 sm:px-6 py-3 sm:py-4">
                         <div className="text-sm font-medium text-gray-900">
                           #{preventa.id_preventa}
                         </div>
