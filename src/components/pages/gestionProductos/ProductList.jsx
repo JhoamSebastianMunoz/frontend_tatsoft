@@ -9,7 +9,7 @@ import Botones from '../../../components/atoms/Botones';
 import Encabezado from '../../../components/molecules/Encabezado';
 import Buscador from '../../../components/molecules/Buscador';
 import Loading from '../../../components/Loading/Loading';
-import SidebarAdm from '../../organisms/SidebarAdm';
+import SidebarAdm from '../../organisms/Sidebar';
 
 const ProductList = () => {
   const navigate = useNavigate();

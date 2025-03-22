@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Encabezado from "../../molecules/Encabezado";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import Boton from "../../atoms/Botones";
 import Buscador from "../../molecules/Buscador";
 import Tipografia from "../../atoms/Tipografia";

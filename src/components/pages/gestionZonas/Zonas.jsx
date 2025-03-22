@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { areaService, clientService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
-import Sidebar from "../../organisms/sidebar"
+import Sidebar from "../../organisms/Sidebar"
 
 
 const scrollStyle = `

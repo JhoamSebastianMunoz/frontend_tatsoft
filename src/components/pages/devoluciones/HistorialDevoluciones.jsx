@@ -10,7 +10,7 @@ import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 import CampoTexto from "../../atoms/CamposTexto";
 import Loading from "../../Loading/Loading";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 
 const HistorialDevoluciones = () => {
   const navigate = useNavigate();

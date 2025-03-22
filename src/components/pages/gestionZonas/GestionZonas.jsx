@@ -4,7 +4,7 @@ import { areaService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Loading from "../../../components/Loading/Loading";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import Boton from "../../atoms/Botones";
 import Encabezado from "../../molecules/Encabezado";
 
