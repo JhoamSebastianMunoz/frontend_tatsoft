@@ -4,11 +4,10 @@ import { presaleService, userService } from "../../../context/services/ApiServic
 import { useAuth } from "../../../context/AuthContext";
 
 // Componentes
-import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
-import SidebarAdm from "../../organisms/Sidebar";
+import Sidebar from "../../organisms/Sidebar";
 import CampoTexto from "../../atoms/CamposTexto";
 import Loading from "../../Loading/Loading";
 
@@ -275,92 +274,76 @@ const HistorialPreventas = () => {
   };
 
   if (loading && preventas.length === 0) {
-    return <Loading message="Cargando historial de preventas..." />;
+    return <Loading message="Cargando historial de preventas" />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Encabezado 
-        mensaje="Historial de Preventas" 
-        onClick={() => navigate("/perfil")}
-      />
-      <SidebarAdm/>
-      <div className="container mx-auto px-4 py-6">
-        {/* Alertas */}
+    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
+      <Tipografia>
+      <Sidebar/>
+      <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
+        <div className="w-full bg-white shadow-sm mb-4">
+          <div className="px-2 sm:px-4 lg:px-8 py-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Historial de Preventas</h1>
+          </div>
+        </div>
+
         {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 sm:p-3 mb-2 rounded">
             <div className="flex items-center">
               <Icono name="eliminarAlert" size={20} />
-              <span className="ml-2">{error}</span>
+              <span className="ml-2 text-sm sm:text-base">{error}</span>
             </div>
           </div>
         )}
 
-        {/* Filtros y búsqueda */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
-            <div className="w-full md:w-1/2">
+        <div className="bg-slate-50 rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
+            <div className="w-full sm:w-1/2">
               <CampoTexto 
                 placeholder="Buscar por ID, fecha, total o colaborador..." 
                 value={filtroBusqueda}
                 onChange={(e) => setFiltroBusqueda(e.target.value)}
+                className="w-full"
               />
             </div>
             
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-              <Tipografia className="whitespace-nowrap">Estado:</Tipografia>
-              <select 
-                className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-              >
-                <option value="Todos">Todos</option>
-                <option value="Pendiente">Pendiente</option>
-                <option value="Confirmada">Confirmada</option>
-                <option value="Cancelada">Cancelada</option>
-              </select>
-
-              {user.rol === "ADMINISTRADOR" && (
-                <>
-                  <Tipografia className="whitespace-nowrap">Colaborador:</Tipografia>
-                  <select 
-                    className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
-                    value={filtroColaborador}
-                    onChange={(e) => setFiltroColaborador(e.target.value)}
-                  >
-                    <option value="Todos">Todos</option>
-                    {colaboradores.map(colaborador => (
-                      <option key={colaborador.id} value={colaborador.id}>
-                        {colaborador.nombre_completo}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              )}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Tipografia className="whitespace-nowrap text-sm sm:text-base">Estado:</Tipografia>
+                <select 
+                  className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                >
+                  <option value="Todos">Todos</option>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Confirmada">Confirmada</option>
+                  <option value="Cancelada">Cancelada</option>
+                </select>
+              </div>
               
-              {user.rol === "COLABORADOR" && (
-                <Boton 
-                  tipo="primario" 
-                  label="Nueva Preventa" 
-                  onClick={() => navigate("/preventa/nueva")}
-                  className="w-full sm:w-auto"
-                />
-              )}
+              <Boton 
+                tipo="primario" 
+                label="Nueva Preventa" 
+                onClick={() => navigate("/preventa/nueva")}
+                className="w-full sm:w-auto"
+              />
             </div>
           </div>
         </div>
 
         {/* Lista de preventas */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+          <Tipografia variant="h2" size="lg" className="text-orange-700 font-bold mb-4 sm:mb-6 text-lg sm:text-xl">
             Preventas Registradas
           </Tipografia>
 
           {preventasFiltradas.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full">
               <div className="min-w-full divide-y divide-gray-200">
                 {/* Encabezados de tabla */}
-                <div className="hidden md:grid md:grid-cols-6 bg-gray-50 px-6 py-3">
+                <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-4 sm:px-6 py-3">
                   <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ID
                   </div>
@@ -388,13 +371,13 @@ const HistorialPreventas = () => {
                   {preventasFiltradas.map((preventa) => (
                     <div key={preventa.id_preventa} className="hover:bg-gray-50">
                       {/* Vista móvil */}
-                      <div className="md:hidden p-4">
+                      <div className="md:hidden p-3 sm:p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <span className="text-sm font-medium text-gray-900">
                               #{preventa.id_preventa}
                             </span>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-xs sm:text-sm text-gray-500">
                               {formatearFecha(preventa.fecha_creacion)}
                             </div>
                             {user.rol === "ADMINISTRADOR" && (
@@ -410,13 +393,13 @@ const HistorialPreventas = () => {
                             {preventa.estado}
                           </span>
                         </div>
-                        <div className="text-sm text-gray-500 mb-2">
+                        <div className="text-xs sm:text-sm text-gray-500 mb-2">
                           Total: ${Number(preventa.total).toLocaleString('es-CO')}
                         </div>
                         <div className="flex justify-end space-x-2">
                           <button
                             onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                            className="text-indigo-600 hover:text-indigo-900 text-sm"
+                            className="text-orange-600 hover:text-orange-900 text-xs sm:text-sm"
                           >
                             Ver
                           </button>
@@ -426,7 +409,7 @@ const HistorialPreventas = () => {
                               {user.rol === 'ADMINISTRADOR' && (
                                 <button
                                   onClick={() => confirmarPreventa(preventa.id_preventa)}
-                                  className="text-green-600 hover:text-green-900 text-sm"
+                                  className="text-green-600 hover:text-green-900 text-xs sm:text-sm"
                                 >
                                   Confirmar
                                 </button>
@@ -434,7 +417,7 @@ const HistorialPreventas = () => {
                               
                               <button
                                 onClick={() => handleCancelarPreventa(preventa.id_preventa)}
-                                className="text-red-600 hover:text-red-900 text-sm"
+                                className="text-red-600 hover:text-red-900 text-xs sm:text-sm"
                               >
                                 Cancelar
                               </button>
@@ -444,7 +427,7 @@ const HistorialPreventas = () => {
                       </div>
 
                       {/* Vista desktop */}
-                      <div className="hidden md:grid md:grid-cols-6 px-6 py-4">
+                      <div className="hidden md:grid md:grid-cols-5 px-4 sm:px-6 py-3 sm:py-4">
                         <div className="text-sm font-medium text-gray-900">
                           #{preventa.id_preventa}
                         </div>
@@ -471,7 +454,7 @@ const HistorialPreventas = () => {
                           <div className="flex justify-end space-x-2">
                             <button
                               onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                              className="text-indigo-600 hover:text-indigo-900"
+                              className="text-orange-600 hover:text-orange-900"
                             >
                               Ver
                             </button>
@@ -504,12 +487,13 @@ const HistorialPreventas = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center py-10 text-gray-500">
+            <div className="text-center py-6 sm:py-10 text-gray-500 text-sm sm:text-base">
               No se encontraron preventas con los criterios de búsqueda actuales
             </div>
           )}
         </div>
       </div>
+      </Tipografia>
     </div>
   );
 };

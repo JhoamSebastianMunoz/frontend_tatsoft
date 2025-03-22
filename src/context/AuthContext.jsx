@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
               id: userId,
               id_usuario: userId // Mantener también id_usuario para compatibilidad
             });
-            return true;
+          return true;
           } else {
             console.error("No se recibieron datos del perfil de usuario");
             return false;

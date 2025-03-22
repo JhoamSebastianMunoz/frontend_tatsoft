@@ -132,14 +132,7 @@ const Sidebar = () => {
       subItems: ["Historial de Preventas"],
       subPaths: ["/preventa/historial"],
     },
-    {
-      name: "catalogo",
-      label: "Gestión de Catálogo",
-      path: "/productos",
-      icon: "catalog",
-      subItems: ["Ver Catálogo", "Añadir Producto"],
-      subPaths: ["/productos", "/registrar-producto"],
-    },
+   
   ];
 
   const collaboratorMenuItems = [
@@ -148,8 +141,8 @@ const Sidebar = () => {
       label: "Mi Perfil",
       path: "/perfil",
       icon: "profile",
-      subItems: ["Ver Perfil", "Editar Perfil"],
-      subPaths: ["/perfil", "/editar-perfil"],
+      subItems: ["Ver Perfil"],
+      subPaths: ["/perfil"],
     },
     {
       name: "gest-clientes",
@@ -177,12 +170,18 @@ const Sidebar = () => {
     },
     {
       name: "catalogo",
-      label: "Gestión de Catálogo",
+      label: "Catálogo",
       path: "/productos",
       icon: "catalog",
-      subItems: ["Ver Catálogo"],
       subPaths: ["/productos"],
     },
+    {
+      name: "gest-zonas",
+      label: "Mis Zonas",
+      path: "/gestion-zonas",
+      icon: "zones",
+      subPaths: ["/gestion-zonas", "/registrar-zona"],
+    }
   ];
 
   const renderIcon = (iconName, className = "") => {
