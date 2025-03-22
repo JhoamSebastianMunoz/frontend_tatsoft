@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { presaleService, productService, clientService } from "../../../context/services/ApiService";
+import { presaleService, productService, clientService, userService } from "../../../context/services/ApiService";
+import { imageService } from "../../../context/services/ImageService";
 import { useAuth } from "../../../context/AuthContext";
 
 // Componentes
@@ -24,6 +25,49 @@ const NuevaPreventa = () => {
   const [busquedaProducto, setBusquedaProducto] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [productImages, setProductImages] = useState({});
+  const [clientes, setClientes] = useState([]);
+  const [busquedaCliente, setBusquedaCliente] = useState("");
+
+  // Cargar clientes según el rol del usuario
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        setLoading(true);
+        let response;
+
+        if (user.rol === "ADMINISTRADOR") {
+          // Si es administrador, cargar todos los clientes
+          response = await clientService.getAllClients();
+        } else {
+          // Si es colaborador, cargar solo los clientes de sus zonas asignadas
+          const zonasResponse = await userService.getUserOwnZonas();
+          const clientesPromises = zonasResponse.data.zonas.map(async (zona) => {
+            const clientesResponse = await userService.getClientesZona(zona.id_zona_de_trabajo);
+            return clientesResponse.data;
+          });
+          const clientesArrays = await Promise.all(clientesPromises);
+          // Aplanar el array de clientes y eliminar duplicados
+          const clientesUnicos = new Map();
+          clientesArrays.flat().forEach(cliente => {
+            if (!clientesUnicos.has(cliente.id_cliente)) {
+              clientesUnicos.set(cliente.id_cliente, cliente);
+            }
+          });
+          response = { data: Array.from(clientesUnicos.values()) };
+        }
+
+        setClientes(response.data);
+      } catch (err) {
+        console.error("Error al cargar clientes:", err);
+        setError("No se pudieron cargar los clientes. Por favor, intente nuevamente.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClientes();
+  }, [user.rol]);
 
   // Cargar información del cliente si se proporciona el ID
   useEffect(() => {
@@ -44,13 +88,36 @@ const NuevaPreventa = () => {
     fetchClienteInfo();
   }, [clientId]);
 
-  // Cargar productos disponibles
+  // Cargar productos disponibles y sus imágenes
   useEffect(() => {
     const fetchProductos = async () => {
       try {
         setLoading(true);
         const response = await productService.getAllProducts();
         setProductos(response.data);
+
+        // Cargar imágenes para los productos
+        const imagePromises = response.data.map(async (producto) => {
+          if (producto.id_imagen) {
+            try {
+              const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+              if (imageUrl) {
+                return { id: producto.id_producto, url: imageUrl };
+              }
+            } catch (error) {
+              console.error('Error cargando imagen para producto', producto.id_producto, error);
+            }
+          }
+          return { id: producto.id_producto, url: null };
+        });
+        
+        const productImagesResults = await Promise.all(imagePromises);
+        const imagesMap = {};
+        productImagesResults.forEach(({ id, url }) => {
+          imagesMap[id] = url;
+        });
+        
+        setProductImages(imagesMap);
       } catch (err) {
         console.error("Error al cargar productos:", err);
         setError("No se pudieron cargar los productos disponibles.");
@@ -60,6 +127,15 @@ const NuevaPreventa = () => {
     };
     fetchProductos();
   }, []);
+
+  // Filtrar clientes según la búsqueda
+  const clientesFiltrados = busquedaCliente.trim() === ""
+    ? clientes
+    : clientes.filter(cliente => 
+        (cliente.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+        cliente.nombre_completo_cliente?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+        cliente.telefono?.includes(busquedaCliente))
+      );
 
   // Filtrar productos según la búsqueda
   const productosFiltrados = busquedaProducto.trim() === ""
@@ -75,15 +151,28 @@ const NuevaPreventa = () => {
     );
 
     if (productoExistente) {
+      // Verificar stock disponible
+      const nuevaCantidad = productoExistente.cantidad + 1;
+      if (nuevaCantidad > (producto.cantidad_ingreso || 0)) {
+        setError(`No hay suficiente stock disponible para ${producto.nombre_producto}. Stock actual: ${producto.cantidad_ingreso || 0}`);
+        return;
+      }
+      
       // Si ya existe, solo actualizar la cantidad
       setProductosSeleccionados(
         productosSeleccionados.map((p) =>
           p.id_producto === producto.id_producto
-            ? { ...p, cantidad: p.cantidad + 1 }
+            ? { ...p, cantidad: nuevaCantidad }
             : p
         )
       );
     } else {
+      // Verificar stock disponible para nuevo producto
+      if (1 > (producto.cantidad_ingreso || 0)) {
+        setError(`No hay suficiente stock disponible para ${producto.nombre_producto}. Stock actual: ${producto.cantidad_ingreso || 0}`);
+        return;
+      }
+      
       // Si no existe, añadirlo con cantidad 1
       setProductosSeleccionados([
         ...productosSeleccionados,
@@ -98,6 +187,14 @@ const NuevaPreventa = () => {
       productosSeleccionados.map((p) => {
         if (p.id_producto === id) {
           const nuevaCantidad = operacion === "aumentar" ? p.cantidad + 1 : p.cantidad - 1;
+          
+          // Verificar stock disponible
+          const producto = productos.find(prod => prod.id_producto === id);
+          if (nuevaCantidad > (producto?.cantidad_ingreso || 0)) {
+            setError(`No hay suficiente stock disponible para ${producto?.nombre_producto}. Stock actual: ${producto?.cantidad_ingreso || 0}`);
+            return p;
+          }
+          
           return { ...p, cantidad: Math.max(nuevaCantidad, 1) }; // No permitir cantidades menores a 1
         }
         return p;
@@ -131,6 +228,28 @@ const NuevaPreventa = () => {
       return;
     }
 
+    // Verificar stock disponible para todos los productos
+    for (const producto of productosSeleccionados) {
+      const productoInfo = productos.find(p => p.id_producto === producto.id_producto);
+      if (producto.cantidad > (productoInfo?.cantidad_ingreso || 0)) {
+        setError(`No hay suficiente stock disponible para ${productoInfo?.nombre_producto}. Stock actual: ${productoInfo?.cantidad_ingreso || 0}`);
+        return;
+      }
+    }
+
+    // Mostrar diálogo de confirmación
+    const total = calcularSubtotal();
+    const confirmacion = window.confirm(
+      `¿Está seguro que desea crear la preventa?\n\n` +
+      `Cliente: ${clienteInfo.razon_social || clienteInfo.nombre_completo_cliente}\n` +
+      `Total: $${total.toLocaleString('es-CO')}\n` +
+      `Productos: ${productosSeleccionados.length}`
+    );
+
+    if (!confirmacion) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
@@ -151,15 +270,43 @@ const NuevaPreventa = () => {
       }, 2000);
     } catch (err) {
       console.error("Error al crear preventa:", err);
-      setError("Ocurrió un error al registrar la preventa. Por favor, intente nuevamente.");
+      
+      // Manejar errores específicos de la API
+      if (err.response) {
+        switch (err.response.status) {
+          case 401:
+            setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+            break;
+          case 403:
+            setError("No tiene permisos para realizar esta acción.");
+            break;
+          case 422:
+            setError(err.response.data.errors?.[0]?.msg || "Error de validación en los datos enviados.");
+            break;
+          case 500:
+            setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+            break;
+          default:
+            setError(err.response.data?.message || "Ocurrió un error al registrar la preventa. Por favor, intente nuevamente.");
+        }
+      } else {
+        setError("Error de conexión. Por favor, verifique su conexión a internet e intente nuevamente.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Seleccionar otro cliente
-  const handleSeleccionarCliente = () => {
-    navigate("/gestion/clientes");
+  // Seleccionar cliente
+  const handleSeleccionarCliente = (cliente) => {
+    setClienteInfo(cliente);
+    setBusquedaCliente("");
+  };
+
+  // Deseleccionar cliente
+  const handleDeseleccionarCliente = () => {
+    setClienteInfo(null);
+    setProductosSeleccionados([]);
   };
 
   if (loading && !productos.length) {
@@ -192,18 +339,19 @@ const NuevaPreventa = () => {
             </div>
           </div>
         )}
+
         {/* Información del cliente */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           <div className="flex justify-between items-center mb-4">
             <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold">
               Información del Cliente
             </Tipografia>
-            
-            {!clienteInfo && (
+            {clienteInfo && (
               <Boton
                 tipo="secundario"
-                label="Seleccionar Cliente"
-                onClick={handleSeleccionarCliente}
+                label="Cambiar Cliente"
+                onClick={handleDeseleccionarCliente}
+                size="small"
               />
             )}
           </div>
@@ -211,22 +359,54 @@ const NuevaPreventa = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Tipografia className="text-gray-600 text-sm">Nombre / Razón Social</Tipografia>
-                <Tipografia className="font-medium">
+                <Tipografia className="font-medium break-words">
                   {clienteInfo.razon_social || clienteInfo.nombre_completo_cliente}
                 </Tipografia>
               </div>
               <div>
                 <Tipografia className="text-gray-600 text-sm">Teléfono</Tipografia>
-                <Tipografia className="font-medium">{clienteInfo.telefono}</Tipografia>
+                <Tipografia className="font-medium break-words">{clienteInfo.telefono}</Tipografia>
               </div>
               <div className="sm:col-span-2">
                 <Tipografia className="text-gray-600 text-sm">Dirección</Tipografia>
-                <Tipografia className="font-medium">{clienteInfo.direccion}</Tipografia>
+                <Tipografia className="font-medium break-words">{clienteInfo.direccion}</Tipografia>
               </div>
             </div>
           ) : (
-            <div className="text-center py-4 text-gray-500">
-              Seleccione un cliente para registrar la preventa
+            <div>
+              <div className="mb-4">
+                <CampoTexto
+                  placeholder="Buscar cliente por nombre, razón social o teléfono..."
+                  value={busquedaCliente}
+                  onChange={(e) => setBusquedaCliente(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {clientesFiltrados.map((cliente) => (
+                  <div
+                    key={cliente.id_cliente}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white hover:bg-gray-50"
+                    onClick={() => handleSeleccionarCliente(cliente)}
+                  >
+                    <div className="space-y-2">
+                      <Tipografia className="font-medium break-words">
+                        {cliente.razon_social || cliente.nombre_completo_cliente}
+                      </Tipografia>
+                      <Tipografia className="text-sm text-gray-600 break-words">
+                        {cliente.telefono}
+                      </Tipografia>
+                      <Tipografia className="text-sm text-gray-600 break-words line-clamp-2">
+                        {cliente.direccion}
+                      </Tipografia>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {clientesFiltrados.length === 0 && (
+                <div className="text-center py-4 text-gray-500">
+                  No se encontraron clientes con ese criterio de búsqueda
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -249,27 +429,56 @@ const NuevaPreventa = () => {
               productosFiltrados.map((producto) => (
                 <div
                   key={producto.id_producto}
-                  className="border rounded-lg p-3 hover:shadow-md transition-shadow"
+                  className="border rounded-lg p-3 hover:shadow-md transition-shadow bg-white hover:bg-gray-50"
                 >
-                  <div className="flex flex-col h-full justify-between">
-                    <div>
-                      <Tipografia className="font-medium truncate">
-                        {producto.nombre_producto}
-                      </Tipografia>
-                      <Tipografia className="text-purple-600 font-bold mt-1">
-                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                      </Tipografia>
-                      <Tipografia className="text-sm text-gray-500 mt-1">
-                        Stock: {producto.cantidad_ingreso || 0}
-                      </Tipografia>
+                  <div className="flex flex-col h-full">
+                    <div className="flex-grow">
+                      {/* Imagen del producto */}
+                      <div className="relative h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden">
+                        {productImages[producto.id_producto] ? (
+                          <img
+                            src={productImages[producto.id_producto]}
+                            alt={producto.nombre_producto}
+                            className="w-full h-full object-contain p-2"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              const imgMap = {...productImages};
+                              imgMap[producto.id_producto] = null;
+                              setProductImages(imgMap);
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-gray-400">
+                            <Icono name="gest-productos" size={48} />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Tipografia className="font-medium break-words line-clamp-2">
+                          {producto.nombre_producto}
+                        </Tipografia>
+                        <Tipografia className="text-purple-600 font-bold">
+                          ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                        </Tipografia>
+                        <Tipografia className="text-sm text-gray-500">
+                          Stock: {producto.cantidad_ingreso || 0}
+                        </Tipografia>
+                      </div>
                     </div>
                     <Boton
                       tipo="primario"
                       label="Agregar"
                       size="small"
                       onClick={() => handleAddProduct(producto)}
-                      className="mt-2"
+                      className="mt-4 w-full"
+                      disabled={!clienteInfo}
                     />
+                    {!clienteInfo && (
+                      <Tipografia className="text-xs text-red-500 mt-1 text-center">
+                        Seleccione un cliente primero
+                      </Tipografia>
+                    )}
                   </div>
                 </div>
               ))
@@ -289,15 +498,32 @@ const NuevaPreventa = () => {
           {productosSeleccionados.length > 0 ? (
             <div className="space-y-4">
               {productosSeleccionados.map((producto) => (
-                <div key={producto.id_producto} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <Tipografia className="font-medium">{producto.nombre_producto}</Tipografia>
-                    <Tipografia className="text-purple-600">
-                      ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                    </Tipografia>
+                <div key={producto.id_producto} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-4 w-full sm:w-auto">
+                    {/* Imagen del producto seleccionado */}
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {productImages[producto.id_producto] ? (
+                        <img
+                          src={productImages[producto.id_producto]}
+                          alt={producto.nombre_producto}
+                          className="w-full h-full object-contain p-1"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          <Icono name="gest-productos" size={24} />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-grow min-w-0">
+                      <Tipografia className="font-medium break-words">{producto.nombre_producto}</Tipografia>
+                      <Tipografia className="text-purple-600">
+                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                      </Tipografia>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 mt-2 sm:mt-0">
                     <button
                       className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
                       onClick={() => handleUpdateCantidad(producto.id_producto, "disminuir")}
@@ -313,7 +539,7 @@ const NuevaPreventa = () => {
                     </button>
                   </div>
                   
-                  <div className="ml-4 flex items-center space-x-4">
+                  <div className="flex items-center space-x-4 mt-2 sm:mt-0">
                     <Tipografia className="font-bold">
                       ${((parseFloat(producto.precio) || 0) * producto.cantidad).toLocaleString('es-CO')}
                     </Tipografia>
