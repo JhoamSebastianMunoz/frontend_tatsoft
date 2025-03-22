@@ -4,7 +4,7 @@ import { areaService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import SidebarAdm from "../../organisms/Sidebar";
 import Encabezado from "../../molecules/Encabezado";
 
 const RegistrarZona = () => {

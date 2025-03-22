@@ -6,12 +6,23 @@ import Icono from "../../atoms/Iconos";
 import CampoTexto from "../../atoms/CamposTexto";
 import Buscador from "../../molecules/Buscador";
 import Alerta from "../../molecules/Alertas";
-import SidebarAdm from "../../organisms/SidebarAdm";
+import Sidebar from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
 
 const IngresoStock = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // Estado para el control de la barra de navegación
+  const [collapsed, setCollapsed] = useState(() => {
+    const savedState = localStorage.getItem("sidebarCollapsed");
+    return savedState ? JSON.parse(savedState) : true;
+  });
+
+  // Guardar estado del sidebar en localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(collapsed));
+  }, [collapsed]);
   
   // Estados para el producto seleccionado
   const [productoSeleccionado, setProductoSeleccionado] = useState({
@@ -107,22 +118,24 @@ const IngresoStock = () => {
   };
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
-      {/* Sidebar usando el componente del organism */}
-      <SidebarAdm activeMenuItem="inventario" />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar />
       
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col ml-64">
+      <div className={`flex-1 transition-all duration-300 ${
+        !collapsed ? "md:ml-70" : "md:ml-16"
+      }`}>
         {/* Header */}
-        <header className="bg-purple-600 text-white p-4 flex items-center justify-between">
-          <Tipografia variant="h1" size="xl" className="font-medium">
+        <div className="text-black p-4 shadow-md">
+          <Tipografia variant="h1" size="xl" className="text-black font-medium pl-8">
             Ingreso de Stock
           </Tipografia>
-        </header>
+        </div>
 
         {/* Contenido del formulario */}
         <div className="p-6">
-          <div className="bg-white rounded-lg shadow-md p-6 mx-auto max-w-4xl">
+          <div className="bg-white rounded-lg shadow-md p-6">
             <form onSubmit={handleSubmit}>
               {/* Buscador de productos */}
               <div className="mb-6 flex gap-2">
@@ -154,7 +167,7 @@ const IngresoStock = () => {
                   <select
                     value={categoriaSeleccionada}
                     onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-                    className="p-1.5 border rounded text-sm"
+                    className="p-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                   >
                     {categorias.map((cat) => (
                       <option key={cat} value={cat}>
@@ -167,7 +180,7 @@ const IngresoStock = () => {
               
               {/* Detalles del producto */}
               <div className="mb-6">
-                <Tipografia variant="h2" size="lg" className="mb-3">Detalles del Producto</Tipografia>
+                <Tipografia variant="h2" size="lg" className="mb-3 text-orange-500">Detalles del Producto</Tipografia>
                 <div className="flex gap-4">
                   <div className="w-24 h-24 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
                     <img 
@@ -183,7 +196,7 @@ const IngresoStock = () => {
                         <Tipografia size="sm">Código: {productoSeleccionado.codigo}</Tipografia>
                       </div>
                       <div>
-                        <Tipografia size="sm">Precio: ${productoSeleccionado.precio}</Tipografia>
+                        <Tipografia size="sm">Precio: <span className="text-orange-500 font-medium">${productoSeleccionado.precio}</span></Tipografia>
                       </div>
                       <div>
                         <Tipografia size="sm">Categoría: {productoSeleccionado.categoria}</Tipografia>
@@ -201,7 +214,7 @@ const IngresoStock = () => {
               
               {/* Detalle del Ingreso */}
               <div className="mb-6">
-                <Tipografia variant="h2" size="lg" className="mb-3">Detalle del Ingreso</Tipografia>
+                <Tipografia variant="h2" size="lg" className="mb-3 text-orange-500">Detalle del Ingreso</Tipografia>
                 <div className="grid grid-cols-3 gap-4">
                   <CampoTexto
                     label="Cantidad a ingresar:"
@@ -220,7 +233,7 @@ const IngresoStock = () => {
                         name="fechaVencimiento"
                         value={formData.fechaVencimiento}
                         onChange={handleInputChange}
-                        className="w-full p-2 border rounded pr-8 bg-purple-50 border-purple-300"
+                        className="w-full p-2 border rounded pr-8 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                       />
                     </div>
                   </div>
