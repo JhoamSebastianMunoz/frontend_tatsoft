@@ -91,7 +91,7 @@ const VerUsuarioAdm = () => {
         <Sidebar />
       </div>
 
-      <div className="pl-[280px] pr-8 py-6">
+      <div className="ml-16 sm:ml-20 lg:ml-64 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-5xl mx-auto">
           {/* Tarjeta de Usuario */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">

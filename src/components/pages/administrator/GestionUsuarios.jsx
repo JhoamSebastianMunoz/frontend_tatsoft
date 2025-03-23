@@ -88,11 +88,11 @@ const GestionUsuarios = () => {
   return (
     <div className="min-h-screen flex bg-slate-100">
       <style>{scrollStyle}</style>
-      <div className="fixed top-0 left-0 h-full z-10">
+      <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
         <Sidebar />
       </div>
       
-      <div className="w-full flex-1 pl-14 sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
+      <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
         <div className="max-w-[1600px] mx-auto">
           <Tipografia>
             <div className="w-full">

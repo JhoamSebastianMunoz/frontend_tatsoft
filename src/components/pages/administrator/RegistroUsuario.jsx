@@ -118,9 +118,32 @@ const RegistroUsuario = () => {
     if (!formData.password) {
       erroresTemp.password = "La contraseña es obligatoria";
       esValido = false;
-    } else if (formData.password.length < 6) {
-      erroresTemp.password = "La contraseña debe tener al menos 6 caracteres";
-      esValido = false;
+    } else {
+      // Validar longitud mínima
+      if (formData.password.length < 8) {
+        erroresTemp.password = "La contraseña debe tener al menos 8 caracteres";
+        esValido = false;
+      }
+      // Validar mayúsculas
+      if (!/[A-Z]/.test(formData.password)) {
+        erroresTemp.password = "La contraseña debe contener al menos una letra mayúscula";
+        esValido = false;
+      }
+      // Validar minúsculas
+      if (!/[a-z]/.test(formData.password)) {
+        erroresTemp.password = "La contraseña debe contener al menos una letra minúscula";
+        esValido = false;
+      }
+      // Validar números
+      if (!/\d/.test(formData.password)) {
+        erroresTemp.password = "La contraseña debe contener al menos un número";
+        esValido = false;
+      }
+      // Validar caracteres especiales
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+        erroresTemp.password = "La contraseña debe contener al menos un carácter especial (!@#$%^&*(),.?\":{}|<>)";
+        esValido = false;
+      }
     }
 
     if (!formData.confirmarPassword) {
@@ -146,7 +169,14 @@ const RegistroUsuario = () => {
   };
 
   const manejarAtras = () => {
+    console.log("Volviendo al paso 1...");
     setPaso(1);
+    // Limpiar los errores de contraseña al volver atrás
+    setErrores(prevErrores => ({
+      ...prevErrores,
+      password: "",
+      confirmarPassword: ""
+    }));
   };
 
   const manejarEnvio = async (e) => {
@@ -506,21 +536,7 @@ const RegistroUsuario = () => {
                 </div>
                 
                 <div className="mt-6 border-t border-gray-200 pt-5">
-                  <style jsx>{`
-                    @media (max-width: 640px) {
-                      .form-buttons-container {
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 16px;
-                        margin: 0;
-                      }
-                      .form-buttons-container > * {
-                        margin: 0 !important;
-                      }
-                    }
-                  `}</style>
-                  
-                  <div className="form-buttons-container flex justify-center gap-10 md:gap-20">
+                  <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 sm:gap-10 md:gap-20 px-3 sm:px-0">
                     {paso === 1 ? (
                       <>
                         <Boton
@@ -528,12 +544,14 @@ const RegistroUsuario = () => {
                           label="Cancelar"
                           onClick={manejarCancelar}
                           size="medium"
+                          className="w-full min-w-[200px] sm:w-auto sm:min-w-0"
                         />
                         <Boton
                           tipo="primario"
                           label="Siguiente"
                           onClick={manejarSiguiente}
                           size="medium"
+                          className="w-full min-w-[200px] sm:w-auto sm:min-w-0"
                         />
                       </>
                     ) : (
@@ -541,8 +559,12 @@ const RegistroUsuario = () => {
                         <Boton
                           tipo="secundario"
                           label="Atrás"
-                          onClick={manejarAtras}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            manejarAtras();
+                          }}
                           size="medium"
+                          className="w-full min-w-[200px] sm:w-auto sm:min-w-0"
                         />
                         <Boton
                           tipo="primario"
@@ -550,6 +572,7 @@ const RegistroUsuario = () => {
                           type="submit"
                           size="medium"
                           disabled={loading}
+                          className="w-full min-w-[200px] sm:w-auto sm:min-w-0"
                         />
                       </>
                     )}
