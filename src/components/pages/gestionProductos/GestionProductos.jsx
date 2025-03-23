@@ -292,15 +292,15 @@ const GestionProductos = () => {
           className="p-4 cursor-pointer" 
           onClick={() => handleVerProducto(producto.id_producto)}
         >
-          <h3 className="font-semibold text-gray-800 mb-1 truncate">
+          <h3 className="font-literata text-base text-gray-800 mb-1 truncate">
             {producto.nombre_producto}
           </h3>
           
-          <p className="text-orange-500 font-bold text-lg mb-2">
+          <p className="font-literata text-lg text-orange-500 font-bold mb-2">
             ${parseFloat(producto.precio).toFixed(2)}
           </p>
           
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className="font-literata text-sm text-gray-600 mb-4 line-clamp-2">
             {producto.descripcion || "Sin descripción"}
           </p>
         </div>
@@ -384,10 +384,10 @@ const GestionProductos = () => {
             {productosFiltrados.length === 0 ? (
               <div className="bg-white rounded-lg shadow-md p-6 text-center py-12">
                 <Icono name="gest-productos" size={60} className="mx-auto text-gray-400 mb-4" />
-                <Tipografia size="lg" className="text-gray-600 mb-2">
+                <Tipografia variant="h2" size="xl" className="text-gray-600 mb-2">
                   No se encontraron productos
                 </Tipografia>
-                <Tipografia className="text-gray-500 mb-6">
+                <Tipografia size="base" className="text-gray-500 mb-6">
                   {searchTerm || categoriaSeleccionada !== 'Todas'
                     ? "No hay productos que coincidan con tu búsqueda. Intenta con otros filtros."
                     : "Aún no hay productos registrados. Comienza agregando un nuevo producto."}
@@ -416,10 +416,10 @@ const GestionProductos = () => {
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
             </div>
-            <Tipografia className="text-center mb-4">
+            <Tipografia variant="h2" size="xl" className="text-center mb-4">
               ¿Estás seguro de que deseas eliminar este producto?
             </Tipografia>
-            <Tipografia className="text-center text-gray-500 text-sm mb-4">
+            <Tipografia size="sm" className="text-center text-gray-500 mb-4">
               Esta acción no se puede deshacer.
             </Tipografia>
             <div className="flex justify-center space-x-3">
