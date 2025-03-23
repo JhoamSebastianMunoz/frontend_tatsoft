@@ -330,16 +330,16 @@ const GestionCategorias = () => {
             {/* Alertas de error */}
             {showErrorAlert && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded transition-opacity duration-300">
-                <p className="font-medium">Error</p>
-                <p>{error}</p>
+                <Tipografia size="base" className="font-medium">Error</Tipografia>
+                <Tipografia size="base">{error}</Tipografia>
               </div>
             )}
             
             {/* Alertas de éxito */}
             {showSuccessAlert && (
               <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded transition-opacity duration-300">
-                <p className="font-medium">¡Operación exitosa!</p>
-                <p>{successMessage}</p>
+                <Tipografia size="base" className="font-medium">¡Operación exitosa!</Tipografia>
+                <Tipografia size="base">{successMessage}</Tipografia>
               </div>
             )}
             
@@ -347,31 +347,43 @@ const GestionCategorias = () => {
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto"></div>
-                <p className="mt-4 text-gray-600">Cargando categorías...</p>
+                <Tipografia size="base" className="mt-4 text-gray-600">Cargando categorías...</Tipografia>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead className="bg-gray-50">
                     <tr className="text-left">
-                      <th className="py-3 px-4 font-medium text-gray-800">Código</th>
-                      <th className="py-3 px-4 font-medium text-gray-800">Nombre Categoría</th>
-                      <th className="py-3 px-4 font-medium text-gray-800">Fecha de Creación</th>
-                      <th className="py-3 px-4 font-medium text-gray-800 text-center">Acciones</th>
+                      <th className="py-3 px-4">
+                        <Tipografia size="sm" className="font-medium text-gray-800">Código</Tipografia>
+                      </th>
+                      <th className="py-3 px-4">
+                        <Tipografia size="sm" className="font-medium text-gray-800">Nombre Categoría</Tipografia>
+                      </th>
+                      <th className="py-3 px-4">
+                        <Tipografia size="sm" className="font-medium text-gray-800">Fecha de Creación</Tipografia>
+                      </th>
+                      <th className="py-3 px-4">
+                        <Tipografia size="sm" className="font-medium text-gray-800 text-center">Acciones</Tipografia>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {categoriasFiltradas.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="text-center py-8 text-gray-500">
-                          No se encontraron categorías. 
-                          {searchTerm ? " Prueba con otro término de búsqueda." : " Agrega una nueva categoría para comenzar."}
+                        <td colSpan="4" className="text-center py-8">
+                          <Tipografia size="base" className="text-gray-500">
+                            No se encontraron categorías. 
+                            {searchTerm ? " Prueba con otro término de búsqueda." : " Agrega una nueva categoría para comenzar."}
+                          </Tipografia>
                         </td>
                       </tr>
                     ) : (
                       categoriasFiltradas.map((categoria) => (
                         <tr key={categoria.id_categoria} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4">{categoria.id_categoria}</td>
+                          <td className="py-3 px-4">
+                            <Tipografia size="base">{categoria.id_categoria}</Tipografia>
+                          </td>
                           <td className="py-3 px-4">
                             {categoriaEnEdicion === categoria.id_categoria ? (
                               <input
@@ -382,11 +394,13 @@ const GestionCategorias = () => {
                                 className="w-full p-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                               />
                             ) : (
-                              categoria.nombre_categoria
+                              <Tipografia size="base">{categoria.nombre_categoria}</Tipografia>
                             )}
                           </td>
                           <td className="py-3 px-4">
-                            {new Date(categoria.fecha_creacion || Date.now()).toLocaleDateString()}
+                            <Tipografia size="base">
+                              {new Date(categoria.fecha_creacion || Date.now()).toLocaleDateString()}
+                            </Tipografia>
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex justify-center space-x-2">
@@ -438,15 +452,15 @@ const GestionCategorias = () => {
       {showNuevaCategoriaModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
-            <h3 className="text-lg font-semibold mb-4">
+            <Tipografia variant="h2" size="xl" className="mb-4">
               Agregar nueva categoría
-            </h3>
+            </Tipografia>
             
             <form onSubmit={handleSubmitNuevaCategoria}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Tipografia size="sm" className="block text-gray-700 mb-1">
                   Nombre de la categoría*
-                </label>
+                </Tipografia>
                 <input
                   type="text"
                   name="nombre_categoria"
@@ -482,15 +496,15 @@ const GestionCategorias = () => {
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
             </div>
-            <p className="text-center mb-2 font-medium">
+            <Tipografia variant="h2" size="xl" className="text-center mb-2">
               ¿Eliminar categoría?
-            </p>
-            <p className="text-center mb-4 text-gray-600 text-sm">
+            </Tipografia>
+            <Tipografia size="base" className="text-center mb-4 text-gray-600">
               {categoriaEliminar ? categoriaEliminar.nombre_categoria : ""} 
-            </p>
-            <p className="text-center text-gray-500 text-sm mb-4">
+            </Tipografia>
+            <Tipografia size="sm" className="text-center text-gray-500 mb-4">
               Esta acción no se puede deshacer.
-            </p>
+            </Tipografia>
             <div className="flex justify-center space-x-3">
               <Botones
                 tipo="cancelar"

@@ -295,15 +295,15 @@ const EditarProducto = () => {
           <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-                <p className="font-medium">Error</p>
-                <p>{error}</p>
+                <Tipografia size="base" className="font-medium">Error</Tipografia>
+                <Tipografia size="base">{error}</Tipografia>
               </div>
             )}
            
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Nombre del Producto*</label>
+                  <Tipografia size="sm" className="block text-gray-700 mb-1">Nombre del Producto*</Tipografia>
                   <input
                     type="text"
                     name="nombre_producto"
@@ -315,15 +315,15 @@ const EditarProducto = () => {
                 </div>
                
                 <div>
-                  <label className="block text-sm font-medium mb-1">Categoría*</label>
+                  <Tipografia size="sm" className="block text-gray-700 mb-1">Categoría*</Tipografia>
                   <div className="relative">
                     <div
                       className="w-full p-2 border rounded flex justify-between items-center cursor-pointer"
                       onClick={() => setShowCategorias(!showCategorias)}
                     >
-                      <span className="text-gray-700">
+                      <Tipografia size="base" className="text-gray-700">
                         {formData.categoria || "Seleccione una categoría"}
-                      </span>
+                      </Tipografia>
                       <Icono name="despliegue" size={16} />
                     </div>
                    
@@ -335,7 +335,7 @@ const EditarProducto = () => {
                             className="p-2 hover:bg-orange-100 cursor-pointer"
                             onClick={() => handleCategoriaChange(categoria)}
                           >
-                            {categoria.nombre_categoria}
+                            <Tipografia size="base">{categoria.nombre_categoria}</Tipografia>
                           </div>
                         ))}
                         <div
@@ -345,7 +345,7 @@ const EditarProducto = () => {
                             setShowCategorias(false);
                           }}
                         >
-                          + Agregar otra categoría
+                          <Tipografia size="base">+ Agregar otra categoría</Tipografia>
                         </div>
                       </div>
                     )}
@@ -353,7 +353,7 @@ const EditarProducto = () => {
                 </div>
                
                 <div>
-                  <label className="block text-sm font-medium mb-1">Precio*</label>
+                  <Tipografia size="sm" className="block text-gray-700 mb-1">Precio*</Tipografia>
                   <input
                     type="number"
                     name="precio"
@@ -367,7 +367,7 @@ const EditarProducto = () => {
                 </div>
                
                 <div>
-                  <label className="block text-sm font-medium mb-1">Stock</label>
+                  <Tipografia size="sm" className="block text-gray-700 mb-1">Stock</Tipografia>
                   <input
                     type="number"
                     name="cantidad_ingreso"
@@ -379,7 +379,7 @@ const EditarProducto = () => {
                 </div>
                
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Descripción</label>
+                  <Tipografia size="sm" className="block text-gray-700 mb-1">Descripción</Tipografia>
                   <textarea
                     name="descripcion"
                     value={formData.descripcion}
@@ -391,9 +391,9 @@ const EditarProducto = () => {
              
               {/* Sección de imagen */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">Imagen del Producto</label>
+                <Tipografia size="sm" className="block text-gray-700 mb-2">Imagen del Producto</Tipografia>
                
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
                   <div className="w-32 h-32 bg-gray-100 border rounded flex items-center justify-center overflow-hidden">
                     {imagePreview ? (
                       <img
@@ -412,7 +412,7 @@ const EditarProducto = () => {
                     )}
                   </div>
                  
-                  <div className="flex-1">
+                  <div className="flex-1 w-full md:w-auto">
                     <input
                       type="file"
                       id="imageInput"
@@ -425,16 +425,16 @@ const EditarProducto = () => {
                       className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-md cursor-pointer hover:bg-orange-600 transition-colors"
                     >
                       <Icono name="subir-archivo" customColor="white" size={20} />
-                      <span className="ml-2">Cambiar imagen</span>
+                      <Tipografia size="base" className="ml-2">Cambiar imagen</Tipografia>
                     </label>
                    
-                    <p className="text-xs text-gray-500 mt-2">
+                    <Tipografia size="xs" className="text-gray-500 mt-2 block">
                       {formData.id_imagen && !imageFile ? (
                         "El producto ya tiene una imagen. Selecciona una nueva para reemplazarla."
                       ) : (
                         "Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 6MB"
                       )}
-                    </p>
+                    </Tipografia>
                   </div>
                 </div>
               </div>
@@ -462,7 +462,9 @@ const EditarProducto = () => {
       {showNuevaCategoriaModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
-            <h3 className="text-lg font-semibold mb-4">Agregar nueva categoría</h3>
+            <Tipografia variant="h2" size="xl" className="mb-4">
+              Agregar nueva categoría
+            </Tipografia>
            
             <input
               type="text"
@@ -496,7 +498,9 @@ const EditarProducto = () => {
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
             </div>
-            <p className="text-center mb-4">¿Desea cancelar la edición?</p>
+            <Tipografia variant="h2" size="xl" className="text-center mb-4">
+              ¿Desea cancelar la edición?
+            </Tipografia>
             <div className="flex justify-center space-x-2">
               <Boton
                 tipo="cancelar"
@@ -520,7 +524,9 @@ const EditarProducto = () => {
             <div className="flex justify-center mb-4">
               <Icono name="confirmar" size={65} />
             </div>
-            <p className="text-center mb-4">Producto actualizado exitosamente</p>
+            <Tipografia variant="h2" size="xl" className="text-center mb-4">
+              Producto actualizado exitosamente
+            </Tipografia>
           </div>
         </div>
       )}
@@ -532,7 +538,9 @@ const EditarProducto = () => {
             <div className="flex justify-center mb-4">
               <Icono name="confirmar" size={60} />
             </div>
-            <p className="text-center mb-4">Imagen seleccionada correctamente</p>
+            <Tipografia variant="h2" size="xl" className="text-center mb-4">
+              Imagen seleccionada correctamente
+            </Tipografia>
           </div>
         </div>
       )}
