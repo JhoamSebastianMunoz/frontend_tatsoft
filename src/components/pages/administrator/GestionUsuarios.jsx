@@ -26,7 +26,11 @@ const GestionUsuarios = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [menuAbierto, setMenuAbierto] = useState(null);
-
+  
+  // Agregar estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(9); // Para mostrar 3x3 en pantallas grandes
+  
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
@@ -63,6 +67,7 @@ const GestionUsuarios = () => {
     }
     
     setFilteredUsuarios(results);
+    setCurrentPage(1); // Resetear a primera página cuando cambian los filtros
   }, [usuarios, filtro, busqueda]);
 
   const handleBusquedaChange = (e) => {
@@ -79,6 +84,21 @@ const GestionUsuarios = () => {
 
   const toggleMenu = (id) => {
     setMenuAbierto(menuAbierto === id ? null : id);
+  };
+  
+  // Cálculos para paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsuarios.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredUsuarios.length / itemsPerPage);
+  
+  // Handlers para paginación
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+  
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
   };
 
   if (loading) {
@@ -178,7 +198,7 @@ const GestionUsuarios = () => {
                   <div className="w-full">
                     {filteredUsuarios.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {filteredUsuarios.map((usuario) => (
+                        {currentItems.map((usuario) => (
                           <div key={usuario.id_usuario} className="bg-white rounded-lg shadow-sm overflow-hidden">
                             <div className="h-1 w-full bg-gray-200"></div>
                             <div className="p-4 relative">
@@ -274,6 +294,68 @@ const GestionUsuarios = () => {
                           size="small"
                           className="mt-2"
                         />
+                      </div>
+                    )}
+                  
+                    {filteredUsuarios.length > 0 && (
+                      <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
+                        <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
+                          <p>
+                            Mostrando <span className="font-medium">{indexOfFirstItem + 1}</span> a{" "}
+                            <span className="font-medium">
+                              {Math.min(indexOfLastItem, filteredUsuarios.length)}
+                            </span>{" "}
+                            de{" "}
+                            <span className="font-medium">
+                              {filteredUsuarios.length}
+                            </span>{" "}
+                            resultados
+                          </p>
+                        </div>
+                        <div>
+                          <nav
+                            className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                            aria-label="Pagination"
+                          >
+                            <button 
+                              className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                                currentPage === 1 
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-500 hover:bg-gray-50 cursor-pointer'
+                              }`}
+                              onClick={handlePrevPage}
+                              disabled={currentPage === 1}
+                            >
+                              Anterior
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                              <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`relative inline-flex items-center px-4 py-2 border ${
+                                  currentPage === page
+                                    ? 'text-gray-700 z-10'
+                                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                } text-sm font-medium`}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                            
+                            <button 
+                              className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                                currentPage === totalPages 
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-500 hover:bg-gray-50 cursor-pointer'
+                              }`}
+                              onClick={handleNextPage}
+                              disabled={currentPage === totalPages}
+                            >
+                              Siguiente
+                            </button>
+                          </nav>
+                        </div>
                       </div>
                     )}
                   </div>
