@@ -133,6 +133,7 @@ export const presaleService = {
   createPresale: (presaleData) => presalesApi.post('/registerPresale', presaleData),
   addProductsToPresale: (id, products) => presalesApi.post(`/addProductsPresale/${id}`, products),
   getAllPresales: () => presalesApi.get('/getAllPresales'),
+  getPresalesByUser: (userId) => presalesApi.get(`/getPresalesByUser/${userId}`),
   getPresaleById: (id) => presalesApi.get(`/getPresaleById/${id}`),
   getPresaleDetails: (id) => presalesApi.get(`/detailsPresale/${id}`),
   cancelPresale: (id) => presalesApi.put(`/cancelPreventa/${id}`),
