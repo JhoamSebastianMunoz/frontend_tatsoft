@@ -71,25 +71,21 @@ const HistorialPreventas = () => {
           throw new Error("El usuario no tiene un rol definido");
         }
 
-        // Obtener el ID del usuario de manera más robusta
-        const userId = user.id || user.id_usuario;
-        if (!userId && user.rol !== "ADMINISTRADOR") {
-          throw new Error("No se pudo obtener el ID del usuario");
-        }
-
         let response;
         if (user.rol === "ADMINISTRADOR") {
           console.log("Intentando cargar todas las preventas...");
           response = await presaleService.getAllPresales();
         } else {
-          console.log("Intentando cargar preventas del usuario:", userId);
-          response = await presaleService.getPresalesByUser(userId);
+          // Para colaboradores, obtener el ID del usuario actual
+          const userId = user.id || user.id_usuario;
+          if (!userId) {
+            throw new Error("No se pudo obtener el ID del usuario");
+          }
+          console.log("Intentando cargar preventas del colaborador:", userId);
+          response = await presaleService.getAllPresales();
         }
         
         console.log("Respuesta completa del backend:", response);
-        console.log("Tipo de respuesta:", typeof response);
-        console.log("Tipo de response.data:", typeof response.data);
-        console.log("Estructura de response.data:", JSON.stringify(response.data, null, 2));
         
         // Validación más robusta de la respuesta
         if (!response || !response.data) {
@@ -99,6 +95,8 @@ const HistorialPreventas = () => {
         // Procesar los datos de manera más estructurada
         let data = [];
         const responseData = response.data;
+
+        console.log("Estructura de responseData:", responseData);
 
         // Intentar obtener el array de datos de diferentes estructuras posibles
         if (Array.isArray(responseData)) {
@@ -127,6 +125,18 @@ const HistorialPreventas = () => {
 
         console.log("Datos extraídos:", data);
 
+        // Si el usuario es colaborador, filtrar las preventas
+        if (user.rol === "COLABORADOR") {
+          const userId = user.id || user.id_usuario;
+          console.log("Filtrando preventas para el colaborador:", userId);
+          data = data.filter(preventa => {
+            console.log("Preventa:", preventa);
+            console.log("ID Usuario de la preventa:", preventa.id_usuario);
+            console.log("ID Usuario actual:", userId);
+            return preventa.id_colaborador === userId;
+          });
+        }
+
         // Validar que los datos tienen la estructura esperada
         if (!data.every(preventa => 
           typeof preventa.id_preventa !== 'undefined' && 
@@ -136,7 +146,10 @@ const HistorialPreventas = () => {
           throw new Error("Los datos de las preventas están incompletos");
         }
 
-        console.log("Datos procesados:", data);
+        // Ordenar las preventas por fecha de creación (más recientes primero)
+        data.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
+
+        console.log("Datos procesados finales:", data);
         setPreventas(data);
         
       } catch (err) {
@@ -297,25 +310,25 @@ const HistorialPreventas = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Tipografia className="whitespace-nowrap text-sm sm:text-base">Estado:</Tipografia>
-                <select 
+              <select 
                   className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
-                  value={filtroEstado}
-                  onChange={(e) => setFiltroEstado(e.target.value)}
-                >
-                  <option value="Todos">Todos</option>
-                  <option value="Pendiente">Pendiente</option>
-                  <option value="Confirmada">Confirmada</option>
-                  <option value="Cancelada">Cancelada</option>
-                </select>
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+              >
+                <option value="Todos">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmada">Confirmada</option>
+                <option value="Cancelada">Cancelada</option>
+              </select>
               </div>
               
               {user.rol === "COLABORADOR" && (
-                <Boton 
-                  tipo="primario" 
-                  label="Nueva Preventa" 
-                  onClick={() => navigate("/preventa/nueva")}
+              <Boton 
+                tipo="primario" 
+                label="Nueva Preventa" 
+                onClick={() => navigate("/preventa/nueva")}
                   className="w-full sm:w-auto"
-                />
+              />
               )}
             </div>
           </div>
@@ -336,13 +349,13 @@ const HistorialPreventas = () => {
                     ID
                   </div>
                   <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha de Creación
+                      Fecha de Creación
                   </div>
                   <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
+                      Estado
                   </div>
                   <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
+                      Total
                   </div>
                   {user.rol === "ADMINISTRADOR" && (
                     <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -350,7 +363,7 @@ const HistorialPreventas = () => {
                     </div>
                   )}
                   <div className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
+                      Acciones
                   </div>
                 </div>
 
@@ -363,23 +376,23 @@ const HistorialPreventas = () => {
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <span className="text-sm font-medium text-gray-900">
-                              #{preventa.id_preventa}
+                          #{preventa.id_preventa}
                             </span>
                             <div className="text-xs sm:text-sm text-gray-500">
-                              {formatearFecha(preventa.fecha_creacion)}
-                            </div>
+                          {formatearFecha(preventa.fecha_creacion)}
+                        </div>
                             {user.rol === "ADMINISTRADOR" && (
                               <div className="text-sm text-gray-500">
                                 Colaborador: {preventa.nombre_colaborador}
                               </div>
                             )}
                           </div>
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
-                              preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
-                              'bg-red-100 text-red-800'}`}>
-                            {preventa.estado}
-                          </span>
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                            preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
+                            'bg-red-100 text-red-800'}`}>
+                          {preventa.estado}
+                        </span>
                         </div>
                         <div className="text-xs sm:text-sm text-gray-500 mb-2">
                           Total: ${Number(preventa.total).toLocaleString('es-CO')}
@@ -392,17 +405,8 @@ const HistorialPreventas = () => {
                             Ver
                           </button>
                           
-                          {preventa.estado === 'Pendiente' && (
+                          {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                             <>
-                              {user.rol === 'ADMINISTRADOR' && (
-                                <button
-                                  onClick={() => confirmarPreventa(preventa.id_preventa)}
-                                  className="text-green-600 hover:text-green-900 text-xs sm:text-sm"
-                                >
-                                  Confirmar
-                                </button>
-                              )}
-                              
                               <button
                                 onClick={() => handleCancelarPreventa(preventa.id_preventa)}
                                 className="text-red-600 hover:text-red-900 text-xs sm:text-sm"
@@ -447,17 +451,8 @@ const HistorialPreventas = () => {
                               Ver
                             </button>
                             
-                            {preventa.estado === 'Pendiente' && (
+                            {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                               <>
-                                {user.rol === 'ADMINISTRADOR' && (
-                                  <button
-                                    onClick={() => confirmarPreventa(preventa.id_preventa)}
-                                    className="text-green-600 hover:text-green-900"
-                                  >
-                                    Confirmar
-                                  </button>
-                                )}
-                                
                                 <button
                                   onClick={() => handleCancelarPreventa(preventa.id_preventa)}
                                   className="text-red-600 hover:text-red-900"

@@ -137,7 +137,7 @@ export const presaleService = {
   getPresaleById: (id) => presalesApi.get(`/getPresaleById/${id}`),
   getPresaleDetails: (id) => presalesApi.get(`/detailsPresale/${id}`),
   cancelPresale: (id) => presalesApi.put(`/cancelPreventa/${id}`),
-  confirmPresale: (id, returnedProducts) => presalesApi.put(`/confirmPresale/${id}`, { returnedProductos: returnedProducts }),
+  confirmPresale: (id, data) => presalesApi.put(`/confirmPresale/${id}`, data),
   updatePresale: (id, productData) => presalesApi.put(`/updatePresale/${id}`, productData),
   deletePresale: (id) => presalesApi.delete(`/deletePresale/${id}`),
     // Obtener todas las devoluciones

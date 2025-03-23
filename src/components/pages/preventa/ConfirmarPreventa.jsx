@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { presaleService } from "../../../context/services/ApiService";
@@ -28,6 +27,7 @@ const ConfirmarPreventa = () => {
   useEffect(() => {
     if (user.rol !== 'ADMINISTRADOR') {
       navigate("/unauthorized");
+      return;
     }
   }, [user, navigate]);
 
@@ -36,7 +36,16 @@ const ConfirmarPreventa = () => {
     const fetchDetalles = async () => {
       try {
         setLoading(true);
+        setError("");
+        console.log("Iniciando carga de detalles de preventa:", id);
+        
         const response = await presaleService.getPresaleDetails(id);
+        console.log("Respuesta del backend:", response);
+        
+        if (!response || !response.data) {
+          throw new Error("La respuesta del servidor no tiene el formato esperado");
+        }
+
         const data = response.data;
         
         // Verificar si la preventa ya está confirmada o cancelada
@@ -45,12 +54,44 @@ const ConfirmarPreventa = () => {
           setTimeout(() => {
             navigate("/preventa/historial");
           }, 3000);
-        } else {
-          setDetalles(data);
+          return;
         }
+
+        // Verificar que la preventa tenga productos
+        if (!data.productos || data.productos.length === 0) {
+          setError("Esta preventa no tiene productos asociados.");
+          setTimeout(() => {
+            navigate("/preventa/historial");
+          }, 3000);
+          return;
+        }
+
+        setDetalles(data);
       } catch (err) {
         console.error("Error al cargar detalles de la preventa:", err);
-        setError("No se pudieron cargar los detalles de la preventa.");
+        
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+              break;
+            case 403:
+              setError("No tiene permisos para ver los detalles de esta preventa.");
+              break;
+            case 404:
+              setError("No se encontró la preventa solicitada.");
+              break;
+            case 500:
+              setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+              break;
+            default:
+              setError(err.response.data?.message || "Error al cargar los detalles de la preventa.");
+          }
+        } else if (err.request) {
+          setError("Error de conexión. Por favor, verifique su conexión a internet.");
+        } else {
+          setError(err.message || "Error al procesar la solicitud.");
+        }
       } finally {
         setLoading(false);
       }
@@ -76,15 +117,80 @@ const ConfirmarPreventa = () => {
       setEnviando(true);
       setError("");
       
-      await presaleService.confirmPresale(id, { returnedProductos: productosDevueltos });
+      // Validar que no se estén devolviendo todos los productos
+      if (productosDevueltos.length === detalles.productos.length) {
+        setError("No se pueden devolver todos los productos. Por favor, seleccione al menos un producto para confirmar.");
+        return;
+      }
+
+      // Validar que los productos a devolver existan en la preventa
+      const productosInvalidos = productosDevueltos.filter(
+        id => !detalles.productos.some(p => p.id_producto === id)
+      );
+
+      if (productosInvalidos.length > 0) {
+        setError("Algunos productos seleccionados no existen en la preventa.");
+        return;
+      }
+
+      // Preparar los datos para la API
+      const requestData = {
+        returnedProductos: productosDevueltos,
+        id_preventa: detalles.id_preventa,
+        id_usuario: user.id,
+        fecha_confirmacion: new Date().toISOString()
+      };
+
+      console.log("Enviando confirmación de preventa:", requestData);
+
+      const response = await presaleService.confirmPresale(id, requestData);
       
-      setSuccess(true);
-      setTimeout(() => {
-        navigate("/ventas/historial");
-      }, 2000);
+      console.log("Respuesta de confirmación:", response);
+      
+      if (response.data?.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate("/preventa/historial");
+        }, 2000);
+      } else {
+        throw new Error(response.data?.message || "No se recibió confirmación de la operación");
+      }
     } catch (err) {
       console.error("Error al confirmar preventa:", err);
-      setError("Error al confirmar la preventa. Por favor, intente nuevamente.");
+      console.error("Detalles del error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message
+      });
+      
+      if (err.response) {
+        switch (err.response.status) {
+          case 401:
+            setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+            break;
+          case 403:
+            setError("No tiene permisos para confirmar esta preventa.");
+            break;
+          case 404:
+            setError("No se encontró la preventa solicitada.");
+            break;
+          case 409:
+            setError("La preventa ya ha sido procesada por otro usuario.");
+            break;
+          case 422:
+            setError("Los datos enviados no son válidos. Por favor, verifique la información.");
+            break;
+          case 500:
+            setError(err.response.data?.message || "Error interno del servidor. Por favor, intente nuevamente más tarde.");
+            break;
+          default:
+            setError(err.response.data?.message || "Error al confirmar la preventa.");
+        }
+      } else if (err.request) {
+        setError("Error de conexión. Por favor, verifique su conexión a internet.");
+      } else {
+        setError(err.message || "Error al procesar la solicitud.");
+      }
     } finally {
       setEnviando(false);
     }

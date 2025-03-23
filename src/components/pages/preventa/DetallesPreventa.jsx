@@ -24,12 +24,42 @@ const DetallesPreventa = () => {
     const fetchDetalles = async () => {
       try {
         setLoading(true);
+        setError("");
+        console.log("Iniciando carga de detalles de preventa:", id);
+        
         const response = await presaleService.getPresaleDetails(id);
-        const data = response.data;
-        setDetalles(data);
+        console.log("Respuesta del backend:", response);
+        
+        if (!response || !response.data) {
+          throw new Error("La respuesta del servidor no tiene el formato esperado");
+        }
+
+        setDetalles(response.data);
       } catch (err) {
         console.error("Error al cargar detalles de la preventa:", err);
-        setError("No se pudieron cargar los detalles de la preventa.");
+        
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+              break;
+            case 403:
+              setError("No tiene permisos para ver los detalles de esta preventa.");
+              break;
+            case 404:
+              setError("No se encontró la preventa solicitada.");
+              break;
+            case 500:
+              setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+              break;
+            default:
+              setError(err.response.data?.message || "Error al cargar los detalles de la preventa.");
+          }
+        } else if (err.request) {
+          setError("Error de conexión. Por favor, verifique su conexión a internet.");
+        } else {
+          setError(err.message || "Error al procesar la solicitud.");
+        }
       } finally {
         setLoading(false);
       }
@@ -60,12 +90,43 @@ const DetallesPreventa = () => {
     if (window.confirm("¿Está seguro que desea cancelar esta preventa?")) {
       try {
         setLoading(true);
-        await presaleService.cancelPresale(id);
-        alert("Preventa cancelada con éxito");
-        navigate("/preventa/historial");
+        setError("");
+        
+        const response = await presaleService.cancelPresale(id);
+        console.log("Respuesta de cancelación:", response);
+        
+        if (response.data?.message) {
+          alert("Preventa cancelada con éxito");
+          navigate("/preventa/historial");
+        } else {
+          throw new Error("No se recibió confirmación de la cancelación");
+        }
       } catch (err) {
         console.error("Error al cancelar preventa:", err);
-        setError("Error al cancelar la preventa. Por favor, intente nuevamente.");
+        
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+              break;
+            case 403:
+              setError("No tiene permisos para cancelar esta preventa.");
+              break;
+            case 404:
+              setError("No se encontró la preventa solicitada.");
+              break;
+            case 500:
+              setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+              break;
+            default:
+              setError(err.response.data?.message || "Error al cancelar la preventa.");
+          }
+        } else if (err.request) {
+          setError("Error de conexión. Por favor, verifique su conexión a internet.");
+        } else {
+          setError(err.message || "Error al procesar la solicitud.");
+        }
+      } finally {
         setLoading(false);
       }
     }
@@ -272,14 +333,11 @@ const DetallesPreventa = () => {
                     label="Cancelar Preventa" 
                     onClick={handleCancelar}
                   />
-                  
-                  {user.rol === 'ADMINISTRADOR' && (
-                    <Boton 
-                      tipo="primario" 
-                      label="Confirmar Preventa" 
-                      onClick={handleConfirmar}
-                    />
-                  )}
+                  <Boton 
+                    tipo="primario" 
+                    label="Confirmar Preventa" 
+                    onClick={handleConfirmar}
+                  />
                 </div>
               )}
             </div>
