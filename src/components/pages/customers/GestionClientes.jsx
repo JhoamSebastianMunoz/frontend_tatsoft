@@ -76,13 +76,13 @@ const GestionClientes = () => {
         </div>
       </div>
     
-      <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
+      <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de clientes</h1>
           </div>
           
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4  ml-3">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">

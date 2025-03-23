@@ -43,7 +43,7 @@ const CampoTextoProfile = ({
         />
         {onEdit && (
           <FiEdit 
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600 hover:text-purple-800 cursor-pointer transition-colors" 
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#F78220] hover:text-[#d56c1b] cursor-pointer transition-colors" 
             size={15}
             onClick={onEdit}
             aria-label="Editar campo"

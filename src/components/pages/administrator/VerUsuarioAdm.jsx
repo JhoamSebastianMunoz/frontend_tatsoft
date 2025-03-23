@@ -7,6 +7,7 @@ import Encabezado from "../../../components/molecules/Encabezado";
 import AvatarUsuario from "../../../components/atoms/AvatarUsuario";
 import AlertaInhabilitar from "./AlertaInhabilitar";
 import Loading from "../../../components/Loading/Loading";
+import Sidebar from "../../organisms/Sidebar";
 
 const VerUsuarioAdm = () => {
   const { id } = useParams();
@@ -85,255 +86,166 @@ const VerUsuarioAdm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Encabezado ruta="/admin" mensaje="Perfil de Usuario" />
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 mx-4">
-          {error}
-        </div>
-      )}
-      
-      <div className="container mx-auto p-4">
-        <div className="flex flex-col md:flex-row md:gap-6">
-          {/* Vista móvil */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-4 relative">
-              <div className="flex flex-col items-center pt-5 pb-4">
-                <div className="bg-gray-200 rounded-full w-24 h-24 flex items-center justify-center overflow-hidden mb-2">
-                  {userData.foto ? (
-                    <img
-                      src={userData.foto}
-                      alt="Foto de perfil"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center text-gray-500 text-sm">
-                      <AvatarUsuario size="100" />
-                    </div>
-                  )}
-                </div>
-                
-                <Tipografia
-                  variant="h2"
-                  className="text-white text-center font-semibold my-2"
-                >
-                  {userData.nombreCompleto}
-                </Tipografia>
-                
-                <div className="mt-2 w-full flex flex-col sm:flex-row gap-2">
-                  <Botones
-                    tipo={userStatus === "activo" ? "cancelar" : "alerta"}
-                    label={buttonText}
-                    onClick={handleShowAlert}
-                    className="w-full py-2"
+    <div className="min-h-screen bg-gray-50">
+      <div className="fixed top-0 left-0 h-full">
+        <Sidebar />
+      </div>
+
+      <div className="ml-16 sm:ml-20 lg:ml-64 px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Tarjeta de Usuario */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0">
+                {userData.foto ? (
+                  <img
+                    src={userData.foto}
+                    alt="Foto de perfil"
+                    className="w-16 h-16 rounded-full object-cover"
                   />
-                  <Botones
-                    variant="primary"
-                    label="Editar Usuario"
-                    onClick={handleEditarUsuario}
-                    className="w-full py-2"
-                  />
-                </div>
+                ) : (
+                  <AvatarUsuario size="64" />
+                )}
               </div>
-            </div>
-            
-            <div className="p-4 space-y-4">
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Nombre:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
+              
+              <div className="flex-grow">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-1">
                   {userData.nombreCompleto}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  CC:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">{userData.cedula}</Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Celular:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.celular}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Correo:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.correo}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Rol:
-                </Tipografia>
-                <Tipografia className="font-medium p-1">
-                  {userData.rol}
-                </Tipografia>
-              </div>
-              <div>
-                <Tipografia variant="label" className="text-gray-700 text-base">
-                  Estado:
-                </Tipografia>
-                <Tipografia className={`font-medium p-1 ${userData.estado === "activo" ? "text-green-600" : "text-red-600"}`}>
-                  {userData.estado === "activo" ? "Activo" : "Inactivo"}
-                </Tipografia>
-              </div>
-            </div>
-          </div>
-          
-          {/* Vista desktop */}
-          <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden md:w-1/3 lg:w-1/4">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-6">
-              <div className="flex flex-col items-center">
-                <div className="rounded-full mb-3 flex items-center justify-center">
-                  {userData.foto ? (
-                    <img
-                      src={userData.foto}
-                      alt="Foto de perfil"
-                      className="w-32 h-32 object-cover rounded-full"
-                    />
-                  ) : (
-                    <AvatarUsuario size="130" />
-                  )}
-                </div>
-                <Tipografia
-                  variant="h2"
-                  className="text-white text-center text-xl lg:text-2xl font-semibold"
-                >
-                  {userData.nombreCompleto}
-                </Tipografia>
-                <Tipografia
-                  variant="body"
-                  className="text-purple-200 mt-1 text-center"
-                >
-                  {userData.rol}
-                </Tipografia>
-              </div>
-            </div>
-            
-            <div className="p-5 space-y-3">
-              <Botones
-                label="Editar Usuario"
-                onClick={handleEditarUsuario}
-                className="w-full py-2"
-              />
-              <Botones
-                label={buttonText}
-                tipo={userStatus === "activo" ? "cancelar" : "alerta"}
-                className="w-full py-2"
-                onClick={handleShowAlert}
-              />
-            </div>
-          </div>
-          
-          <div className="hidden md:block md:w-2/3 lg:w-3/4 bg-white rounded-xl shadow-lg p-6 lg:p-7">
-            <Tipografia
-              variant="h2"
-              className="text-xl font-semibold mb-5 text-purple-900"
-            >
-              Información Personal
-            </Tipografia>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Nombre Completo
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.nombreCompleto}
-                  </Tipografia>
-                </div>
-              </div>
-              
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Número de Identificación
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">{userData.cedula}</Tipografia>
-                </div>
-              </div>
-              
-              <div>
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Teléfono Celular
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.celular}
-                  </Tipografia>
-                </div>
-              </div>
-              
-              <div className="lg:col-span-2">
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Correo Electrónico
-                </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
-                  <Tipografia className="font-medium">
-                    {userData.correo}
-                  </Tipografia>
-                </div>
-              </div>
-              
-              <div className="lg:col-span-2">
-                <Tipografia
-                  variant="label"
-                  className="text-gray-500 text-sm block mb-1"
-                >
-                  Estado
-                </Tipografia>
-                <div
-                  className={`border rounded-lg p-2 lg:p-3 ${
-                    userData.estado === "activo"
-                      ? "border-green-400 bg-green-100"
-                      : "border-red-300 bg-red-50"
-                  }`}
-                >
-                  <Tipografia
-                    className={`font-medium ${
-                      userData.estado === "activo"
-                        ? "text-gray-800"
-                        : "text-red-700"
-                    }`}
-                  >
+                </h2>
+                <p className="text-gray-600 mb-2">{userData.correo}</p>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                    {userData.rol}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    userData.estado === "activo" 
+                      ? "bg-green-50 text-green-700" 
+                      : "bg-red-50 text-red-700"
+                  }`}>
                     {userData.estado === "activo" ? "Activo" : "Inactivo"}
-                  </Tipografia>
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Botones
+                  label="Editar"
+                  onClick={handleEditarUsuario}
+                  className="bg-[#F78220] hover:bg-[#F78220]/90 text-white px-4 py-2 rounded-lg"
+                />
+                <Botones
+                  label={buttonText}
+                  tipo={userStatus === "activo" ? "secundario" : "alerta"}
+                  onClick={handleShowAlert}
+                  className="border border-[#F78220] text-[#F78220] hover:bg-[#F78220]/5 px-4 py-2 rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Información Personal */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Información Personal
+            </h3>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Nombre
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2.5">
+                  <span className="text-gray-400 mr-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </span>
+                  <span className="text-gray-900">{userData.nombreCompleto?.split(' ')[0]}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Apellido
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2.5">
+                  <span className="text-gray-400 mr-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </span>
+                  <span className="text-gray-900">{userData.nombreCompleto?.split(' ')[1]}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Documento de Identidad
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2.5">
+                  <span className="text-gray-400 mr-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                  </span>
+                  <span className="text-gray-900">{userData.cedula}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Teléfono Móvil
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2.5">
+                  <span className="text-gray-400 mr-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </span>
+                  <span className="text-gray-900">{userData.celular}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Correo Electrónico
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2.5">
+                  <span className="text-gray-400 mr-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </span>
+                  <span className="text-gray-900">{userData.correo}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Rol en el Sistema
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2.5">
+                  <span className="text-gray-400 mr-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                  </span>
+                  <span className="text-gray-900">{userData.rol}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      {showAlert && (
-        <AlertaInhabilitar
-          onClose={handleCloseAlert}
-          onConfirm={handleConfirmStatusChange}
-          alertText={alertText}
-          isEnabling={userStatus !== "activo"}
-        />
-      )}
+
+      <AlertaInhabilitar
+        isOpen={showAlert}
+        onClose={handleCloseAlert}
+        onConfirm={handleConfirmStatusChange}
+        message={alertText}
+      />
+
+      {loading && <Loading message="Cargando información del usuario..." />}
     </div>
   );
 };

@@ -9,6 +9,7 @@ import CampoTexto from "../../../components/atoms/CamposTexto";
 import AlertaEdicion from "./AlertaEdicion";
 import Icono from "../../../components/atoms/Iconos";
 import Loading from "../../../components/Loading/Loading";
+import Sidebar from '../../organisms/Sidebar';
 
 const EditarUsuario = () => {
   const { id } = useParams();
@@ -130,7 +131,7 @@ const EditarUsuario = () => {
   };
 
   const handleVolver = () => {
-    navigate(`/ver/usuario/${id}`);
+    navigate(`/gestion/usuarios`);
   };
 
   const nombreStr = userData.nombre || '';
@@ -145,117 +146,129 @@ const EditarUsuario = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-50 via-indigo-50 to-white p-4 md:p-6">  
-      <div className="max-w-5xl mx-auto">
-        
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-900 to-indigo-700 p-6 relative">
-            <div className="absolute top-4 left-4 cursor-pointer" onClick={handleVolver}>
-              <Icono name="volver" size={45} color="white" />
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="mb-4 transform hover:scale-105 transition-transform duration-300">
-                <AvatarTexto nombre={fullName} size="large" />
-              </div>
-              {userData.rol && (
-                <div className="px-6 py-1.5 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
-                  <Tipografia className="text-white font-medium">{userData.rol}</Tipografia>
-                </div>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6"> 
+      <div className="fixed top-0 left-0 h-full z-10">
+        <Sidebar />
+      </div>
+      <div className="w-full pl-16 sm:pl-20 md:pl-24 lg:pl-28">
+        <div className="max-w-5xl mx-auto">
           
-          <div className="p-4 md:p-1">
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white border-b-2 border-[#F78220] p-6 relative shadow-sm">
+              <div className="absolute top-4 left-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={handleVolver}>
+                <Icono name="volver" size={45} color="#F78220" />
               </div>
-            )}
-            
-            <div className="flex justify-between items-center ">
-              <Tipografia size="xl" className="font-semibold text-gray-600 px-4 mb-1">
-                Editando Usuario
-              </Tipografia>
-              {isDirty && (
-                <div className="bg-yellow-100 px-3 py-1 rounded-full flex items-center">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-yellow-700">Cambios sin guardar</span>
+              
+              <div className="flex flex-col items-center">
+                <div className="mb-4 transform hover:scale-105 transition-transform duration-300">
+                  <AvatarTexto nombre={fullName} size="large" />
                 </div>
-              )}
+                {userData.rol && (
+                  <div className="px-6 py-1.5 bg-[#F78220] rounded-full shadow-sm">
+                    <Tipografia className="text-white font-medium text-sm">{userData.rol}</Tipografia>
+                  </div>
+                )}
+              </div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
-              <div className="shadow-md p-7 rounded-xl">
-                <Tipografia className="text-purple-700 font-medium mb-4">
-                  Información Personal
-                </Tipografia>
-                <div className="space-y-5">
-                  <CampoTextoProfile
-                    label="Nombre"
-                    value={userData.nombre}
-                    onChange={(e) => handleChange("nombre", e)}
-                    onEdit={() => {}}
-                  />
-                  <CampoTextoProfile
-                    label="Apellido"
-                    value={userData.apellido}
-                    onChange={(e) => handleChange("apellido", e)}
-                    onEdit={() => {}}
-                  />
-                  <CampoTexto
-                    label="Documento de Identidad"
-                    value={userData.cc}
-                    disabled={true}
-                    className="bg-gray-100"
-                  />
+            <div className="p-4 md:p-6">
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md mb-4">
+                  <Tipografia className="text-sm">{error}</Tipografia>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-[#F78220] rounded-full"></div>
+                  <Tipografia size="xl" className="font-semibold text-gray-800">
+                    Editando Usuario
+                  </Tipografia>
+                </div>
+                {isDirty && (
+                  <div className="bg-[#F78220]/10 px-3 py-1 rounded-full flex items-center">
+                    <div className="w-2 h-2 bg-[#F78220] rounded-full mr-2"></div>
+                    <span className="text-sm text-[#F78220] font-medium">Cambios sin guardar</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:border-[#F78220]/30 transition-all duration-300">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Tipografia className="text-[#F78220] font-medium">
+                      Información Personal
+                    </Tipografia>
+                  </div>
+                  <div className="space-y-5">
+                    <CampoTextoProfile
+                      label="Nombre"
+                      value={userData.nombre}
+                      onChange={(e) => handleChange("nombre", e)}
+                      onEdit={() => {}}
+                    />
+                    <CampoTextoProfile
+                      label="Apellido"
+                      value={userData.apellido}
+                      onChange={(e) => handleChange("apellido", e)}
+                      onEdit={() => {}}
+                    />
+                    <CampoTexto
+                      label="Documento de Identidad"
+                      value={userData.cc}
+                      disabled={true}
+                      className="bg-gray-50 border-gray-200"
+                    />
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:border-[#F78220]/30 transition-all duration-300">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Tipografia className="text-[#F78220] font-medium">
+                      Información de Contacto
+                    </Tipografia>
+                  </div>
+                  <div className="space-y-5">
+                    <CampoTextoProfile
+                      label="Celular"
+                      value={userData.celular}
+                      onChange={(e) => handleChange("celular", e)}
+                      onEdit={() => {}}
+                      type="text"
+                    />
+                    <CampoTextoProfile
+                      label="Correo Electrónico"
+                      value={userData.correo}
+                      onChange={(e) => handleChange("correo", e)}
+                      onEdit={() => {}}
+                      type="email"
+                    />
+                    <CampoTextoProfile
+                      label="Rol en la Empresa"
+                      value={userData.rol}
+                      onChange={(e) => handleChange("rol", e)}
+                      onEdit={() => {}}
+                    />
+                  </div>
                 </div>
               </div>
               
-              <div className="p-7 shadow-md rounded-xl">
-                <Tipografia className="text-purple-700 font-medium mb-4">
-                  Información de Contacto
-                </Tipografia>
-                <div className="space-y-5">
-                  <CampoTextoProfile
-                    label="Celular"
-                    value={userData.celular}
-                    onChange={(e) => handleChange("celular", e)}
-                    onEdit={() => {}}
-                    type="text"
-                  />
-                  <CampoTextoProfile
-                    label="Correo Electrónico"
-                    value={userData.correo}
-                    onChange={(e) => handleChange("correo", e)}
-                    onEdit={() => {}}
-                    type="email"
-                  />
-                  <CampoTextoProfile
-                    label="Rol en la Empresa"
-                    value={userData.rol}
-                    onChange={(e) => handleChange("rol", e)}
-                    onEdit={() => {}}
-                  />
-                </div>
+              <div className="mt-6 flex flex-col sm:flex-row justify-center w-full gap-3 pb-4">
+                <Boton
+                  tipo="primario"
+                  label={loading ? "Guardando..." : "Guardar Cambios"}
+                  onClick={handleSave}
+                  className="w-full sm:w-auto px-6 py-2 bg-[#F78220] hover:bg-[#e67316] text-white shadow-sm"
+                  disabled={loading || !isDirty}
+                />
+                <Boton
+                  tipo="secundario"
+                  label="Cancelar Cambios"
+                  onClick={handleCancel}
+                  className="w-full sm:w-auto px-6 py-2 border border-gray-200 hover:border-[#F78220] text-gray-700 hover:text-[#F78220]"
+                  disabled={loading || !isDirty}
+                />
               </div>
-            </div>
-            
-            <div className="mt-4 flex flex-col sm:flex-row justify-center w-full gap-3 pb-4">
-              <Boton
-                tipo="primario"
-                label={loading ? "Guardando..." : "Guardar Cambios"}
-                onClick={handleSave}
-                className="w-full sm:w-auto px-4 py-2"
-                disabled={loading || !isDirty}
-              />
-              <Boton
-                tipo="cancelar"
-                label="Descartar Cambios"
-                onClick={handleCancel}
-                className="w-full sm:w-auto px-4 py-2"
-                disabled={loading || !isDirty}
-              />
             </div>
           </div>
         </div>
@@ -263,9 +276,9 @@ const EditarUsuario = () => {
       
       {showAlert && (
         <AlertaEdicion
+          success={success}
+          message={success ? "Los cambios se guardaron correctamente" : "Error al guardar los cambios"}
           onClose={handleCloseAlert}
-          onConfirm={handleCloseAlert}
-          onCancel={() => setShowAlert(false)}
         />
       )}
     </div>

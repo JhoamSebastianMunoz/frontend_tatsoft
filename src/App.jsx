@@ -9,7 +9,7 @@ import CodigoVerificacion from "./components/pages/loginPage/CodigoVerification"
 import Restablecer from "./components/pages/loginPage/Restablecer";
 
 // Páginas de administrador
-import VerUsuario from "./components/pages/administrator/VerUsuarioAdm";
+import VerUsuarioAdm from "./components/pages/administrator/VerUsuarioAdm";
 import EditarUsuario from "./components/pages/administrator/EditarUsuario";
 import RegistroUsuario from "./components/pages/administrator/RegistroUsuario";
 import GestionUsuarios from "./components/pages/administrator/GestionUsuarios";
@@ -125,7 +125,7 @@ const App = () => {
         path="/ver/usuario/:id"
         element={
           <ProtectedRoute
-            element={<VerUsuario />}
+            element={<VerUsuarioAdm />}
             allowedRoles={["ADMINISTRADOR"]}
           />
         }
