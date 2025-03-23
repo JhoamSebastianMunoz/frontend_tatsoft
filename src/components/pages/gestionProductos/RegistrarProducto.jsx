@@ -275,12 +275,10 @@ const RegistrarProducto = () => {
     <div className="min-h-screen bg-gray-50 flex">  
       {/* Sidebar */}
       <Sidebar />
-      
-      <div className={`flex-1 transition-all duration-300 ${
-        !collapsed ? "md:ml-70" : "md:ml-16"
-      }`}>
-      {/* Header */}
-      <div className="text-black p-4 mb-4 ">
+      <Tipografia>
+      <div className="flex-1 pl-8 md:pl-[280px] lg:pl-[150px] w-full px-3 sm:px-4 md:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-black p-4 mb-1">
           <Tipografia 
             variant="h1" 
             size="2xl" 
@@ -291,7 +289,7 @@ const RegistrarProducto = () => {
         </div>
         
         {/* Contenido principal */}
-        <div className="p-6">
+        <div className="p-4">
           <div className="bg-white rounded-lg shadow-md p-6 w-full">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
@@ -632,6 +630,7 @@ const RegistrarProducto = () => {
           </div>
         </div>
       )}
+      </Tipografia>
     </div>
   );
 };
