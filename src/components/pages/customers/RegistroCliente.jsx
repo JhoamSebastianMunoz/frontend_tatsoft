@@ -382,6 +382,11 @@ const RegistroCliente = () => {
                         required
                       >
                         <option value="">Seleccione una zona</option>
+                        <option value="1">Zona Norte - Centro Comercial</option>
+                        <option value="2">Zona Sur - Parque Industrial</option>
+                        <option value="3">Zona Este - Área Residencial</option>
+                        <option value="4">Zona Oeste - Distrito Comercial</option>
+                        <option value="5">Zona Centro - Plaza Principal</option>
                         {zonas.map((zona) => (
                           <option key={zona.id_zona_de_trabajo} value={zona.id_zona_de_trabajo}>
                             {zona.nombre_zona_trabajo}
