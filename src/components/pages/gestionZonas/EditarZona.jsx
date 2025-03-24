@@ -107,7 +107,6 @@ const EditarZona = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Encabezado mensaje="Editar Zona" />
-
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-md p-8">
           <Tipografia>
