@@ -425,7 +425,7 @@ const Sidebar = () => {
       } fixed left-0 top-0 z-50 shadow-md`}
     >
       <Tipografia>
-        <div className="flex items-center justify-between h-14 px-4 bg-gray-100">
+        <div className="flex items-center justify-between h-14 px-4 ">
           {!collapsed ? (
             <h2 className="text-lg font-semibold text-gray-700">Menu</h2>
           ) : (

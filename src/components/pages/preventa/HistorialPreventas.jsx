@@ -371,7 +371,7 @@ const HistorialPreventas = () => {
                 <div className="divide-y divide-gray-200">
                   {preventasFiltradas.map((preventa) => (
                     <div key={preventa.id_preventa} className="hover:bg-gray-50">
-                      {/* Vista móvil */}
+                 
                       <div className="md:hidden p-3 sm:p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
@@ -418,7 +418,7 @@ const HistorialPreventas = () => {
                         </div>
                       </div>
 
-                      {/* Vista desktop */}
+               
                       <div className="hidden md:grid md:grid-cols-6 px-4 sm:px-6 py-3 sm:py-4">
                         <div className="text-sm font-medium text-gray-900">
                           #{preventa.id_preventa}
@@ -446,7 +446,7 @@ const HistorialPreventas = () => {
                           <div className="flex justify-end space-x-2">
                             <button
                               onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                              className="text-orange-600 hover:text-orange-900"
+                              className="text-gray-600 hover:text-gray-900"
                             >
                               Ver
                             </button>
