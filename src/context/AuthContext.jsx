@@ -29,8 +29,7 @@ export const AuthProvider = ({ children }) => {
             // Asegurarse de que el ID esté presente en el objeto user
             setUser({
               ...response.data,
-              id: userId,
-              id_usuario: userId // Mantener también id_usuario para compatibilidad
+              id: userId
             });
           } else {
             console.error("No se recibieron datos del perfil de usuario");
@@ -78,10 +77,9 @@ export const AuthProvider = ({ children }) => {
             // Asegurarse de que el ID esté presente en el objeto user
             setUser({
               ...userResponse.data,
-              id: userId,
-              id_usuario: userId // Mantener también id_usuario para compatibilidad
+              id: userId
             });
-          return true;
+            return true;
           } else {
             console.error("No se recibieron datos del perfil de usuario");
             return false;

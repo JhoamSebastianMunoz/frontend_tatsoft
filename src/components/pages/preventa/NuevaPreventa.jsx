@@ -4,6 +4,7 @@ import { presaleService, productService, clientService, userService } from "../.
 import { imageService } from "../../../context/services/ImageService";
 import { useAuth } from "../../../context/AuthContext";
 
+
 // Componentes
 import Encabezado from "../../../components/molecules/Encabezado";
 import Tipografia from "../../../components/atoms/Tipografia";
@@ -273,70 +274,82 @@ const NuevaPreventa = () => {
       return;
     }
 
-    // Verificar stock disponible para todos los productos
-    for (const producto of productosSeleccionados) {
-      const productoInfo = productos.find(p => p.id_producto === producto.id_producto);
-      if (producto.cantidad > (productoInfo?.cantidad_ingreso || 0)) {
-        setError(`No hay suficiente stock disponible para ${productoInfo?.nombre_producto}. Stock actual: ${productoInfo?.cantidad_ingreso || 0}`);
-        return;
-      }
-    }
-
-    // Mostrar diálogo de confirmación
-    const total = calcularSubtotal();
-    const confirmacion = window.confirm(
-      `¿Está seguro que desea crear la preventa?\n\n` +
-      `Cliente: ${clienteInfo.razon_social || clienteInfo.nombre_completo_cliente}\n` +
-      `Total: $${total.toLocaleString('es-CO')}\n` +
-      `Productos: ${productosSeleccionados.length}`
-    );
-
-    if (!confirmacion) {
-      return;
-    }
-
     try {
       setLoading(true);
       setError("");
 
+      // Verificar token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("No hay sesión activa. Por favor, inicie sesión nuevamente.");
+        return;
+      }
+
+      // Preparar datos según la documentación
       const preventaData = {
-        id_cliente: clienteInfo.id_cliente,
+        id_cliente: String(clienteInfo.id_cliente), // Convertir a string según la documentación
         detalles: productosSeleccionados.map(p => ({
-          id_producto: p.id_producto,
-          cantidad: p.cantidad
+          id_producto: Number(p.id_producto), // Asegurar que sea número
+          cantidad: Number(p.cantidad) // Asegurar que sea número
         }))
       };
 
+      console.log("Estructura de la preventa a enviar:", preventaData);
+
       const response = await presaleService.createPresale(preventaData);
       
-      setSuccess(true);
-      setTimeout(() => {
-        navigate("/preventa/historial");
-      }, 2000);
+      console.log("Respuesta completa del servidor:", response);
+
+      if (response.status === 201) {
+        setSuccess(true);
+        alert("Preventa creada exitosamente");
+        
+        // Esperar un momento antes de redirigir
+        setTimeout(() => {
+          navigate("/preventa/historial");
+        }, 1500);
+      }
     } catch (err) {
-      console.error("Error al crear preventa:", err);
+      console.error("Error detallado:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       
-      // Manejar errores específicos de la API
+      let mensajeError = "";
+      
       if (err.response) {
         switch (err.response.status) {
           case 401:
-            setError("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+            mensajeError = "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
             break;
           case 403:
-            setError("No tiene permisos para realizar esta acción.");
+            mensajeError = "No tiene permisos para realizar esta acción.";
             break;
           case 422:
-            setError(err.response.data.errors?.[0]?.msg || "Error de validación en los datos enviados.");
+            // Manejar errores de validación específicos
+            const validationError = err.response.data.errors?.[0];
+            if (validationError) {
+              mensajeError = `Error de validación: ${validationError.msg}`;
+            } else {
+              mensajeError = "Error de validación en los datos enviados.";
+            }
             break;
           case 500:
-            setError("Error interno del servidor. Por favor, intente nuevamente más tarde.");
+            mensajeError = err.response.data?.details || 
+                          "Error interno del servidor. Por favor, intente nuevamente más tarde.";
             break;
           default:
-            setError(err.response.data?.message || "Ocurrió un error al registrar la preventa. Por favor, intente nuevamente.");
+            mensajeError = err.response.data?.message || 
+                          "Error al procesar la solicitud. Por favor, intente nuevamente.";
         }
       } else {
-        setError("Error de conexión. Por favor, verifique su conexión a internet e intente nuevamente.");
+        mensajeError = "Error de conexión. Por favor, verifique su conexión a internet.";
       }
+      
+      console.error("Mensaje de error para el usuario:", mensajeError);
+      setError(mensajeError);
+      alert(mensajeError);
     } finally {
       setLoading(false);
     }
@@ -359,16 +372,47 @@ const NuevaPreventa = () => {
     setClienteInfo(null);
   };
 
+  // Función para manejar el reinicio del componente
+  const handleReset = () => {
+    setClienteInfo(null);
+    setProductosSeleccionados([]);
+    setBusquedaProducto("");
+    setBusquedaCliente("");
+    setError("");
+    setSuccess(false);
+    setZonaSeleccionada(null);
+    // Recargar los datos iniciales
+    if (user.rol === "COLABORADOR") {
+      fetchZonasAsignadas();
+    }
+    fetchProductos();
+  };
+
   if (loading && !productos.length) {
     return <Loading message="Cargando datos..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Encabezado
-        mensaje="Nueva Preventa"
+      <div className="bg-orange-600 shadow-lg">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <Tipografia 
+              variant="h1" 
+              className="text-white text-2xl font-bold"
+            >
+              Nueva Preventa
+            </Tipografia>
+            <button 
         onClick={() => navigate("/perfil")}
-      />
+              className="text-white hover:bg-orange-700 p-2 rounded-full transition-colors duration-200"
+            >
+              <Icono name="perfil" size={24} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       <SidebarAdm />
       <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
@@ -751,9 +795,12 @@ const NuevaPreventa = () => {
               {/* Botones de acción */}
               <div className="flex justify-end space-x-4 mt-6">
                 <Boton
-                  tipo="cancelar"
+                  tipo="secundario"
                   label="Cancelar"
-                  onClick={() => navigate("/perfil")}
+                  onClick={() => {
+                    handleReset(); // Reiniciar el componente
+                    window.scrollTo(0, 0); // Volver al inicio de la página
+                  }}
                 />
                 <Boton
                   tipo="primario"
