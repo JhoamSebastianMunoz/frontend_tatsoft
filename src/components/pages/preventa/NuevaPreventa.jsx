@@ -28,46 +28,67 @@ const NuevaPreventa = () => {
   const [productImages, setProductImages] = useState({});
   const [clientes, setClientes] = useState([]);
   const [busquedaCliente, setBusquedaCliente] = useState("");
+  const [zonasAsignadas, setZonasAsignadas] = useState([]);
+  const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
 
   // Cargar clientes según el rol del usuario
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         setLoading(true);
+        setClientes([]); // Resetear clientes al cambiar de zona
         let response;
 
         if (user.rol === "ADMINISTRADOR") {
-          // Si es administrador, cargar todos los clientes
           response = await clientService.getAllClients();
-        } else {
-          // Si es colaborador, cargar solo los clientes de sus zonas asignadas
-          const zonasResponse = await userService.getUserOwnZonas();
-          const clientesPromises = zonasResponse.data.zonas.map(async (zona) => {
-            const clientesResponse = await userService.getClientesZona(zona.id_zona_de_trabajo);
-            return clientesResponse.data;
-          });
-          const clientesArrays = await Promise.all(clientesPromises);
-          // Aplanar el array de clientes y eliminar duplicados
-          const clientesUnicos = new Map();
-          clientesArrays.flat().forEach(cliente => {
-            if (!clientesUnicos.has(cliente.id_cliente)) {
-              clientesUnicos.set(cliente.id_cliente, cliente);
-            }
-          });
-          response = { data: Array.from(clientesUnicos.values()) };
+        } else if (zonaSeleccionada) {
+          console.log("Obteniendo clientes para zona:", zonaSeleccionada.id_zona_de_trabajo);
+          response = await userService.getClientesZona(zonaSeleccionada.id_zona_de_trabajo);
+          
+          // Según la documentación, la respuesta incluye los clientes en response.data.clientes
+          if (response.data?.clientes) {
+            setClientes(response.data.clientes);
+            return; // Salir temprano si encontramos los clientes
+          }
         }
 
-        setClientes(response.data);
+        // Para el caso del administrador o respuestas diferentes
+        if (response?.data) {
+          setClientes(Array.isArray(response.data) ? response.data : []);
+        }
       } catch (err) {
         console.error("Error al cargar clientes:", err);
-        setError("No se pudieron cargar los clientes. Por favor, intente nuevamente.");
+        let errorMessage = "No se pudieron cargar los clientes.";
+        
+        // Manejar errores específicos según la documentación
+        if (err.response) {
+          switch (err.response.status) {
+            case 400:
+              errorMessage = "La zona especificada no existe.";
+              break;
+            case 401:
+              errorMessage = "Sesión expirada. Por favor, inicie sesión nuevamente.";
+              break;
+            case 403:
+              errorMessage = "No tiene permisos para acceder a esta información.";
+              break;
+            case 500:
+              errorMessage = "Error interno del servidor. Por favor, intente más tarde.";
+              break;
+          }
+        }
+        
+        setError(errorMessage);
+        setClientes([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClientes();
-  }, [user.rol]);
+    if (user.rol === "ADMINISTRADOR" || zonaSeleccionada) {
+      fetchClientes();
+    }
+  }, [user.rol, zonaSeleccionada]);
 
   // Cargar información del cliente si se proporciona el ID
   useEffect(() => {
@@ -128,14 +149,38 @@ const NuevaPreventa = () => {
     fetchProductos();
   }, []);
 
+  // Cargar zonas asignadas al colaborador
+  useEffect(() => {
+    const fetchZonasAsignadas = async () => {
+      try {
+        setLoading(true);
+        const response = await userService.getUserOwnZonas();
+        setZonasAsignadas(response.data.zonas || []);
+      } catch (err) {
+        console.error("Error al cargar zonas:", err);
+        setError("No se pudieron cargar las zonas asignadas.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user.rol === "COLABORADOR") {
+      fetchZonasAsignadas();
+    }
+  }, [user.rol]);
+
   // Filtrar clientes según la búsqueda
-  const clientesFiltrados = busquedaCliente.trim() === ""
-    ? clientes
-    : clientes.filter(cliente => 
-        (cliente.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-        cliente.nombre_completo_cliente?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-        cliente.telefono?.includes(busquedaCliente))
-      );
+  const clientesFiltrados = React.useMemo(() => {
+    if (!Array.isArray(clientes)) return [];
+    
+    return busquedaCliente.trim() === ""
+      ? clientes
+      : clientes.filter(cliente => 
+          (cliente?.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+           cliente?.nombre_completo_cliente?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+           cliente?.telefono?.includes(busquedaCliente))
+        );
+  }, [clientes, busquedaCliente]);
 
   // Filtrar productos según la búsqueda
   const productosFiltrados = busquedaProducto.trim() === ""
@@ -309,6 +354,11 @@ const NuevaPreventa = () => {
     setProductosSeleccionados([]);
   };
 
+  const handleSeleccionarZona = (zona) => {
+    setZonaSeleccionada(zona);
+    setClienteInfo(null);
+  };
+
   if (loading && !productos.length) {
     return <Loading message="Cargando datos..." />;
   }
@@ -337,6 +387,134 @@ const NuevaPreventa = () => {
               <Icono name="confirmar" size={20} />
               <span className="ml-2">Preventa registrada con éxito. Redirigiendo...</span>
             </div>
+          </div>
+        )}
+
+        {/* Nueva sección de Zonas Asignadas con información detallada */}
+        {user.rol === "COLABORADOR" && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <Tipografia variant="h2" size="lg" className="text-orange-700 font-bold">
+                Zonas Asignadas
+              </Tipografia>
+              <div className="text-sm text-gray-600">
+                {zonasAsignadas.length} zonas disponibles
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-4">
+                <Loading message="Cargando zonas..." />
+              </div>
+            ) : zonasAsignadas.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {zonasAsignadas.map((zona) => (
+                  <div
+                    key={zona.id_zona_de_trabajo}
+                    onClick={() => handleSeleccionarZona(zona)}
+                    className={`
+                      border rounded-lg p-4 cursor-pointer transition-all duration-200
+                      ${zonaSeleccionada?.id_zona_de_trabajo === zona.id_zona_de_trabajo
+                        ? 'bg-orange-50 border-orange-500 shadow-md'
+                        : 'hover:shadow-md hover:border-orange-300'
+                      }
+                    `}
+                  >
+                    {/* Encabezado de la zona */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex-grow">
+                        <Tipografia className="font-medium text-lg mb-1">
+                          {zona.nombre_zona_trabajo}
+                        </Tipografia>
+                        {zona.ciudad && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Icono name="ubicacion" size={16} className="mr-1" />
+                            <span>{zona.ciudad}</span>
+                          </div>
+                        )}
+                      </div>
+                      {zonaSeleccionada?.id_zona_de_trabajo === zona.id_zona_de_trabajo && (
+                        <div className="text-orange-500">
+                          <Icono name="confirmar" size={24} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Detalles de la zona */}
+                    <div className="space-y-2 border-t border-gray-100 pt-3">
+                      {/* Descripción */}
+                      {zona.descripcion && (
+                        <div className="text-sm">
+                          <Tipografia className="text-gray-600 line-clamp-2">
+                            {zona.descripcion}
+                          </Tipografia>
+                        </div>
+                      )}
+
+                      {/* Información adicional */}
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        {zona.departamento && (
+                          <div>
+                            <Tipografia className="text-gray-500 text-xs">
+                              Departamento
+                            </Tipografia>
+                            <Tipografia className="text-gray-700">
+                              {zona.departamento}
+                            </Tipografia>
+                          </div>
+                        )}
+
+                        {zona.municipio && (
+                          <div>
+                            <Tipografia className="text-gray-500 text-xs">
+                              Municipio
+                            </Tipografia>
+                            <Tipografia className="text-gray-700">
+                              {zona.municipio}
+                            </Tipografia>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Coordenadas */}
+                      {(zona.latitud || zona.longitud) && (
+                        <div className="text-xs text-gray-500 flex items-center mt-2">
+                          <Icono name="ubicacion" size={14} className="mr-1" />
+                          <span>
+                            Lat: {zona.latitud}, Long: {zona.longitud}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Estado de la zona */}
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                        {zona.estado && (
+                          <div className={`text-xs px-2 py-1 rounded-full ${
+                            zona.estado === 'Activa' 
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {zona.estado}
+                          </div>
+                        )}
+                        
+                        {zona.cantidad_clientes !== undefined && (
+                          <div className="text-xs text-gray-600">
+                            {zona.cantidad_clientes} clientes
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <Tipografia className="text-gray-500">
+                  No hay zonas asignadas disponibles
+                </Tipografia>
+              </div>
+            )}
           </div>
         )}
 
@@ -381,30 +559,39 @@ const NuevaPreventa = () => {
                   onChange={(e) => setBusquedaCliente(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {clientesFiltrados.map((cliente) => (
-                  <div
-                    key={cliente.id_cliente}
-                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white hover:bg-gray-50"
-                    onClick={() => handleSeleccionarCliente(cliente)}
-                  >
-                    <div className="space-y-2">
-                      <Tipografia className="font-medium break-words">
-                        {cliente.razon_social || cliente.nombre_completo_cliente}
-                      </Tipografia>
-                      <Tipografia className="text-sm text-gray-600 break-words">
-                        {cliente.telefono}
-                      </Tipografia>
-                      <Tipografia className="text-sm text-gray-600 break-words line-clamp-2">
-                        {cliente.direccion}
-                      </Tipografia>
+              {!loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.isArray(clientesFiltrados) && clientesFiltrados.length > 0 ? (
+                    clientesFiltrados.map((cliente) => (
+                      <div
+                        key={cliente.id_cliente}
+                        className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white hover:bg-gray-50"
+                        onClick={() => handleSeleccionarCliente(cliente)}
+                      >
+                        <div className="space-y-2">
+                          <Tipografia className="font-medium break-words">
+                            {cliente.razon_social || cliente.nombre_completo_cliente}
+                          </Tipografia>
+                          <Tipografia className="text-sm text-gray-600 break-words">
+                            {cliente.telefono}
+                          </Tipografia>
+                          <Tipografia className="text-sm text-gray-600 break-words line-clamp-2">
+                            {cliente.direccion}
+                          </Tipografia>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-4 text-gray-500">
+                      {!zonaSeleccionada && user.rol === "COLABORADOR" 
+                        ? "Seleccione una zona para ver sus clientes"
+                        : "No se encontraron clientes en esta zona"}
                     </div>
-                  </div>
-                ))}
-              </div>
-              {clientesFiltrados.length === 0 && (
-                <div className="text-center py-4 text-gray-500">
-                  No se encontraron clientes con ese criterio de búsqueda
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Loading message="Cargando clientes..." />
                 </div>
               )}
             </div>
@@ -456,14 +643,14 @@ const NuevaPreventa = () => {
                       
                       <div className="space-y-2">
                         <Tipografia className="font-medium break-words line-clamp-2">
-                          {producto.nombre_producto}
-                        </Tipografia>
+                        {producto.nombre_producto}
+                      </Tipografia>
                         <Tipografia className="text-purple-600 font-bold">
-                          ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                        </Tipografia>
+                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                      </Tipografia>
                         <Tipografia className="text-sm text-gray-500">
-                          Stock: {producto.cantidad_ingreso || 0}
-                        </Tipografia>
+                        Stock: {producto.cantidad_ingreso || 0}
+                      </Tipografia>
                       </div>
                     </div>
                     <Boton
@@ -517,9 +704,9 @@ const NuevaPreventa = () => {
                     
                     <div className="flex-grow min-w-0">
                       <Tipografia className="font-medium break-words">{producto.nombre_producto}</Tipografia>
-                      <Tipografia className="text-purple-600">
-                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                      </Tipografia>
+                    <Tipografia className="text-purple-600">
+                      ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                    </Tipografia>
                     </div>
                   </div>
                   

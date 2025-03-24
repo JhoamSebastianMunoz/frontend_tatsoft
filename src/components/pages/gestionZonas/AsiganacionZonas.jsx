@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { userService, areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
+import Icono from "../../../components/atoms/Iconos";
 
 const AsignacionZonas = () => {
   const navigate = useNavigate();
@@ -97,8 +98,6 @@ const AsignacionZonas = () => {
       setLoading(true);
       
       // Llamada a la API para asignar zonas a los colaboradores seleccionados
-      // La API espera un arreglo de IDs de zona, pero como estamos asignando colaboradores a una zona,
-      // enviamos el array de IDs de colaboradores al ID de zona específico
       await userService.assignZonasToUser(id, selectedColaboradores);
       
       alert(`Colaboradores asignados con éxito a ${zonaNombre}`);
@@ -131,12 +130,12 @@ const AsignacionZonas = () => {
   return (
     <div className="w-screen h-screen flex flex-col bg-white">
       {/* Header */}
-      <div className="bg-purple-600 text-white p-4 flex items-center justify-between">
+      <div className="bg-orange-600 text-white p-4 flex items-center justify-between">
         <button
           onClick={() => navigate(`/gestion-zonas/colaboradores/${id}`)}
-          className="text-white flex items-center justify-center rounded-full bg-white bg-opacity-30 h-10 w-10"
+          className="text-white flex items-center justify-center rounded-full bg-white bg-opacity-30 h-10 w-10 hover:bg-opacity-40 transition-all duration-200"
         >
-          <span className="text-2xl">&#8592;</span>
+          <Icono name="flecha-izquierda" size={24} />
         </button>
         <span className="text-xl font-medium">{zonaNombre}</span>
         <div className="w-10"></div> {/* Espacio para equilibrar el header */}
@@ -158,12 +157,10 @@ const AsignacionZonas = () => {
             placeholder="Buscar colaborador"
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full p-2 pl-4 pr-10 border rounded-full text-sm"
+            className="w-full p-2 pl-4 pr-10 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Icono name="buscar" size={20} />
           </div>
         </div>
       </div>
@@ -172,7 +169,7 @@ const AsignacionZonas = () => {
       <div className="px-6 py-2">
         <button
           onClick={handleAsignar}
-          className="bg-purple-500 text-white py-1.5 px-6 rounded-full text-sm"
+          className="bg-orange-500 text-white py-1.5 px-6 rounded-full text-sm hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={selectedColaboradores.length === 0}
         >
           Asignar
@@ -187,29 +184,29 @@ const AsignacionZonas = () => {
               {row.map((colaborador) => (
                 <div
                   key={colaborador.id}
-                  className="flex-1 border rounded-lg p-4 flex flex-row items-start"
+                  className="flex-1 border rounded-lg p-4 flex flex-row items-start hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="mr-2 mt-1">
                     <input
                       type="checkbox"
                       checked={colaborador.selected}
                       onChange={() => handleSelectColaborador(colaborador.id)}
-                      className="w-4 h-4 rounded-sm border-purple-500 text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded-sm border-orange-500 text-orange-600 focus:ring-orange-500"
                     />
                   </div>
                   <div className="flex-1">
                     <div className="mb-1">
-                      <span className="font-medium text-sm">Nombre:</span> {colaborador.nombre}
+                      <span className="font-medium text-sm text-gray-700">Nombre:</span> {colaborador.nombre}
                     </div>
                     <div className="mb-1">
-                      <span className="font-medium text-sm">Cel:</span> {colaborador.cel}
+                      <span className="font-medium text-sm text-gray-700">Cel:</span> {colaborador.cel}
                     </div>
                     <div>
-                      <span className="font-medium text-sm">Rol:</span> {colaborador.rol}
+                      <span className="font-medium text-sm text-gray-700">Rol:</span> {colaborador.rol}
                     </div>
                   </div>
                   <div className="h-full flex items-center">
-                    <div className="w-6 h-6 bg-purple-800 rounded-md"></div>
+                    <div className="w-6 h-6 bg-orange-800 rounded-md"></div>
                   </div>
                 </div>
               ))}

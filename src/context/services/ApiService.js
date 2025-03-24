@@ -76,8 +76,16 @@ export const userService = {
   getUserOwnZonas: () =>
     usersApi.get('/api/usuarios/mis-zonas'),
   
-  getClientesZona: (idZona) =>
-    usersApi.get(`/api/usuarios/getclientes-zonas/${idZona}`),
+  getClientesZona: async (zonaId) => {
+    try {
+      // Actualizar la URL según la documentación
+      const response = await usersApi.get(`/api/usuarios/getclientes-zonas/${zonaId}`);
+      return response;
+    } catch (error) {
+      console.error("Error en getClientesZona:", error);
+      throw error;
+    }
+  },
   
   removeZonaFromUser: (idUsuario, idZona) =>
     usersApi.delete(`/api/usuarios/eliminar-zona/${idUsuario}/${idZona}`),

@@ -222,7 +222,7 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<ProductList />}
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+            allowedRoles={["COLABORADOR"]}
           />
         }
       />
@@ -345,7 +345,7 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<NuevaPreventa />}
-            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+            allowedRoles={["ADMINISTRADOR","COLABORADOR"]}
           />
         }
       />
