@@ -136,11 +136,10 @@ const GestionClientes = () => {
           
 
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Buscar:
+                  Buscar
                 </label>
                 <Buscador
                   placeholder="Buscar cliente por nombre o razón social"
@@ -262,7 +261,7 @@ const GestionClientes = () => {
                     <div
                       className={`h-2 ${
                         cliente.activo
-                          ? "bg-green-500"
+                          ? "bg-slate-500"
                           : "bg-gray-100"
                       }`}
                     ></div>
@@ -336,7 +335,7 @@ const GestionClientes = () => {
                           className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                             cliente.tipo === "Mayorista"
                               ? "bg-orange-100 text-orange-800"
-                              : "bg-green-100 text-green-800"
+                              : "bg-slate-100 text-slate-800"
                           }`}
                         >
                           {cliente.tipo || "Cliente"}
@@ -425,7 +424,7 @@ const GestionClientes = () => {
               </div>
             )}
             
-            {/* Paginación - Optimizada para móvil */}
+         
             {clientesFiltrados.length > 0 && (
               <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
                 <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
