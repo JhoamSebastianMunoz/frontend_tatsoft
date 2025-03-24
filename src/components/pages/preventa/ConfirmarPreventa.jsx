@@ -148,10 +148,10 @@ const ConfirmarPreventa = () => {
       console.log("Respuesta de confirmación:", response);
       
       if (response.data?.success) {
-        setSuccess(true);
-        setTimeout(() => {
+      setSuccess(true);
+      setTimeout(() => {
           navigate("/preventa/historial");
-        }, 2000);
+      }, 2000);
       } else {
         throw new Error(response.data?.message || "No se recibió confirmación de la operación");
       }
