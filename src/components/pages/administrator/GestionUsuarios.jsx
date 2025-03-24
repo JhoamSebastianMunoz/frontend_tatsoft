@@ -218,6 +218,14 @@ const GestionUsuarios = () => {
                                   >
                                     Ver usuario
                                   </button>
+                                  {usuario.rol !== "ADMINISTRADOR" && (
+                                    <button
+                                      onClick={() => navigate(`/gestion-zonas/asignar/${usuario.id_usuario}`)}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                      Asignar zona
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => {/* Implementar lógica de inhabilitar */}}
                                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"

@@ -60,21 +60,21 @@ const RegistrarZona = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden">
-      {/* Sidebar para móvil - fixed en la parte superior */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white">
+      {/* Sidebar para móvil */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b border-gray-200">
         <Sidebar />
       </div>
 
-      {/* Sidebar para desktop - fixed en el lado izquierdo */}
+      {/* Sidebar para desktop */}
       <div className="hidden md:block fixed top-0 left-0 h-full z-20">
         <Sidebar />
       </div>
 
       {/* Contenido principal */}
-      <main className="w-full md:pl-[280px] pt-[60px] md:pt-0">
+      <main className="w-full md:pl-[280px] pt-[64px] md:pt-4 pl-10">
         <div className="px-4 md:px-6 lg:px-8">
           <Tipografia>
-            <div className="py-4 ml-10">
+            <div className="py-4">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Registrar Zona</h1>
             </div>
             {error && (

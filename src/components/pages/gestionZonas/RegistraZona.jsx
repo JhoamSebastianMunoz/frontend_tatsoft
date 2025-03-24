@@ -80,9 +80,9 @@ const RegistrarZona = () => {
       <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar />
       </div>
-      <div className="bg-slate-50 flex-1 pl-4 sm:pl-8 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-0 sm:ml-6 md:ml-10">
+      <div className="flex-1 w-full bg-slate-50 pl-20 pr-2 md:pl-20 px-3 md:px-6 lg:px-8">
         <Tipografia>
-          <div className="mt-4 mb-5">
+          <div className="mt-4 mb-5 pl-1 lg:pl-16">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
               Registrar Zona
             </h1>

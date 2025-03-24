@@ -81,8 +81,8 @@ const Sidebar = () => {
       label: "Gestión de Usuarios",
       path: "/gestion/usuarios",
       icon: "users",
-      subItems: ["Crear Usuario", "Modificar Usuario", "Eliminar Usuario"],
-      subPaths: ["/registrar/usuario", "/editar/usuario", "/ver/usuario"],
+      subItems: ["Lista de Usuarios", "Crear Usuario"],
+      subPaths: ["/gestion/usuarios", "/registrar/usuario"],
     },
     {
       name: "gest-clientes",
