@@ -66,7 +66,7 @@ export const userService = {
   deleteUser: (id) => usersApi.delete(`/api/usuarios/${id}`),
   getUserProfile: () => usersApi.get('/api/usuarios/perfil'),
   
-  // Nuevos endpoints de asignación de zonas
+  // Endpoints de asignación de zonas
   assignZonasToUser: (idZona, colaboradoresIds) =>
     usersApi.post(`/api/usuarios/asignar-zonas/${idZona}`, { zonas: colaboradoresIds }),
   
@@ -76,16 +76,8 @@ export const userService = {
   getUserOwnZonas: () =>
     usersApi.get('/api/usuarios/mis-zonas'),
   
-  getClientesZona: async (zonaId) => {
-    try {
-      // Actualizar la URL según la documentación
-      const response = await usersApi.get(`/api/usuarios/getclientes-zonas/${zonaId}`);
-      return response;
-    } catch (error) {
-      console.error("Error en getClientesZona:", error);
-      throw error;
-    }
-  },
+  getClientesZona: (idZona) =>
+    usersApi.get(`/api/usuarios/getclientes-zonas/${idZona}`),
   
   removeZonaFromUser: (idUsuario, idZona) =>
     usersApi.delete(`/api/usuarios/eliminar-zona/${idUsuario}/${idZona}`),
@@ -145,7 +137,7 @@ export const presaleService = {
   getPresaleById: (id) => presalesApi.get(`/getPresaleById/${id}`),
   getPresaleDetails: (id) => presalesApi.get(`/detailsPresale/${id}`),
   cancelPresale: (id) => presalesApi.put(`/cancelPreventa/${id}`),
-  confirmPresale: (id, data) => presalesApi.put(`/confirmPresale/${id}`, data),
+  confirmPresale: (id, returnedProducts) => presalesApi.put(`/confirmPresale/${id}`, { returnedProductos: returnedProducts }),
   updatePresale: (id, productData) => presalesApi.put(`/updatePresale/${id}`, productData),
   deletePresale: (id) => presalesApi.delete(`/deletePresale/${id}`),
     // Obtener todas las devoluciones

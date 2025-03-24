@@ -96,8 +96,8 @@ const DetallesPreventa = () => {
         console.log("Respuesta de cancelación:", response);
         
         if (response.data?.message) {
-        alert("Preventa cancelada con éxito");
-        navigate("/preventa/historial");
+          alert("Preventa cancelada con éxito");
+          navigate("/preventa/historial");
         } else {
           throw new Error("No se recibió confirmación de la cancelación");
         }
@@ -328,16 +328,20 @@ const DetallesPreventa = () => {
               {/* Acciones */}
               {detalles.estado === 'Pendiente' && (
                 <div className="flex justify-end space-x-4">
-                  <Boton 
-                    tipo="cancelar" 
-                    label="Cancelar Preventa" 
-                    onClick={handleCancelar}
-                  />
-                    <Boton 
-                      tipo="primario" 
-                      label="Confirmar Preventa" 
-                      onClick={handleConfirmar}
-                    />
+                  {user.rol === 'COLABORADOR' && (
+                    <>
+                      <Boton 
+                        tipo="cancelar" 
+                        label="Cancelar Preventa" 
+                        onClick={handleCancelar}
+                      />
+                      <Boton 
+                        tipo="primario" 
+                        label="Confirmar Preventa" 
+                        onClick={handleConfirmar}
+                      />
+                    </>
+                  )}
                 </div>
               )}
             </div>
