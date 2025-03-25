@@ -176,7 +176,6 @@ const GestionClientes = () => {
             </div>
           </div>
           
-          {/* Botones de filtro tipo con scroll horizontal en móvil - Mejorado */}
           <div className="flex overflow-x-auto pb-1 no-scrollbar p-3 bg-white rounded-lg mb-4">
             <div className="flex gap-2 min-w-max px-1">
               <button
@@ -191,31 +190,25 @@ const GestionClientes = () => {
               </button>
               <button
                 className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                  filtro === "Mayorista"
+                  filtro === "Activos"
                     ? "bg-orange-100 text-orange-700 font-medium"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
-                onClick={() => setFiltro("Mayorista")}
+                onClick={() => setFiltro("Activos")}
               >
-                Mayoristas
+                Activos
               </button>
-              <button
-                className={`px-4 py-2 whitespace-nowrap rounded-md ${
-                  filtro === "Minorista"
+              <button className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                  filtro === "Inactivos"
                     ? "bg-orange-100 text-orange-700 font-medium"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
-                onClick={() => setFiltro("Minorista")}
-              >
-                Minoristas
-              </button>
-              <button className="px-4 py-2 whitespace-nowrap rounded-md text-gray-600 hover:bg-gray-100">
+                onClick={() => setFiltro("Inactivos")}>
                 Inactivos
               </button>
             </div>
           </div>
-          
-          {/* Lista de clientes */}
+   
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <h3 className="font-medium text-black-900 mb-2 sm:mb-0">

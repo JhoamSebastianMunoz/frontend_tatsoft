@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Tipografia from "../atoms/Tipografia";
 
-
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
     const savedState = localStorage.getItem("sidebarCollapsed");
@@ -82,15 +81,15 @@ const Sidebar = () => {
       path: "/gestion/usuarios",
       icon: "users",
       subItems: ["Crear Usuario", "Modificar Usuario", "Eliminar Usuario"],
-      subPaths: ["/registrar/usuario", "/editar/usuario", "/ver/usuario"],
+      subPaths: ["/registrar/usuario", "/editar/usuario/:id", "/ver/usuario/:id"],
     },
     {
       name: "gest-clientes",
       label: "Gestión de Clientes",
       path: "/gestion/clientes",
       icon: "clients",
-      subItems: ["Lista de Clientes", "Nuevo Cliente"],
-      subPaths: ["/gestion/clientes", "/registro/cliente"],
+      subItems: [ "Nuevo Cliente"],
+      subPaths: ["/registro/cliente"],
     },
     {
       name: "gest-productos",
@@ -113,24 +112,24 @@ const Sidebar = () => {
       label: "Gestión de Zonas",
       path: "/gestion-zonas",
       icon: "zones",
-      subItems: ["Lista de Zonas", "Registrar Zona"],
-      subPaths: ["/gestion-zonas", "/registrar-zona"],
+      subItems: [ "Registrar Zona"],
+      subPaths: ["/registrar-zona"],
     },
     {
       name: "gest-acumulados",
       label: "Acumulados",
       path: "/acumulados",
       icon: "accumulated",
-      subItems: ["Reporte Acumulado"],
-      subPaths: ["/reporte-acumulado"],
+      subItems: ["Historial de ventas", "Historial de devoluciones"],
+      subPaths: ["/ventas/historial", "/devoluciones/historial"],
     },
     {
       name: "preventa",
-      label: "Gestión de Preventa",
+      label: "Historial de Preventa",
       path: "/preventa/historial",
       icon: "presale",
-      subItems: ["Historial de Preventas"],
-      subPaths: ["/preventa/historial"],
+      subItems: ["Detalles de preventa"],
+      subPaths: ["/preventa/detalles/:id"],
     },
    
   ];
@@ -424,37 +423,36 @@ const Sidebar = () => {
         collapsed ? "w-16" : "w-70"
       } fixed left-0 top-0 z-50 shadow-md`}
     >
-      <Tipografia>
-        <div className="flex items-center justify-between h-14 px-4 ">
-          {!collapsed ? (
-            <h2 className="text-lg font-semibold text-gray-700">Menu</h2>
-          ) : (
-            <div className="w-full flex justify-center"></div>
-          )}
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-md focus:outline-none text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-            aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
-          >
-            {collapsed ? renderIcon("expand", "") : renderIcon("collapse", "")}
-          </button>
-        </div>
+      <div className="flex items-center justify-between h-14 px-4 ">
+        {!collapsed ? (
+          <Tipografia className="text-xl font-semibold text-gray-700">Menu</Tipografia>
+        ) : (
+          <div className="w-full flex justify-center"></div>
+        )}
+        <button
+          onClick={toggleSidebar}
+          className="p-1.5 rounded-md focus:outline-none text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+          aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
+        >
+          {collapsed ? renderIcon("expand", "") : renderIcon("collapse", "")}
+        </button>
+      </div>
 
-        <div className="py-4 flex flex-col h-[calc(100%-6.5rem)]">
-          <nav className="px-2 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            {menuItems.map((item) => {
-              const isActive = isMenuActive(item.path, item.subPaths);
-              return (
-                <div key={item.name} className="mb-2.5">
-                  <button
-                    onClick={() => {
-                      if (collapsed) {
-                        navigate(item.path);
-                        return;
-                      }
-                      toggleMenu(item.name);
-                    }}
-                    className={`
+      <div className="py-4 flex flex-col h-[calc(100%-6.5rem)]">
+        <nav className="px-2 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          {menuItems.map((item) => {
+            const isActive = isMenuActive(item.path, item.subPaths);
+            return (
+              <div key={item.name} className="mb-2.5">
+                <button
+                  onClick={() => {
+                    if (collapsed) {
+                      navigate(item.path);
+                      return;
+                    }
+                    toggleMenu(item.name);
+                  }}
+                  className={`
                     w-full
                     ${
                       isActive
@@ -464,39 +462,41 @@ const Sidebar = () => {
                     group flex items-center py-2.5 px-3 text-sm font-medium rounded-md transition-colors duration-200
                     ${collapsed ? "justify-center" : "justify-between"}
                   `}
-                    aria-label={item.label}
-                    title={collapsed ? item.label : ""}
+                  aria-label={item.label}
+                  title={collapsed ? item.label : ""}
+                >
+                  <div
+                    className={`flex items-center ${
+                      collapsed ? "" : "space-x-3 flex-1"
+                    }`}
                   >
-                    <div
-                      className={`flex items-center ${
-                        collapsed ? "" : "space-x-3 flex-1"
-                      }`}
-                    >
-                      {renderIcon(
-                        item.icon,
-                        isActive
-                          ? "text-white"
-                          : "text-gray-500 group-hover:text-gray-700 flex-shrink-0"
-                      )}
-                      {!collapsed && (
-                        <span className="text-sm truncate">{item.label}</span>
-                      )}
-                    </div>
-
-                    {!collapsed && item.subItems && (
-                      <div
-                        className={`transform transition-transform duration-200 ${
-                          openMenu === item.name ? "rotate-180" : ""
-                        } ml-2 flex-shrink-0`}
-                      >
-                        {renderIcon("chevron-down", "w-4 h-4 text-gray-400")}
-                      </div>
+                    {renderIcon(
+                      item.icon,
+                      isActive
+                        ? "text-white"
+                        : "text-gray-500 group-hover:text-gray-700 flex-shrink-0"
                     )}
-                  </button>
+                    {!collapsed && (
+                      <Tipografia className="text-base truncate">
+                        {item.label}
+                      </Tipografia>
+                    )}
+                  </div>
 
-                  {!collapsed && (
+                  {!collapsed && item.subItems && (
                     <div
-                      className={`
+                      className={`transform transition-transform duration-200 ${
+                        openMenu === item.name ? "rotate-180" : ""
+                      } ml-2 flex-shrink-0`}
+                    >
+                      {renderIcon("chevron-down", "w-4 h-4 text-gray-400")}
+                    </div>
+                  )}
+                </button>
+
+                {!collapsed && (
+                  <div
+                    className={`
                       overflow-hidden transition-all duration-200 ease-in-out
                       ${
                         openMenu === item.name
@@ -504,14 +504,14 @@ const Sidebar = () => {
                           : "max-h-0 opacity-0"
                       }
                     `}
-                    >
-                      <div className="pl-7 pr-2 py-1.5 space-y-2">
-                        {item.subItems &&
-                          item.subItems.map((subItem, index) => (
-                            <Link
-                              key={index}
-                              to={item.subPaths[index]}
-                              className={`
+                  >
+                    <div className="pl-7 pr-2 py-1.5 space-y-2">
+                      {item.subItems &&
+                        item.subItems.map((subItem, index) => (
+                          <Link
+                            key={index}
+                            to={item.subPaths[index]}
+                            className={`
                             flex items-center py-1.5 px-2.5 text-sm rounded-md transition-colors duration-200
                             ${
                               location.pathname === item.subPaths[index]
@@ -519,27 +519,29 @@ const Sidebar = () => {
                                 : "text-black hover:bg-gray-100 hover:text-gray-800"
                             }
                           `}
-                            >
-                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2.5 flex-shrink-0"></div>
-                              <span className="truncate">{subItem}</span>
-                            </Link>
-                          ))}
-                      </div>
+                          >
+                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2.5 flex-shrink-0"></div>
+                            <Tipografia className="truncate">
+                              {subItem}
+                            </Tipografia>
+                          </Link>
+                        ))}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </nav>
-        </div>
-        <div
-          className={`px-2 ${
-            collapsed ? "flex justify-center" : "px-8"
-          } border-t border-gray-200 bg-white`}
-        >
-          <button
-            onClick={handleLogout}
-            className={`
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      </div>
+      <div
+        className={`px-2 ${
+          collapsed ? "flex justify-center" : "px-8"
+        } border-t border-gray-200 bg-white`}
+      >
+        <button
+          onClick={handleLogout}
+          className={`
       ${
         collapsed
           ? "w-10 h-10 p-0 justify-center"
@@ -549,14 +551,13 @@ const Sidebar = () => {
       bg-orange-500 hover:bg-orange-600 text-white transition-colors duration-200
       focus:outline-none focus:ring-2 focus:ring-orange-700 focus:ring-offset-1 focus:ring-offset-white
     `}
-            aria-label="Cerrar sesión"
-            title={collapsed ? "Cerrar sesión" : ""}
-          >
-            {renderIcon("logout", "text-white flex-shrink-0")}
-            {!collapsed && <span>Cerrar sesión</span>}
-          </button>
-        </div>
-      </Tipografia>
+          aria-label="Cerrar sesión"
+          title={collapsed ? "Cerrar sesión" : ""}
+        >
+          {renderIcon("logout", "text-white flex-shrink-0")}
+          {!collapsed && <Tipografia>Cerrar sesión</Tipografia>}
+        </button>
+      </div>
     </div>
   );
 };
