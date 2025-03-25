@@ -143,10 +143,10 @@ const GestionUsuarios = () => {
                     
                     <div className="flex flex-col gap-2">
                       <div className="w-full">
-                        <Tipografia className="text-gray-800 mb-1 px-1 text-sm">
+                        <Tipografia className="text-gray-800 mb-1 px-1 text-base">
                           Filtrar por rol:
                         </Tipografia>
-                        <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2">
+                        <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 mt-2">
                           {["Todos", "COLABORADOR", "ADMINISTRADOR"].map((opcion) => (
                             <button
                               key={opcion}

@@ -270,16 +270,17 @@ const EditarUsuario = () => {
                   tipo="primario"
                   label={loading ? "Guardando..." : "Guardar Cambios"}
                   onClick={handleSave}
-                  className="w-full sm:w-auto px-6 py-2 bg-[#F78220] hover:bg-[#e67316] text-white shadow-sm"
-                  disabled={loading || !isDirty}
+                  className="w-full sm:w-auto px-6 py-2 cursor-pointer "
+                  // disabled={loading || !isDirty}
                 />
                 <Boton
                   tipo="secundario"
                   label="Cancelar Cambios"
                   onClick={handleCancel}
                   className="w-full sm:w-auto px-6 py-2 border border-gray-200 hover:border-[#F78220] text-gray-700 hover:text-[#F78220]"
-                  disabled={loading || !isDirty}
+                  // disabled={loading || !isDirty}
                 />
+
               </div>
             </div>
           </div>
