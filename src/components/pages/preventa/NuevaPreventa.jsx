@@ -274,51 +274,59 @@ const NuevaPreventa = () => {
       return;
     }
 
+    // Calcular el total y formatear la información para la alerta
+    const total = calcularSubtotal();
+    const productosInfo = productosSeleccionados
+      .map(p => `- ${p.nombre_producto} (${p.cantidad} unidades) - $${(p.precio * p.cantidad).toLocaleString('es-CO')}`)
+      .join('\n');
+
+    const mensajeConfirmacion = 
+      `¿Está seguro que desea crear la siguiente preventa?\n\n` +
+      `Cliente: ${clienteInfo.razon_social || clienteInfo.nombre_completo_cliente}\n` +
+      `Productos:\n${productosInfo}\n\n` +
+      `Total: $${total.toLocaleString('es-CO')}`;
+
+    // Mostrar alerta de confirmación
+    const confirmacion = window.confirm(mensajeConfirmacion);
+
+    if (!confirmacion) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
 
-      // Verificar token
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError("No hay sesión activa. Por favor, inicie sesión nuevamente.");
-        return;
-      }
-
-      // Preparar datos según la documentación
       const preventaData = {
-        id_cliente: String(clienteInfo.id_cliente), // Convertir a string según la documentación
+        id_cliente: clienteInfo.id_cliente.toString(),
         detalles: productosSeleccionados.map(p => ({
-          id_producto: Number(p.id_producto), // Asegurar que sea número
-          cantidad: Number(p.cantidad) // Asegurar que sea número
+          id_producto: parseInt(p.id_producto),
+          cantidad: parseInt(p.cantidad)
         }))
       };
 
-      console.log("Estructura de la preventa a enviar:", preventaData);
+      console.log("Intentando crear preventa con datos:", preventaData);
 
       const response = await presaleService.createPresale(preventaData);
       
-      console.log("Respuesta completa del servidor:", response);
+      console.log("Respuesta del servidor:", response);
 
-      if (response.status === 201) {
-      setSuccess(true);
+      if (response?.status === 201) {
+        setSuccess(true);
         alert("Preventa creada exitosamente");
-        
-        // Esperar un momento antes de redirigir
-      setTimeout(() => {
-        navigate("/preventa/historial");
+        handleReset();
+        setTimeout(() => {
+          navigate("/preventa/historial");
         }, 1500);
       }
     } catch (err) {
-      console.error("Error detallado:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
+      console.error("Error completo:", err);
       
       let mensajeError = "";
       
-      if (err.response) {
+      if (err.message?.includes('Network Error') || err.message?.includes('CORS')) {
+        mensajeError = "Error de conexión con el servidor. Por favor, contacte al administrador del sistema.";
+      } else if (err.response) {
         switch (err.response.status) {
           case 401:
             mensajeError = "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
@@ -327,13 +335,10 @@ const NuevaPreventa = () => {
             mensajeError = "No tiene permisos para realizar esta acción.";
             break;
           case 422:
-            // Manejar errores de validación específicos
             const validationError = err.response.data.errors?.[0];
-            if (validationError) {
-              mensajeError = `Error de validación: ${validationError.msg}`;
-            } else {
-              mensajeError = "Error de validación en los datos enviados.";
-            }
+            mensajeError = validationError ? 
+              `Error de validación: ${validationError.msg}` : 
+              "Error de validación en los datos enviados.";
             break;
           case 500:
             mensajeError = err.response.data?.details || 
@@ -344,10 +349,9 @@ const NuevaPreventa = () => {
                           "Error al procesar la solicitud. Por favor, intente nuevamente.";
         }
       } else {
-        mensajeError = "Error de conexión. Por favor, verifique su conexión a internet.";
+        mensajeError = "Error inesperado. Por favor, intente nuevamente más tarde.";
       }
       
-      console.error("Mensaje de error para el usuario:", mensajeError);
       setError(mensajeError);
       alert(mensajeError);
     } finally {
