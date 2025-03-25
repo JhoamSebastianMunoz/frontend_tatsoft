@@ -39,6 +39,7 @@ const AlertaEdicion = ({ onClose, onConfirm, onCancel }) => {
             />
             <Boton
               label="Confirmar"
+              tipo="primario"
               onClick={handleConfirmar}
               className="w-full sm:flex-1 text-sm sm:text-base py-2"
             />

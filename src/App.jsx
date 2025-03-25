@@ -305,7 +305,7 @@ const App = () => {
         }
       />
       <Route
-        path="/editar/cliente/:id"
+        path="/editar-cliente/:id"
         element={
           <ProtectedRoute
             element={<EditarCliente />}

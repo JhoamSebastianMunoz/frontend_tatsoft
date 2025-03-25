@@ -92,8 +92,8 @@ const Sidebar = () => {
       label: "Mi Perfil",
       path: "/perfil",
       icon: "profile",
-      subItems: ["Ver Perfil", "Editar Perfil"],
-      subPaths: ["/perfil", "/editar-perfil"],
+      subItems: ["Editar Perfil"],
+      subPaths: ["/editar/usuario/:id"],
     },
     {
       name: "gest-usuarios",

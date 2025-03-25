@@ -138,7 +138,7 @@ const GestionClientes = () => {
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-base font-medium text-gray-700 mb-1">
                   Buscar
                 </label>
                 <Buscador
@@ -287,7 +287,7 @@ const GestionClientes = () => {
                             <li
                               className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
                               onClick={() => {
-                                navigate(`/editar-cliente/${cliente.id_cliente}`);
+                                navigate(`/editar-cliente/:id${cliente.id_cliente}`);
                                 setMenuAbierto(null);
                               }}
                             >
