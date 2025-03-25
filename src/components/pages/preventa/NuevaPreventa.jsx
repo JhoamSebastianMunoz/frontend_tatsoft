@@ -331,10 +331,10 @@ const NuevaPreventa = () => {
 
       // Asegurar el formato correcto de los datos
       const preventaData = {
-        id_cliente: clienteInfo.id_cliente.toString(),
+        id_cliente: String(clienteInfo.id_cliente),
         detalles: productosSeleccionados.map(p => ({
-          id_producto: parseInt(p.id_producto, 10),
-          cantidad: parseInt(p.cantidad, 10)
+          id_producto: Number(p.id_producto),
+          cantidad: Number(p.cantidad)
         }))
       };
 
@@ -359,13 +359,14 @@ const NuevaPreventa = () => {
       // Usar una petición directa con axios para depuración
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        '/presales-api/registerPresale',
+        'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net/registerPresale',
         preventaData,
         {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-          }
+          },
+          timeout: 10000
         }
       );
       
@@ -379,7 +380,9 @@ const NuevaPreventa = () => {
       }
     } catch (err) {
       console.error("Error completo:", err);
-      
+      if (err.response && err.response.data) {
+        console.log("Respuesta del servidor:", JSON.stringify(err.response.data, null, 2));
+      }
       let mensajeError = "";
       
       // Manejo específico según la documentación
