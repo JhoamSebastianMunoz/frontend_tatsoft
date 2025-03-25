@@ -454,19 +454,20 @@ const RegistrarProducto = () => {
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
                 ¿Estás seguro de que deseas cancelar?
               </Tipografia>
-              <Tipografia size="sm" className="text-center text-gray-500 mb-4">
+              <Tipografia size="base" className="text-center text-gray-600 ml-10">
                 Los cambios no guardados se perderán.
               </Tipografia>
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-3">
                 <Boton
-                  tipo="cancelar"
-                  label="No, continuar editando"
+                  tipo="primario"
+                  label="Seguir editando"
+                  size="small"
                   onClick={() => setShowCancelarAlerta(false)}
                   className="w-full sm:w-[200px] h-[45px] order-2 sm:order-1"
                 />
                 <Boton
-                  tipo="primario"
-                  label="Sí, cancelar"
+                  tipo="secundario"
+                  label="Cancelar"
                   onClick={confirmarCancelar}
                   className="w-full sm:w-[200px] h-[45px] order-1 sm:order-2"
                 />
