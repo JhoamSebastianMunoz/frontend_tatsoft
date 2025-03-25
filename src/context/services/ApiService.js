@@ -132,21 +132,24 @@ export const productService = {
 export const presaleService = {
   createPresale: async (presaleData) => {
     try {
-      // Determinar URL base según entorno
-      const baseUrl = process.env.NODE_ENV === 'production' 
+      // Determinar si estamos en producción o desarrollo
+      const isProduction = window.location.hostname !== 'localhost';
+      
+      // URL base según el ambiente
+      const baseUrl = isProduction 
         ? 'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net'
         : '';
       
-      console.log('URL base para preventas:', baseUrl);
+      console.log('URL base:', baseUrl);
       console.log('Datos a enviar:', presaleData);
       
-      // Obtener el token
+      // Obtener token de autenticación
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No hay token disponible. Inicie sesión nuevamente.');
       }
       
-      // Configurar headers
+      // Configurar la petición
       const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -154,9 +157,10 @@ export const presaleService = {
         }
       };
       
-      // Realizar la petición
+      // En el backend, las rutas están montadas directamente en la raíz
+      // No usamos el prefijo /presales-api
       const response = await axios.post(
-        `${baseUrl}/presales-api/registerPresale`, 
+        `${baseUrl}/registerPresale`, 
         presaleData,
         config
       );
@@ -166,7 +170,7 @@ export const presaleService = {
     } catch (error) {
       console.error('Error detallado en createPresale:', error);
       
-      // Información más detallada del error
+      // Logging detallado para depurar
       if (error.response) {
         console.error('Respuesta del servidor:', error.response.data);
         console.error('Status del error:', error.response.status);
@@ -181,16 +185,28 @@ export const presaleService = {
       throw error;
     }
   },
-  addProductsToPresale: (id, products) => presalesApi.post(`/addProductsPresale/${id}`, products),
+  
+  // Lo mismo para los demás métodos, quitar el prefijo /presales-api
   getAllPresales: async () => {
+    const isProduction = window.location.hostname !== 'localhost';
+    const baseUrl = isProduction ? 'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net' : '';
+    const token = localStorage.getItem('token');
+    
     try {
-      const response = await presalesApi.get('/getAllPresales');
+      const response = await axios.get(`${baseUrl}/getAllPresales`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       return response;
     } catch (error) {
-      console.error('Error en getAllPresales:', error.response || error);
+      console.error('Error en getAllPresales:', error);
       throw error;
     }
   },
+  
+  // Otros métodos siguiendo el mismo patrón
+  addProductsToPresale: (id, products) => presalesApi.post(`/addProductsPresale/${id}`, products),
   getPresalesByUser: (userId) => presalesApi.get(`/getPresalesByUser/${userId}`),
   getPresaleById: (id) => presalesApi.get(`/getPresaleById/${id}`),
   getPresaleDetails: (id) => presalesApi.get(`/detailsPresale/${id}`),

@@ -304,7 +304,7 @@ const NuevaPreventa = () => {
       return;
     }
 
-    // Mostrar diálogo de confirmación con detalles
+    // Mostrar diálogo de confirmación
     const total = calcularSubtotal();
     const productosInfo = productosSeleccionados
       .map(p => `- ${p.nombre_producto} (${p.cantidad} unidades) - $${(p.precio * p.cantidad).toLocaleString('es-CO')}`)
@@ -320,69 +320,45 @@ const NuevaPreventa = () => {
     if (!confirmacion) return;
 
     try {
-      if (!verificarToken()) {
-        setError("Su sesión ha expirado o el token no es válido. Por favor, inicie sesión nuevamente.");
-        setTimeout(() => navigate("/login"), 2000);
-        return;
-      }
-
       setLoading(true);
       setError("");
 
-      // Asegurar el formato correcto de los datos
+      // Verificar token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("No hay sesión activa. Por favor, inicie sesión nuevamente.");
+        return;
+      }
+
+      // Preparar datos en el formato exacto que espera el backend
       const preventaData = {
-        id_cliente: clienteInfo.id_cliente.toString(),
+        id_cliente: String(clienteInfo.id_cliente),
         detalles: productosSeleccionados.map(p => ({
-          id_producto: parseInt(p.id_producto, 10),
-          cantidad: parseInt(p.cantidad, 10)
+          id_producto: Number(p.id_producto),
+          cantidad: Number(p.cantidad)
         }))
       };
 
-      // Validar explícitamente la estructura
-      if (!preventaData.id_cliente) {
-        throw new Error("ID de cliente no válido");
-      }
+      console.log("Datos a enviar:", preventaData);
       
-      if (!Array.isArray(preventaData.detalles) || preventaData.detalles.length === 0) {
-        throw new Error("La lista de productos no es válida");
-      }
+      // Usar el servicio modificado
+      const response = await presaleService.createPresale(preventaData);
       
-      // Verificar cada detalle
-      preventaData.detalles.forEach((detalle, index) => {
-        if (!detalle.id_producto || !detalle.cantidad) {
-          throw new Error(`Producto #${index + 1} con datos incompletos`);
-        }
-      });
-      
-      console.log("Datos validados a enviar:", preventaData);
-      
-      // Usar una petición directa con axios para depuración
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        '/presales-api/registerPresale',
-        preventaData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      console.log("Respuesta completa:", response);
+      console.log("Respuesta del servidor:", response);
       
       if (response.status === 201) {
       setSuccess(true);
         alert("Preventa creada exitosamente");
         handleReset();
-        setTimeout(() => navigate("/preventa/historial"), 1500);
+        setTimeout(() => {
+          navigate("/preventa/historial");
+        }, 1500);
       }
     } catch (err) {
       console.error("Error completo:", err);
       
       let mensajeError = "";
       
-      // Manejo específico según la documentación
       if (err.response) {
         switch (err.response.status) {
           case 401:
@@ -392,27 +368,24 @@ const NuevaPreventa = () => {
             mensajeError = "No tiene permisos para realizar esta acción.";
             break;
           case 422:
-            // Error de validación según documentación
             const validationError = err.response.data.errors?.[0];
             mensajeError = validationError ? 
               `Error de validación: ${validationError.msg}` : 
               "Error de validación en los datos enviados.";
             break;
           case 500:
-            // Error interno del servidor puede contener más detalles
-            mensajeError = err.response.data?.details || 
-                          "Error interno del servidor. Por favor, intente nuevamente más tarde.";
-            // Log específico para depurar errores 500
-            console.error("Respuesta completa del error 500:", err.response.data);
+            mensajeError = "Error interno del servidor. Por favor, intente más tarde o contacte al administrador.";
+            // Usar información detallada para depuración
+            console.error("Detalles del error 500:", err.response.data);
             break;
           default:
             mensajeError = err.response.data?.message || 
                           "Error al procesar la solicitud. Por favor, intente nuevamente.";
         }
       } else if (err.message?.includes('Network Error')) {
-        mensajeError = "Error de conexión con el servidor. Por favor, verifique su conexión a internet o contacte al administrador.";
+        mensajeError = "Error de conexión con el servidor. Verifique su conexión a internet.";
       } else {
-        mensajeError = "Error desconocido. Por favor, intente nuevamente más tarde.";
+        mensajeError = "Error inesperado. Por favor, intente nuevamente más tarde.";
       }
       
       setError(mensajeError);

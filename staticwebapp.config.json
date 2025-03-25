@@ -1,0 +1,32 @@
+{
+  "navigationFallback": {
+    "rewrite": "index.html",
+    "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/js/*"]
+  },
+  "routes": [
+    {
+      "route": "/registerPresale",
+      "allowedRoles": ["anonymous", "authenticated"],
+      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "rewrite": "https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net/registerPresale"
+    },
+    {
+      "route": "/getAllPresales",
+      "allowedRoles": ["anonymous", "authenticated"],
+      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "rewrite": "https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net/getAllPresales"
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/login",
+      "statusCode": 302
+    }
+  },
+  "globalHeaders": {
+    "content-security-policy": "default-src https: 'unsafe-eval' 'unsafe-inline'; object-src 'none'",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  }
+} 
