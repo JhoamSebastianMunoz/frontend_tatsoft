@@ -256,12 +256,6 @@ const GestionProductos = () => {
               <ul className="py-1 text-sm text-gray-600">
                 <li
                   className="px-3 py-2 hover:bg-slate-100 cursor-pointer"
-                  onClick={() => handleVerProducto(producto.id_producto)}
-                >
-                  Ver
-                </li>
-                <li
-                  className="px-3 py-2 hover:bg-slate-100 cursor-pointer"
                   onClick={() => handleEditarProducto(producto.id_producto)}
                 >
                   Editar
@@ -680,12 +674,12 @@ const GestionProductos = () => {
             <Tipografia variant="h2" size="xl" className="text-center mb-4">
               ¿Estás seguro de que deseas eliminar este producto?
             </Tipografia>
-            <Tipografia size="sm" className="text-center text-gray-500 mb-4">
+            <Tipografia size="base" className="text-center text-gray-600 ml-5">
               Esta acción no se puede deshacer.
             </Tipografia>
-            <div className="flex justify-center space-x-3">
+            <div className="flex justify-center space-x-3 mt-2">
               <Boton
-                tipo="cancelar"
+                tipo="secundario"
                 label="Cancelar"
                 onClick={cancelarEliminacion}
               />

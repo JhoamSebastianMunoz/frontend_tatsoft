@@ -441,7 +441,7 @@ const EditarProducto = () => {
              
               <div className="flex justify-center space-x-4 mt-6">
                 <Boton
-                  tipo="cancelar"
+                  tipo="secundario"
                   label="Cancelar"
                   onClick={handleCancelar}
                 />
@@ -503,13 +503,14 @@ const EditarProducto = () => {
             </Tipografia>
             <div className="flex justify-center space-x-2">
               <Boton
-                tipo="cancelar"
-                label="No"
+                tipo="primario"
+                label="Seguir editando"
                 onClick={cancelarCancelacion}
               />
               <Boton
-                tipo="primario"
-                label="Sí, cancelar"
+                tipo="secundario"
+                size="medium"
+                label="Cancelar"
                 onClick={confirmarCancelacion}
               />
             </div>

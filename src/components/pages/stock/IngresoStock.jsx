@@ -119,10 +119,8 @@ const IngresoStock = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+      <Tipografia>
       <Sidebar />
-      
-      {/* Contenido principal */}
       <div className={`flex-1 transition-all duration-300 ${
         !collapsed ? "md:ml-70" : "md:ml-16"
       }`}>
@@ -212,8 +210,8 @@ const IngresoStock = () => {
                   </div>
                   <div className="flex flex-col justify-center items-start sm:items-end w-full sm:w-auto">
                     <Tipografia size="sm" className="text-gray-600 mb-1">Stock Actual:</Tipografia>
-                    <div className="border rounded p-2 sm:p-3 w-full sm:w-48 flex items-center justify-center bg-orange-50">
-                      <Tipografia size="xl" className="font-bold text-orange-500">{productoSeleccionado.stock}</Tipografia>
+                    <div className="border rounded p-1 sm:p-3 w-full sm:w-48 flex items-center justify-center bg-slate-50">
+                      <Tipografia size="xl" className="font-bold text-balck">{productoSeleccionado.stock}</Tipografia>
                     </div>
                   </div>
                 </div>
@@ -298,7 +296,7 @@ const IngresoStock = () => {
               <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 md:gap-4 mt-4 sm:mt-6 md:mt-8">
                 <Botones
                   label="Cancelar"
-                  tipo="cancelar"
+                  tipo="secundario"
                   onClick={handleCancelar}
                   className="w-full sm:w-auto"
                 />
@@ -319,8 +317,8 @@ const IngresoStock = () => {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-sm w-full mx-4">
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <Icono name="advertencia" size={24} className="text-red-500" />
+              <div className="flex items-center justify-center mb-4">
+                <Icono name="eliminarAlert" size={70} className="text-red-500" />
               </div>
               <Tipografia variant="h3" size="lg" className="mb-2">¿Desea cancelar el ingreso?</Tipografia>
               <Tipografia size="base" className="text-gray-600 mb-6">
@@ -329,15 +327,15 @@ const IngresoStock = () => {
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                 <Botones
                   label="Cancelar"
-                  tipo="cancelar"
+                  tipo="secundario"
                   onClick={() => setShowCancelarAlerta(false)}
-                  className="w-full sm:w-auto"
+                  
                 />
                 <Botones
                   label="Aceptar"
-                  tipo="eliminacion"
+                  tipo="primario"
                   onClick={confirmarCancelacion}
-                  className="w-full sm:w-auto"
+                  
                 />
               </div>
             </div>
@@ -353,7 +351,7 @@ const IngresoStock = () => {
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
                 <Icono name="check" size={24} className="text-green-500" />
               </div>
-              <Tipografia variant="h3" size="lg" className="mb-2">Ingreso registrado</Tipografia>
+              <Tipografia variant="h1" size="xl" className="mb-2">Ingreso registrado</Tipografia>
               <Tipografia size="base" className="text-gray-600 mb-6">
                 El ingreso se ha registrado correctamente
               </Tipografia>
@@ -369,6 +367,7 @@ const IngresoStock = () => {
           </div>
         </div>
       )}
+      </Tipografia>
     </div>
   );
 };
