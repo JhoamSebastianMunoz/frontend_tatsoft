@@ -7,6 +7,7 @@ import Loading from "../../../components/Loading/Loading";
 import Sidebar from "../../organisms/Sidebar";
 import Boton from "../../atoms/Botones";
 import Buscador from "../../molecules/Buscador";
+import { useAuth } from "../../../context/AuthContext";
 
 const scrollStyle = `
   .no-scrollbar::-webkit-scrollbar {
@@ -20,6 +21,9 @@ const scrollStyle = `
 
 const GestionZonas = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isColaborador = user && user.rol === "COLABORADOR";
+  
   const [zonas, setZonas] = useState([]);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [eliminado, setEliminado] = useState(false);
@@ -35,34 +39,59 @@ const GestionZonas = () => {
     const fetchZonas = async () => {
       try {
         setLoading(true);
-        const response = await areaService.getAllAreas();
+        setError("");
+        let response;
+        
+        if (isColaborador) {
+          console.log("Solicitando zonas para colaborador con ID:", user?.id_usuario);
+          response = await areaService.getAreasByColaborador(user?.id_usuario);
+        } else {
+          response = await areaService.getAllAreas();
+        }
+        
+        console.log("Zonas obtenidas:", response?.data);
+        
+        if (response && response.data) {
         setZonas(response.data);
         setZonasFiltradas(response.data);
+        } else {
+          console.error("Respuesta inválida:", response);
+          setError("Error en el formato de datos recibidos");
+          setZonas([]);
+          setZonasFiltradas([]);
+        }
       } catch (error) {
         console.error("Error al cargar zonas:", error);
         setError(
           "Error al cargar las zonas. Por favor, intenta de nuevo más tarde."
         );
+        setZonas([]);
+        setZonasFiltradas([]);
       } finally {
         setLoading(false);
       }
     };
 
+    if (user && user.id_usuario) {
     fetchZonas();
-  }, []);
+    } else {
+      console.log("No hay usuario autenticado o falta id_usuario");
+      setLoading(false);
+      setError("No se pudo autenticar el usuario");
+    }
+  }, [user, isColaborador]);
 
-  // Aplicar filtros cuando cambia el término de búsqueda o el tipo de filtro
   useEffect(() => {
     let resultados = zonas;
     
-    // Aplicar filtro por estado de asignación
+    if (!isColaborador) {
     if (filtro === "Asignados") {
       resultados = resultados.filter(zona => zona.asignado === true);
     } else if (filtro === "Por asignar") {
       resultados = resultados.filter(zona => !zona.asignado);
+      }
     }
     
-    // Aplicar filtro por término de búsqueda
     if (searchTerm) {
       const termino = searchTerm.toLowerCase();
       resultados = resultados.filter(zona => 
@@ -71,7 +100,7 @@ const GestionZonas = () => {
     }
     
     setZonasFiltradas(resultados);
-  }, [zonas, filtro, searchTerm]);
+  }, [zonas, filtro, searchTerm, isColaborador]);
 
   const handleEliminarClick = (zona) => {
     setZonaSeleccionada(zona);
@@ -126,6 +155,7 @@ const GestionZonas = () => {
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-2">Gestión de Zonas</h1>
           </div>
           
+          {!isColaborador && (
           <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
             <div className="p-4 flex flex-col md:flex-row justify-between items-center">
               <div className="w-full md:w-auto mb-4 md:mb-0">
@@ -150,11 +180,15 @@ const GestionZonas = () => {
               </div>
             </div>
           </div>
+          )}
 
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
+            <h2 className="text-lg font-medium mb-3 text-black">
+              {isColaborador ? "Búsqueda" : "Filtros"}
+            </h2>
             
             <div className="flex flex-col md:flex-row gap-4 mb-3">
+              {!isColaborador && (
               <div className="w-full md:w-1/2">
                 <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 mt-2">
                   {["Todos", "Asignados", "Por asignar"].map((opcion) => (
@@ -178,8 +212,9 @@ const GestionZonas = () => {
                   ))}
                 </div>
               </div>
+              )}
               
-              <div className="w-full md:w-1/2 pl-0 md:pl-4">
+              <div className={`w-full ${!isColaborador ? 'md:w-1/2 pl-0 md:pl-4' : ''}`}>
                 <div className="flex flex-col items-center md:items-start">
                   <div className="w-[200px] md:w-full">
                     <Buscador
@@ -228,9 +263,11 @@ const GestionZonas = () => {
             <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <h3 className="font-medium text-black-900 mb-2 sm:mb-0 text-center sm:text-left w-full sm:w-auto">
                 Lista de zonas
+                {!isColaborador && (
                 <span className="ml-2 text-sm font-normal text-black-700">
                   Mostrando {zonasFiltradas.length} de {zonas.length}
                 </span>
+                )}
               </h3>
             </div>
             
@@ -248,6 +285,8 @@ const GestionZonas = () => {
                           : "bg-gray-100"
                       }`}
                     ></div>
+                    
+                    {!isColaborador && (
                     <div className="absolute top-3 right-3 z-10 mr-3">
                       <button
                         onClick={() => setMenuAbierto(menuAbierto === zona.id_zona_de_trabajo ? null : zona.id_zona_de_trabajo)}
@@ -287,6 +326,7 @@ const GestionZonas = () => {
                         </div>
                       )}
                     </div>
+                    )}
                     
                     <div className="p-4 flex-grow">
                       <h3 className="font-medium text-lg text-gray-900 break-words mb-2">
@@ -311,6 +351,7 @@ const GestionZonas = () => {
                       </p>
                     </div>
                     
+                    {!isColaborador && (
                     <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 mt-auto">
                       <div className="flex justify-between items-center">
                         <Link 
@@ -321,6 +362,7 @@ const GestionZonas = () => {
                         </Link>
                       </div>
                     </div>
+                    )}
                   </div>
                 ))
               ) : (
@@ -345,6 +387,8 @@ const GestionZonas = () => {
                     No se encontraron zonas.{" "}
                     {zonas.length > 0
                       ? "Intenta con otra búsqueda."
+                      : isColaborador 
+                        ? "No tienes zonas asignadas."
                       : "Añade una nueva zona."}
                   </p>
                 </div>

@@ -94,6 +94,21 @@ export const areaService = {
   updateArea: (id, areaData) => areasApi.put(`/update-area/${id}`, areaData),
   deleteArea: (id) => areasApi.delete(`/delete-area/${id}`),
   getClientsInArea: (id) => areasApi.get(`/get_clientArea/${id}`),
+  getAreasByColaborador: async (colaboradorId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/areas/colaborador/${colaboradorId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      return response;
+    } catch (error) {
+      console.error("Error al obtener áreas del colaborador:", error);
+      throw error;
+    }
+  },
 };
 
 // Servicios de clientes
@@ -272,5 +287,86 @@ export const authService = {
   },
   resetPassword: (email, newPassword) => {
     return authApi.post('/api/reset/reset-password', { email, newPassword });
+  }
+};
+
+// Servicios para la gestión de stock
+export const stockService = {
+  // Obtener todos los ingresos de stock
+  getAllStockEntries: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/entries`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 200) {
+        return response.data.entries || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Error al obtener ingresos de stock:", error);
+      throw error;
+    }
+  },
+  
+  // Obtener usuarios que han registrado ingresos
+  getStockUsers: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 200) {
+        return response.data.users || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Error al obtener usuarios de stock:", error);
+      throw error;
+    }
+  },
+  
+  // Crear un nuevo ingreso de stock
+  createStockEntry: async (entryData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/stock/entries`, entryData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear ingreso de stock:", error);
+      throw error;
+    }
+  },
+  
+  // Obtener detalles de un ingreso específico
+  getStockEntryDetails: async (entryId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/entries/${entryId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 200) {
+        return response.data.entry || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error al obtener detalles del ingreso:", error);
+      throw error;
+    }
   }
 };
