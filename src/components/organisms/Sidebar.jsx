@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Tipografia from "../atoms/Tipografia";
@@ -9,6 +9,7 @@ const Sidebar = () => {
     return savedState ? JSON.parse(savedState) : true;
   });
   
+  const sidebarRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -26,6 +27,25 @@ const Sidebar = () => {
       setUserRole("ADMINISTRADOR");
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        !collapsed && 
+        sidebarRef.current && 
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setCollapsed(true);
+        setOpenMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [collapsed]);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -80,24 +100,24 @@ const Sidebar = () => {
       label: "Gestión de Usuarios",
       path: "/gestion/usuarios",
       icon: "users",
-      subItems: ["Crear Usuario", "Modificar Usuario", "Eliminar Usuario"],
-      subPaths: ["/registrar/usuario", "/editar/usuario/:id", "/ver/usuario/:id"],
+      subItems: ["Lista de Usuarios", "Crear Usuario"],
+      subPaths: ["/gestion/usuarios", "/registrar/usuario"],
     },
     {
       name: "gest-clientes",
       label: "Gestión de Clientes",
       path: "/gestion/clientes",
       icon: "clients",
-      subItems: [ "Nuevo Cliente"],
-      subPaths: ["/registro/cliente"],
+      subItems: [ "Lista de Clientes", "Nuevo Cliente"],
+      subPaths: ["/gestion/clientes", "/registro/cliente"],
     },
     {
       name: "gest-productos",
       label: "Gestión de Productos",
       path: "/gestion-productos",
       icon: "products",
-      subItems: ["Agregar Producto", "Categoría"],
-      subPaths: ["/registrar-producto", "/gestionar-categorias"],
+      subItems: ["Lista de Productos", "Agregar Producto", "Categoría"],
+      subPaths: ["/gestion-productos", "/registrar-producto", "/gestionar-categorias"],
     },
     {
       name: "inventario",
@@ -112,8 +132,8 @@ const Sidebar = () => {
       label: "Gestión de Zonas",
       path: "/gestion-zonas",
       icon: "zones",
-      subItems: [ "Registrar Zona"],
-      subPaths: ["/registrar-zona"],
+      subItems: [ "Lista de Zonas", "Registrar Zona"],
+      subPaths: ["/gestion-zonas", "/registrar-zona"],
     },
     {
       name: "gest-acumulados",
@@ -419,6 +439,7 @@ const Sidebar = () => {
 
   return (
     <div
+      ref={sidebarRef}
       className={`bg-white transition-all duration-300 ease-in-out h-screen ${
         collapsed ? "w-16" : "w-70"
       } fixed left-0 top-0 z-50 shadow-md`}
@@ -451,6 +472,10 @@ const Sidebar = () => {
                       return;
                     }
                     toggleMenu(item.name);
+                    if (!item.subItems) {
+                      navigate(item.path);
+                      setCollapsed(true);
+                    }
                   }}
                   className={`
                     w-full
@@ -511,6 +536,10 @@ const Sidebar = () => {
                           <Link
                             key={index}
                             to={item.subPaths[index]}
+                            onClick={() => {
+                              setCollapsed(true);
+                              setOpenMenu(null);
+                            }}
                             className={`
                             flex items-center py-1.5 px-2.5 text-sm rounded-md transition-colors duration-200
                             ${
