@@ -174,17 +174,13 @@ const HistorialVentas = () => {
 
                 {/* Etiqueta de porcentaje y "Total" alineados a la izquierda */}
                 <div className="flex items-center gap-2">
-                  <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">
-                    9%
-                  </span>
-                  <span className="text-gray-600">Total</span>
 
                   {/* Círculo naranja a la derecha */}
-                  <div className="ml-auto">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full border border-[#F78220] text-[#F78220]">
-                      ⓘ
-                    </span>
-                  </div>
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center ml-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 </div>
               </div>
             </div>
