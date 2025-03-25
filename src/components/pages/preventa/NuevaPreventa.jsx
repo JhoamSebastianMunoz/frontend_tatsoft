@@ -326,7 +326,7 @@ const NuevaPreventa = () => {
       
       // Solo si la respuesta es exitosa
       if (response && response.status === 201) {
-        setSuccess(true);
+      setSuccess(true);
         alert("Preventa creada exitosamente");
         
         // Limpiar estados directamente en lugar de llamar a handleReset
@@ -403,28 +403,15 @@ const NuevaPreventa = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-orange-600 shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Tipografia 
-              variant="h1" 
-              className="text-white text-2xl font-bold"
-            >
-              Nueva Preventa
-            </Tipografia>
-            <button 
-              onClick={() => navigate("/perfil")}
-              className="text-white hover:bg-orange-700 p-2 rounded-full transition-colors duration-200"
-            >
-              <Icono name="perfil" size={24} />
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
+      <div className="w-full bg-white shadow-sm mb-4">
+        <div className="px-2 sm:px-4 lg:px-8 py-2">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nueva Preventa</h1>
         </div>
       </div>
 
-      <SidebarAdm />
-      <div className="container mx-auto px-4 py-6">
+      <SidebarAdm/>
+      <div className="container mx-auto px-2 sm:px-4 py-2">
         {/* Alertas */}
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -444,11 +431,11 @@ const NuevaPreventa = () => {
           </div>
         )}
 
-        {/* Nueva sección de Zonas Asignadas con información detallada */}
+        {/* Zonas Asignadas */}
         {user.rol === "COLABORADOR" && (
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
-              <Tipografia variant="h2" size="lg" className="text-orange-700 font-bold">
+              <Tipografia variant="h2" className="text-orange-700 font-bold text-lg">
                 Zonas Asignadas
               </Tipografia>
               <div className="text-sm text-gray-600">
@@ -573,9 +560,9 @@ const NuevaPreventa = () => {
         )}
 
         {/* Información del cliente */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <div className="flex justify-between items-center mb-4">
-            <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold">
+            <Tipografia variant="h2" className="text-orange-700 font-bold text-lg">
               Información del Cliente
             </Tipografia>
             {clienteInfo && (
@@ -653,8 +640,8 @@ const NuevaPreventa = () => {
         </div>
 
         {/* Búsqueda de productos */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+          <Tipografia variant="h2" className="text-orange-700 font-bold text-lg mb-4">
             Productos Disponibles
           </Tipografia>
           
@@ -732,8 +719,8 @@ const NuevaPreventa = () => {
         </div>
 
         {/* Productos seleccionados */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+          <Tipografia variant="h2" className="text-orange-700 font-bold text-lg mb-4">
             Productos Seleccionados
           </Tipografia>
           {productosSeleccionados.length > 0 ? (
