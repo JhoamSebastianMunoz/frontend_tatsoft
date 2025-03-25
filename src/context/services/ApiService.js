@@ -132,14 +132,52 @@ export const productService = {
 export const presaleService = {
   createPresale: async (presaleData) => {
     try {
-      console.log('URL base:', apiUrls.presales);
-      console.log('Enviando datos de preventa:', presaleData);
+      // Determinar URL base según entorno
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net'
+        : '';
       
-      const response = await presalesApi.post('/registerPresale', presaleData);
-      console.log('Respuesta del servidor:', response);
+      console.log('URL base para preventas:', baseUrl);
+      console.log('Datos a enviar:', presaleData);
+      
+      // Obtener el token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No hay token disponible. Inicie sesión nuevamente.');
+      }
+      
+      // Configurar headers
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
+      // Realizar la petición
+      const response = await axios.post(
+        `${baseUrl}/presales-api/registerPresale`, 
+        presaleData,
+        config
+      );
+      
+      console.log('Respuesta completa:', response);
       return response;
     } catch (error) {
-      console.error('Error en createPresale:', error.response || error);
+      console.error('Error detallado en createPresale:', error);
+      
+      // Información más detallada del error
+      if (error.response) {
+        console.error('Respuesta del servidor:', error.response.data);
+        console.error('Status del error:', error.response.status);
+        console.error('Headers de la respuesta:', error.response.headers);
+      } else if (error.request) {
+        console.error('La petición fue hecha pero no se recibió respuesta');
+        console.error('Detalles de la petición:', error.request);
+      } else {
+        console.error('Error al configurar la petición:', error.message);
+      }
+      
       throw error;
     }
   },
