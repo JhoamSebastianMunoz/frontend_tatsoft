@@ -13,6 +13,8 @@ import VerUsuarioAdm from "./components/pages/administrator/VerUsuarioAdm";
 import EditarUsuario from "./components/pages/administrator/EditarUsuario";
 import RegistroUsuario from "./components/pages/administrator/RegistroUsuario";
 import GestionUsuarios from "./components/pages/administrator/GestionUsuarios";
+import ListaSolicitudes from "./components/pages/administrator/ListaSolicitudes";
+import DetalleSolicitud from "./components/pages/administrator/DetalleSolicitud";
 
 // Páginas de zonas
 import Zonas from "./components/pages/gestionZonas/Zonas";
@@ -146,6 +148,26 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<RegistroUsuario />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      
+      {/* Rutas de solicitudes */}
+      <Route
+        path="/solicitudes"
+        element={
+          <ProtectedRoute
+            element={<ListaSolicitudes />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/solicitudes/detalle/:id"
+        element={
+          <ProtectedRoute
+            element={<DetalleSolicitud />}
             allowedRoles={["ADMINISTRADOR"]}
           />
         }
