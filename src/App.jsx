@@ -53,10 +53,12 @@ import DetallesVenta from "./components/pages/ventas/DetallesVenta";
 
 // Páginas de devoluciones
 import HistorialDevoluciones from "./components/pages/devoluciones/HistorialDevoluciones";
-import DetallesDevolucion from "./components/pages/devoluciones/detalleDevoluciones"; 
-import ComparativaVentasDevoluciones from "./components/pages/devoluciones/ComparativaVentasDevoluciones"; 
+import DetallesDevolucion from "./components/pages/devoluciones/detalleDevoluciones";
+import ComparativaVentasDevoluciones from "./components/pages/devoluciones/ComparativaVentasDevoluciones";
 import ResumenDevoluciones from "./components/pages/devoluciones/ResumenDevoluciones";
- 
+
+// Páginas de acumulados
+import Acumulados from "./components/pages/Acumulado/Acumulados";
 
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
@@ -90,7 +92,7 @@ const App = () => {
       <Route path="/codigo-verificacion" element={<CodigoVerificacion />} />
       <Route path="/restablecer" element={<Restablecer />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
-      
+
       {/* Rutas de perfil */}
       <Route
         path="/perfil"
@@ -101,7 +103,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de administrador - Gestión de usuarios */}
       <Route
         path="/admin"
@@ -148,7 +150,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de gestión de zonas */}
       <Route
         path="/zonas"
@@ -186,7 +188,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Nuevas rutas de gestión de zonas y colaboradores */}
       <Route
         path="/gestion-zonas/colaboradores/:id"
@@ -215,7 +217,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de productos */}
       <Route
         path="/productos"
@@ -263,35 +265,35 @@ const App = () => {
           />
         }
       />
-        
-        {/* Rutas de Inventario */}
-<Route
-  path="/inventario"
-  element={
-    <ProtectedRoute
-      element={<HistorialIngresos />}
-      allowedRoles={["ADMINISTRADOR"]}
-    />
-  }
-/>
-<Route
-  path="/ingreso-stock"
-  element={
-    <ProtectedRoute
-      element={<IngresoStock />}
-      allowedRoles={["ADMINISTRADOR"]}
-    />
-  }
-/>
-<Route
-  path="/historial-ingresos"
-  element={
-    <ProtectedRoute
-      element={<HistorialIngresos />}
-      allowedRoles={["ADMINISTRADOR"]}
-    />
-  }
-/>  
+
+      {/* Rutas de Inventario */}
+      <Route
+        path="/inventario"
+        element={
+          <ProtectedRoute
+            element={<HistorialIngresos />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/ingreso-stock"
+        element={
+          <ProtectedRoute
+            element={<IngresoStock />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/historial-ingresos"
+        element={
+          <ProtectedRoute
+            element={<HistorialIngresos />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
       {/* Rutas de clientes */}
       <Route
         path="/ver/cliente/:id"
@@ -310,7 +312,7 @@ const App = () => {
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
-      />    
+      />
       <Route
         path="/gestion/clientes"
         element={
@@ -319,7 +321,7 @@ const App = () => {
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
-      />    
+      />
       <Route
         path="/registro/cliente"
         element={
@@ -329,23 +331,23 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de preventas */}
       <Route
-      path="/preventa"
-      element={
-        <ProtectedRoute
-        element={<Preventa />}
-        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
+        path="/preventa"
+        element={
+          <ProtectedRoute
+            element={<Preventa />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
       />
       <Route
         path="/preventa/nueva"
         element={
           <ProtectedRoute
             element={<NuevaPreventa />}
-            allowedRoles={["ADMINISTRADOR","COLABORADOR"]}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
       />
@@ -372,7 +374,7 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<ConfirmarPreventa />}
-            allowedRoles={["ADMINISTRADOR","COLABORADOR"]}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
       />
@@ -385,7 +387,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de ventas */}
       <Route
         path="/ventas/historial"
@@ -405,7 +407,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de devoluciones */}
       <Route
         path="/devoluciones/historial"
@@ -443,11 +445,24 @@ const App = () => {
           />
         }
       />
+      {/* Rutas de acumulados */} 
+      <Route
+        path="/acumulados"
+        element={
+          <ProtectedRoute
+            element={<Acumulados />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
       
+
+
+
       {/* Ruta por defecto - Redirige a página de error 404 */}
       <Route path="*" element={<Pagina404 />} />
     </Routes>
   );
 };
-   
+
 export default App;
