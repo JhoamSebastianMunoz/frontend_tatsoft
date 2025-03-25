@@ -94,6 +94,21 @@ export const areaService = {
   updateArea: (id, areaData) => areasApi.put(`/update-area/${id}`, areaData),
   deleteArea: (id) => areasApi.delete(`/delete-area/${id}`),
   getClientsInArea: (id) => areasApi.get(`/get_clientArea/${id}`),
+  getAreasByColaborador: async (colaboradorId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/areas/colaborador/${colaboradorId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      return response;
+    } catch (error) {
+      console.error("Error al obtener áreas del colaborador:", error);
+      throw error;
+    }
+  },
 };
 
 // Servicios de clientes
@@ -130,96 +145,126 @@ export const productService = {
 
 // Servicios de preventas
 export const presaleService = {
-  createPresale: async (presaleData) => {
+  createPresale: async (data) => {
     try {
-      // Determinar si estamos en producción o desarrollo
-      const isProduction = window.location.hostname !== 'localhost';
-      
-      // URL base según el ambiente
-      const baseUrl = isProduction 
-        ? 'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net'
-        : '';
-      
-      console.log('URL base:', baseUrl);
-      console.log('Datos a enviar:', presaleData);
-      
-      // Obtener token de autenticación
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No hay token disponible. Inicie sesión nuevamente.');
-      }
-      
-      // Configurar la petición
-      const config = {
+      const response = await axios.post(`${PRESALES_DIRECT_URL}/registerPresale`, data, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      };
-      
-      // En el backend, las rutas están montadas directamente en la raíz
-      // No usamos el prefijo /presales-api
-      const response = await axios.post(
-        `${baseUrl}/registerPresale`, 
-        presaleData,
-        config
-      );
-      
-      console.log('Respuesta completa:', response);
-      return response;
-    } catch (error) {
-      console.error('Error detallado en createPresale:', error);
-      
-      // Logging detallado para depurar
-      if (error.response) {
-        console.error('Respuesta del servidor:', error.response.data);
-        console.error('Status del error:', error.response.status);
-        console.error('Headers de la respuesta:', error.response.headers);
-      } else if (error.request) {
-        console.error('La petición fue hecha pero no se recibió respuesta');
-        console.error('Detalles de la petición:', error.request);
-      } else {
-        console.error('Error al configurar la petición:', error.message);
-      }
-      
-      throw error;
-    }
-  },
-  
-  // Lo mismo para los demás métodos, quitar el prefijo /presales-api
-  getAllPresales: async () => {
-    const isProduction = window.location.hostname !== 'localhost';
-    const baseUrl = isProduction ? 'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net' : '';
-    const token = localStorage.getItem('token');
-    
-    try {
-      const response = await axios.get(`${baseUrl}/getAllPresales`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       return response;
     } catch (error) {
-      console.error('Error en getAllPresales:', error);
       throw error;
     }
   },
   
-  // Otros métodos siguiendo el mismo patrón
-  addProductsToPresale: (id, products) => presalesApi.post(`/addProductsPresale/${id}`, products),
-  getPresalesByUser: (userId) => presalesApi.get(`/getPresalesByUser/${userId}`),
-  getPresaleById: (id) => presalesApi.get(`/getPresaleById/${id}`),
-  getPresaleDetails: (id) => presalesApi.get(`/detailsPresale/${id}`),
-  cancelPresale: (id) => presalesApi.put(`/cancelPreventa/${id}`),
-  confirmPresale: (id, returnedProducts) => presalesApi.put(`/confirmPresale/${id}`, { returnedProductos: returnedProducts }),
-  updatePresale: (id, productData) => presalesApi.put(`/updatePresale/${id}`, productData),
-  deletePresale: (id) => presalesApi.delete(`/deletePresale/${id}`),
-    // Obtener todas las devoluciones
-    getAllRefund: () => presalesApi.get('/getAllRefund'),
-    // Obtener detalles de una devolución específica
-    getRefundDetails: (id) => presalesApi.get(`/getRefundDetails/${id}`),
-    // Obtener una devolución por ID
-    getByIdRefund: (id) => presalesApi.get(`/getByIdRefund/${id}`),
+  getAllPresales: async () => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/getAllPresales`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  getPresaleDetails: async (id) => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/detailsPresale/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  confirmPresale: async (id, data) => {
+    try {
+      const response = await axios.put(`${PRESALES_DIRECT_URL}/confirmPresale/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  cancelPresale: async (id) => {
+    try {
+      const response = await axios.put(`${PRESALES_DIRECT_URL}/cancelPreventa/${id}`, {}, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Ventas
+  getAllSales: async () => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/getAllSales`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  getSaleDetails: async (id) => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/getSaleDetails/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Devoluciones
+  getAllRefund: async () => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/getAllRefund`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  getRefundDetails: async (id) => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/getRefundDetails/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 // Servicios de ventas
@@ -242,5 +287,86 @@ export const authService = {
   },
   resetPassword: (email, newPassword) => {
     return authApi.post('/api/reset/reset-password', { email, newPassword });
+  }
+};
+
+// Servicios para la gestión de stock
+export const stockService = {
+  // Obtener todos los ingresos de stock
+  getAllStockEntries: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/entries`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 200) {
+        return response.data.entries || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Error al obtener ingresos de stock:", error);
+      throw error;
+    }
+  },
+  
+  // Obtener usuarios que han registrado ingresos
+  getStockUsers: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 200) {
+        return response.data.users || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Error al obtener usuarios de stock:", error);
+      throw error;
+    }
+  },
+  
+  // Crear un nuevo ingreso de stock
+  createStockEntry: async (entryData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/stock/entries`, entryData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear ingreso de stock:", error);
+      throw error;
+    }
+  },
+  
+  // Obtener detalles de un ingreso específico
+  getStockEntryDetails: async (entryId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/entries/${entryId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 200) {
+        return response.data.entry || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error al obtener detalles del ingreso:", error);
+      throw error;
+    }
   }
 };

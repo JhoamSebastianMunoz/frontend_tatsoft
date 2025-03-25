@@ -166,7 +166,7 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<GestionZonas />}
-            allowedRoles={["ADMINISTRADOR"]}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
       />
@@ -233,7 +233,7 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<GestionProductos />}
-            allowedRoles={["ADMINISTRADOR"]}
+            allowedRoles={["ADMINISTRADOR","COLABORADOR"]}
           />
         }
       />
