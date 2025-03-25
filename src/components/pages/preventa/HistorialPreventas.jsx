@@ -22,6 +22,7 @@ const HistorialPreventas = () => {
   const [filtroEstado, setFiltroEstado] = useState("Todos");
   const [filtroColaborador, setFiltroColaborador] = useState("Todos");
   const [colaboradores, setColaboradores] = useState([]);
+  const [filtroFecha, setFiltroFecha] = useState("");
 
   // Formatear fecha para mostrar
   const formatearFecha = (fechaString) => {
@@ -193,11 +194,13 @@ const HistorialPreventas = () => {
 
   // Aplicar filtros
   const preventasFiltradas = preventas.filter(preventa => {
-    // Filtro por estado
     const cumpleFiltroEstado = filtroEstado === "Todos" || 
-      (preventa.estado && preventa.estado.toLowerCase() === filtroEstado.toLowerCase());
+      preventa.estado === filtroEstado;
     
-    // Filtro por búsqueda (incluye búsqueda por colaborador)
+    const cumpleFiltroFecha = !filtroFecha || 
+      new Date(preventa.fecha_creacion).toISOString().split('T')[0] === filtroFecha;
+    
+    // Filtro por búsqueda
     const terminoBusqueda = filtroBusqueda.toLowerCase().trim();
     const fechaFormateada = formatearFecha(preventa.fecha_creacion).toLowerCase();
     
@@ -208,18 +211,19 @@ const HistorialPreventas = () => {
       (preventa.nombre_colaborador && preventa.nombre_colaborador.toLowerCase().includes(terminoBusqueda)) ||
       (preventa.estado && preventa.estado.toLowerCase().includes(terminoBusqueda));
 
-    return cumpleFiltroEstado && cumpleBusqueda;
+    return cumpleFiltroEstado && cumpleFiltroFecha && cumpleBusqueda;
   });
 
   // Log para debugging de filtros
   useEffect(() => {
     console.log('Estado de los filtros:', {
       filtroEstado,
+      filtroFecha,
       filtroBusqueda,
       totalPreventas: preventas.length,
       totalFiltradas: preventasFiltradas.length
     });
-  }, [filtroEstado, filtroBusqueda, preventas]);
+  }, [filtroEstado, filtroFecha, filtroBusqueda, preventas]);
 
   // Ver detalles de preventa
   const verDetallesPreventa = (id) => {
@@ -310,25 +314,43 @@ const HistorialPreventas = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Tipografia className="whitespace-nowrap text-sm sm:text-base">Estado:</Tipografia>
-              <select 
+                <select 
                   className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-              >
-                <option value="Todos">Todos</option>
-                <option value="Pendiente">Pendiente</option>
-                <option value="Confirmada">Confirmada</option>
-                <option value="Cancelada">Cancelada</option>
-              </select>
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                >
+                  <option value="Todos">Todos</option>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Confirmada">Confirmada</option>
+                  <option value="Cancelada">Cancelada</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Tipografia className="whitespace-nowrap text-sm sm:text-base">Fecha:</Tipografia>
+                <input
+                  type="date"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                  className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
+                />
+                {filtroFecha && (
+                  <button
+                    onClick={() => setFiltroFecha("")}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <Icono name="eliminar" size={20} />
+                  </button>
+                )}
               </div>
               
               {user.rol === "COLABORADOR" && (
-              <Boton 
-                tipo="primario" 
-                label="Nueva Preventa" 
-                onClick={() => navigate("/preventa/nueva")}
+                <Boton 
+                  tipo="primario" 
+                  label="Nueva Preventa" 
+                  onClick={() => navigate("/preventa/nueva")}
                   className="w-full sm:w-auto"
-              />
+                />
               )}
             </div>
           </div>
