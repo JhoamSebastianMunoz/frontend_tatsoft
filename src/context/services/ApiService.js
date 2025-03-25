@@ -130,9 +130,29 @@ export const productService = {
 
 // Servicios de preventas
 export const presaleService = {
-  createPresale: (presaleData) => presalesApi.post('/registerPresale', presaleData),
+  createPresale: async (presaleData) => {
+    try {
+      console.log('URL base:', apiUrls.presales);
+      console.log('Enviando datos de preventa:', presaleData);
+      
+      const response = await presalesApi.post('/registerPresale', presaleData);
+      console.log('Respuesta del servidor:', response);
+      return response;
+    } catch (error) {
+      console.error('Error en createPresale:', error.response || error);
+      throw error;
+    }
+  },
   addProductsToPresale: (id, products) => presalesApi.post(`/addProductsPresale/${id}`, products),
-  getAllPresales: () => presalesApi.get('/getAllPresales'),
+  getAllPresales: async () => {
+    try {
+      const response = await presalesApi.get('/getAllPresales');
+      return response;
+    } catch (error) {
+      console.error('Error en getAllPresales:', error.response || error);
+      throw error;
+    }
+  },
   getPresalesByUser: (userId) => presalesApi.get(`/getPresalesByUser/${userId}`),
   getPresaleById: (id) => presalesApi.get(`/getPresaleById/${id}`),
   getPresaleDetails: (id) => presalesApi.get(`/detailsPresale/${id}`),
