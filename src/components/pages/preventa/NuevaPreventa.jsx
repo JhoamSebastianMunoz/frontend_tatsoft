@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { presaleService, productService, clientService, userService } from "../../../context/services/ApiService";
 import { imageService } from "../../../context/services/ImageService";
 import { useAuth } from "../../../context/AuthContext";
+import axios from "axios";
 
 
 // Componentes
@@ -263,6 +264,35 @@ const NuevaPreventa = () => {
     );
   };
 
+  // Añadir esta función al componente
+  const verificarToken = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return false;
+    }
+    
+    try {
+      // Verificar si el token parece válido (al menos tiene estructura JWT)
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.error("El token no tiene formato JWT válido");
+        return false;
+      }
+      
+      // Verificar si ha expirado
+      const payload = JSON.parse(atob(parts[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        console.error("El token ha expirado");
+        return false;
+      }
+      
+      return true;
+    } catch (e) {
+      console.error("Error al verificar token:", e);
+      return false;
+    }
+  };
+
   // Enviar preventa al servidor
   const handleSubmitPreventa = async () => {
     if (!clienteInfo) {
@@ -274,7 +304,7 @@ const NuevaPreventa = () => {
       return;
     }
 
-    // Calcular el total y formatear la información para la alerta
+    // Mostrar diálogo de confirmación con detalles
     const total = calcularSubtotal();
     const productosInfo = productosSeleccionados
       .map(p => `- ${p.nombre_producto} (${p.cantidad} unidades) - $${(p.precio * p.cantidad).toLocaleString('es-CO')}`)
@@ -286,47 +316,74 @@ const NuevaPreventa = () => {
       `Productos:\n${productosInfo}\n\n` +
       `Total: $${total.toLocaleString('es-CO')}`;
 
-    // Mostrar alerta de confirmación
     const confirmacion = window.confirm(mensajeConfirmacion);
-
-    if (!confirmacion) {
-      return;
-    }
+    if (!confirmacion) return;
 
     try {
+      if (!verificarToken()) {
+        setError("Su sesión ha expirado o el token no es válido. Por favor, inicie sesión nuevamente.");
+        setTimeout(() => navigate("/login"), 2000);
+        return;
+      }
+
       setLoading(true);
       setError("");
 
+      // Asegurar el formato correcto de los datos
       const preventaData = {
         id_cliente: clienteInfo.id_cliente.toString(),
         detalles: productosSeleccionados.map(p => ({
-          id_producto: parseInt(p.id_producto),
-          cantidad: parseInt(p.cantidad)
+          id_producto: parseInt(p.id_producto, 10),
+          cantidad: parseInt(p.cantidad, 10)
         }))
       };
 
-      console.log("Intentando crear preventa con datos:", preventaData);
-
-      const response = await presaleService.createPresale(preventaData);
+      // Validar explícitamente la estructura
+      if (!preventaData.id_cliente) {
+        throw new Error("ID de cliente no válido");
+      }
       
-      console.log("Respuesta del servidor:", response);
-
-      if (response?.status === 201) {
-        setSuccess(true);
+      if (!Array.isArray(preventaData.detalles) || preventaData.detalles.length === 0) {
+        throw new Error("La lista de productos no es válida");
+      }
+      
+      // Verificar cada detalle
+      preventaData.detalles.forEach((detalle, index) => {
+        if (!detalle.id_producto || !detalle.cantidad) {
+          throw new Error(`Producto #${index + 1} con datos incompletos`);
+        }
+      });
+      
+      console.log("Datos validados a enviar:", preventaData);
+      
+      // Usar una petición directa con axios para depuración
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        '/presales-api/registerPresale',
+        preventaData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      console.log("Respuesta completa:", response);
+      
+      if (response.status === 201) {
+      setSuccess(true);
         alert("Preventa creada exitosamente");
         handleReset();
-        setTimeout(() => {
-          navigate("/preventa/historial");
-        }, 1500);
+        setTimeout(() => navigate("/preventa/historial"), 1500);
       }
     } catch (err) {
       console.error("Error completo:", err);
       
       let mensajeError = "";
       
-      if (err.message?.includes('Network Error') || err.message?.includes('CORS')) {
-        mensajeError = "Error de conexión con el servidor. Por favor, contacte al administrador del sistema.";
-      } else if (err.response) {
+      // Manejo específico según la documentación
+      if (err.response) {
         switch (err.response.status) {
           case 401:
             mensajeError = "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
@@ -335,21 +392,27 @@ const NuevaPreventa = () => {
             mensajeError = "No tiene permisos para realizar esta acción.";
             break;
           case 422:
+            // Error de validación según documentación
             const validationError = err.response.data.errors?.[0];
             mensajeError = validationError ? 
               `Error de validación: ${validationError.msg}` : 
               "Error de validación en los datos enviados.";
             break;
           case 500:
+            // Error interno del servidor puede contener más detalles
             mensajeError = err.response.data?.details || 
                           "Error interno del servidor. Por favor, intente nuevamente más tarde.";
+            // Log específico para depurar errores 500
+            console.error("Respuesta completa del error 500:", err.response.data);
             break;
           default:
             mensajeError = err.response.data?.message || 
                           "Error al procesar la solicitud. Por favor, intente nuevamente.";
         }
+      } else if (err.message?.includes('Network Error')) {
+        mensajeError = "Error de conexión con el servidor. Por favor, verifique su conexión a internet o contacte al administrador.";
       } else {
-        mensajeError = "Error inesperado. Por favor, intente nuevamente más tarde.";
+        mensajeError = "Error desconocido. Por favor, intente nuevamente más tarde.";
       }
       
       setError(mensajeError);

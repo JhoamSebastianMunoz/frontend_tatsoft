@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
               ...userResponse.data,
               id: userId
             });
-            return true;
+          return true;
           } else {
             console.error("No se recibieron datos del perfil de usuario");
             return false;
