@@ -301,12 +301,12 @@ const NuevaPreventa = () => {
       console.log("Respuesta completa del servidor:", response);
 
       if (response.status === 201) {
-        setSuccess(true);
+      setSuccess(true);
         alert("Preventa creada exitosamente");
         
         // Esperar un momento antes de redirigir
-        setTimeout(() => {
-          navigate("/preventa/historial");
+      setTimeout(() => {
+        navigate("/preventa/historial");
         }, 1500);
       }
     } catch (err) {
