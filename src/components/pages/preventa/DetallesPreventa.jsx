@@ -141,30 +141,29 @@ const DetallesPreventa = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Encabezado 
-        mensaje="Detalles de Preventa" 
-        onClick={handleVolver}
-      />
-      <SidebarAdm/>
+    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
+      <div className="w-full bg-white shadow-sm mb-4">
+        <div className="px-2 sm:px-4 lg:px-8 py-2">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalles de Preventa</h1>
+        </div>
+      </div>
 
-      <div className="container mx-auto px-4 py-6">
-        {/* Alertas */}
+      <SidebarAdm/>
+      <div className="container mx-auto px-2 sm:px-4 py-2">
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
             <div className="flex items-center">
               <Icono name="eliminarAlert" size={20} />
-              <span className="ml-1">{error}</span>
+              <span className="ml-2">{error}</span>
             </div>
           </div>
         )}
 
         {detalles ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Información General */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-                <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+              <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+                <Tipografia variant="h2" className="text-orange-700 font-bold mb-4 text-lg">
                   Información General
                 </Tipografia>
                 
@@ -202,16 +201,15 @@ const DetallesPreventa = () => {
                   
                   <div>
                     <Tipografia className="text-gray-600 text-sm">Total</Tipografia>
-                    <Tipografia className="font-bold text-lg text-purple-700">
+                    <Tipografia className="font-bold text-lg text-orange-700">
                       ${Number(detalles.total).toLocaleString('es-CO')}
                     </Tipografia>
                   </div>
                 </div>
               </div>
 
-              {/* Información del Cliente */}
-              <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-                <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+              <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+                <Tipografia variant="h2" className="text-orange-700 font-bold mb-4 text-lg">
                   Información del Cliente
                 </Tipografia>
                 
@@ -239,9 +237,8 @@ const DetallesPreventa = () => {
                 </div>
               </div>
 
-              {/* Colaborador */}
               <div className="bg-white rounded-lg shadow-md p-4">
-                <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+                <Tipografia variant="h2" className="text-orange-700 font-bold mb-4 text-lg">
                   Colaborador
                 </Tipografia>
                 
@@ -254,10 +251,9 @@ const DetallesPreventa = () => {
               </div>
             </div>
 
-            {/* Productos */}
             <div className="md:col-span-2">
-              <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-                <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+              <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+                <Tipografia variant="h2" className="text-orange-700 font-bold mb-4 text-lg">
                   Productos
                 </Tipografia>
                 
@@ -311,7 +307,7 @@ const DetallesPreventa = () => {
                           <td colSpan="3" className="px-6 py-4 whitespace-nowrap text-right font-bold">
                             Total
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-purple-700">
+                          <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-orange-700">
                             ${Number(detalles.total).toLocaleString('es-CO')}
                           </td>
                         </tr>
@@ -325,21 +321,20 @@ const DetallesPreventa = () => {
                 )}
               </div>
 
-              {/* Acciones */}
               {detalles.estado === 'Pendiente' && (
                 <div className="flex justify-end space-x-4">
                   {user.rol === 'COLABORADOR' && (
                     <>
-                  <Boton 
-                    tipo="cancelar" 
-                    label="Cancelar Preventa" 
-                    onClick={handleCancelar}
-                  />
-                    <Boton 
-                      tipo="primario" 
-                      label="Confirmar Preventa" 
-                      onClick={handleConfirmar}
-                    />
+                      <Boton 
+                        tipo="secundario"
+                        label="Cancelar Preventa" 
+                        onClick={handleCancelar}
+                      />
+                      <Boton 
+                        tipo="primario"
+                        label="Confirmar Preventa" 
+                        onClick={handleConfirmar}
+                      />
                     </>
                   )}
                 </div>
@@ -353,7 +348,7 @@ const DetallesPreventa = () => {
               No se encontró la preventa solicitada
             </Tipografia>
             <Boton 
-              tipo="secundario" 
+              tipo="secundario"
               label="Volver al Historial" 
               onClick={handleVolver}
             />

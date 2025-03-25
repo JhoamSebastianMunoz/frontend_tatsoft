@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService } from '../../../context/services/ApiService';
 import { imageService } from '../../../context/services/ImageService';
@@ -6,7 +5,6 @@ import { useAuth } from '../../../context/AuthContext';
 import Tipografia from '../../../components/atoms/Tipografia';
 import Iconos from '../../../components/atoms/Iconos';
 import Botones from '../../../components/atoms/Botones';
-import Encabezado from '../../../components/molecules/Encabezado';
 import Buscador from '../../../components/molecules/Buscador';
 import Loading from '../../../components/Loading/Loading';
 import SidebarAdm from '../../organisms/Sidebar';
@@ -109,8 +107,7 @@ const ProductList = () => {
   };
 
   const handleViewProduct = (productId) => {
-    // Navegar a detalles de producto o solo mostrar más información
-    console.log('Ver producto', productId);
+    navigate(`/producto/${productId}`);
   };
 
   if (loading && products.length === 0) {
@@ -118,29 +115,26 @@ const ProductList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white overflow-x-hidden">
-      {/* Encabezado fijo */}
-      <div className="fixed top-0 w-full z-10">
-        <Encabezado mensaje="Catálogo de Productos" />
-      </div>
+    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
+      <SidebarAdm />
       
-      {/* Sidebar fijo */}
-      <div className="fixed top-0 left-0 h-full z-10">
-        <SidebarAdm />
-      </div>
-      
-      {/* Contenido principal con padding-top para no solapar con el encabezado fijo */}
-      <div className="w-full pt-16 m-1 p-4">
-        <Tipografia>
+      <Tipografia>
+        <div className="w-full bg-white shadow-sm mb-4">
+          <div className="px-2 sm:px-4 lg:px-8 py-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Catálogo de Productos</h1>
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
           {/* Contador de productos */}
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-purple-600 mb-4">
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
-                  <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
+                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {products.length} Total
                   </span>
-                  <span className="bg-purple-200 text-purple-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                  <span className="bg-transparent border border-orange-600 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full">
                     {filteredProducts.length} Filtrados
                   </span>
                 </div>
@@ -159,7 +153,7 @@ const ProductList = () => {
           
           {/* Filtros */}
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-3 text-black">Filtros</h2>
+            <h2 className="text-lg font-medium mb-3 text-gray-800">Filtros</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -177,7 +171,7 @@ const ProductList = () => {
                   Categoría:
                 </label>
                 <select
-                  className="w-full p-2 border border-purple-200 focus:ring-2 focus:ring-purple-300 focus:border-purple-500 rounded-lg"
+                  className="w-full p-2 border border-gray-300 focus:ring-2 focus:ring-orange-300 focus:border-orange-500 rounded-lg"
                   value={categoriaSeleccionada}
                   onChange={handleCategoriaChange}
                 >
@@ -201,7 +195,7 @@ const ProductList = () => {
                     setSearchTerm("");
                     setCategoriaSeleccionada("Todas");
                   }}
-                  className="text-sm text-purple-600 hover:text-purple-800 flex items-center transition-colors duration-150"
+                  className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -224,17 +218,19 @@ const ProductList = () => {
           {/* Mensaje de error */}
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-              <p className="font-medium">Error</p>
-              <p>{error}</p>
+              <div className="flex items-center">
+                <Iconos name="eliminarAlert" size={20} />
+                <span className="ml-2 text-sm sm:text-base">{error}</span>
+              </div>
             </div>
           )}
           
           {/* Lista de productos */}
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="border-b pb-3 mb-4 flex justify-between items-center">
-              <h3 className="font-medium text-black-900">
+              <h3 className="font-medium text-orange-700 text-lg sm:text-xl">
                 Productos Disponibles
-                <span className="ml-2 text-sm font-normal text-black-700">
+                <span className="ml-2 text-sm font-normal text-gray-700">
                   Mostrando {filteredProducts.length} de {products.length}
                 </span>
               </h3>
@@ -271,11 +267,11 @@ const ProductList = () => {
                       )}
                     </div>
                    
-                    <h3 className="mb-2 font-bold text-purple-900 line-clamp-2 h-14 text-lg">
+                    <h3 className="mb-2 font-bold text-gray-900 line-clamp-2 h-14 text-lg">
                       {product.nombre_producto}
                     </h3>
                    
-                    <p className="text-lg font-semibold text-purple-700 mb-2">
+                    <p className="text-lg font-semibold text-orange-700 mb-2">
                       ${parseFloat(product.precio || 0).toLocaleString('es-CO')}
                     </p>
                    
@@ -349,8 +345,8 @@ const ProductList = () => {
               </div>
             )}
           </div>
-        </Tipografia>
-      </div>
+        </div>
+      </Tipografia>
     </div>
   );
 };

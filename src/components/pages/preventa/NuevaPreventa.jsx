@@ -5,7 +5,6 @@ import { imageService } from "../../../context/services/ImageService";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 
-
 // Componentes
 import Encabezado from "../../../components/molecules/Encabezado";
 import Tipografia from "../../../components/atoms/Tipografia";
@@ -32,6 +31,68 @@ const NuevaPreventa = () => {
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [zonasAsignadas, setZonasAsignadas] = useState([]);
   const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
+
+  // Definir funciones auxiliares fuera de useEffect
+  const fetchZonasAsignadas = async () => {
+    try {
+      setLoading(true);
+      const response = await userService.getUserOwnZonas();
+      setZonasAsignadas(response.data.zonas || []);
+    } catch (err) {
+      console.error("Error al cargar zonas:", err);
+      setError("No se pudieron cargar las zonas asignadas.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProductos = async () => {
+    try {
+      setLoading(true);
+      const response = await productService.getAllProducts();
+      setProductos(response.data);
+
+      // Cargar imágenes para los productos
+      const imagePromises = response.data.map(async (producto) => {
+        if (producto.id_imagen) {
+          try {
+            const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+            if (imageUrl) {
+              return { id: producto.id_producto, url: imageUrl };
+            }
+          } catch (error) {
+            console.error('Error cargando imagen para producto', producto.id_producto, error);
+          }
+        }
+        return { id: producto.id_producto, url: null };
+      });
+      
+      const productImagesResults = await Promise.all(imagePromises);
+      const imagesMap = {};
+      productImagesResults.forEach(({ id, url }) => {
+        imagesMap[id] = url;
+      });
+      
+      setProductImages(imagesMap);
+    } catch (err) {
+      console.error("Error al cargar productos:", err);
+      setError("No se pudieron cargar los productos disponibles.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar zonas al inicio
+  useEffect(() => {
+    if (user.rol === "COLABORADOR") {
+      fetchZonasAsignadas();
+    }
+  }, [user.rol]);
+
+  // Cargar productos al inicio
+  useEffect(() => {
+    fetchProductos();
+  }, []);
 
   // Cargar clientes según el rol del usuario
   useEffect(() => {
@@ -110,66 +171,6 @@ const NuevaPreventa = () => {
     };
     fetchClienteInfo();
   }, [clientId]);
-
-  // Cargar productos disponibles y sus imágenes
-  useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        setLoading(true);
-        const response = await productService.getAllProducts();
-        setProductos(response.data);
-
-        // Cargar imágenes para los productos
-        const imagePromises = response.data.map(async (producto) => {
-          if (producto.id_imagen) {
-            try {
-              const imageUrl = await imageService.getImageUrl(producto.id_imagen);
-              if (imageUrl) {
-                return { id: producto.id_producto, url: imageUrl };
-              }
-            } catch (error) {
-              console.error('Error cargando imagen para producto', producto.id_producto, error);
-            }
-          }
-          return { id: producto.id_producto, url: null };
-        });
-        
-        const productImagesResults = await Promise.all(imagePromises);
-        const imagesMap = {};
-        productImagesResults.forEach(({ id, url }) => {
-          imagesMap[id] = url;
-        });
-        
-        setProductImages(imagesMap);
-      } catch (err) {
-        console.error("Error al cargar productos:", err);
-        setError("No se pudieron cargar los productos disponibles.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProductos();
-  }, []);
-
-  // Cargar zonas asignadas al colaborador
-  useEffect(() => {
-    const fetchZonasAsignadas = async () => {
-      try {
-        setLoading(true);
-        const response = await userService.getUserOwnZonas();
-        setZonasAsignadas(response.data.zonas || []);
-      } catch (err) {
-        console.error("Error al cargar zonas:", err);
-        setError("No se pudieron cargar las zonas asignadas.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user.rol === "COLABORADOR") {
-      fetchZonasAsignadas();
-    }
-  }, [user.rol]);
 
   // Filtrar clientes según la búsqueda
   const clientesFiltrados = React.useMemo(() => {
@@ -264,33 +265,21 @@ const NuevaPreventa = () => {
     );
   };
 
-  // Añadir esta función al componente
-  const verificarToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return false;
-    }
+  // Función para manejar el reinicio del componente
+  const handleReset = () => {
+    setClienteInfo(null);
+    setProductosSeleccionados([]);
+    setBusquedaProducto("");
+    setBusquedaCliente("");
+    setError("");
+    setSuccess(false);
+    setZonaSeleccionada(null);
     
-    try {
-      // Verificar si el token parece válido (al menos tiene estructura JWT)
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        console.error("El token no tiene formato JWT válido");
-        return false;
-      }
-      
-      // Verificar si ha expirado
-      const payload = JSON.parse(atob(parts[1]));
-      if (payload.exp && payload.exp * 1000 < Date.now()) {
-        console.error("El token ha expirado");
-        return false;
-      }
-      
-      return true;
-    } catch (e) {
-      console.error("Error al verificar token:", e);
-      return false;
+    // Llamamos a las funciones para recargar datos
+    if (user.rol === "COLABORADOR") {
+      fetchZonasAsignadas();
     }
+    fetchProductos();
   };
 
   // Enviar preventa al servidor
@@ -304,7 +293,7 @@ const NuevaPreventa = () => {
       return;
     }
 
-    // Mostrar diálogo de confirmación con detalles
+    // Mostrar diálogo de confirmación
     const total = calcularSubtotal();
     const productosInfo = productosSeleccionados
       .map(p => `- ${p.nombre_producto} (${p.cantidad} unidades) - $${(p.precio * p.cantidad).toLocaleString('es-CO')}`)
@@ -320,16 +309,10 @@ const NuevaPreventa = () => {
     if (!confirmacion) return;
 
     try {
-      if (!verificarToken()) {
-        setError("Su sesión ha expirado o el token no es válido. Por favor, inicie sesión nuevamente.");
-        setTimeout(() => navigate("/login"), 2000);
-        return;
-      }
-
       setLoading(true);
       setError("");
 
-      // Asegurar el formato correcto de los datos
+      // Preparar datos para la API
       const preventaData = {
         id_cliente: String(clienteInfo.id_cliente),
         detalles: productosSeleccionados.map(p => ({
@@ -338,45 +321,26 @@ const NuevaPreventa = () => {
         }))
       };
 
-      // Validar explícitamente la estructura
-      if (!preventaData.id_cliente) {
-        throw new Error("ID de cliente no válido");
-      }
+      // Enviar datos al servicio
+      const response = await presaleService.createPresale(preventaData);
       
-      if (!Array.isArray(preventaData.detalles) || preventaData.detalles.length === 0) {
-        throw new Error("La lista de productos no es válida");
-      }
-      
-      // Verificar cada detalle
-      preventaData.detalles.forEach((detalle, index) => {
-        if (!detalle.id_producto || !detalle.cantidad) {
-          throw new Error(`Producto #${index + 1} con datos incompletos`);
-        }
-      });
-      
-      console.log("Datos validados a enviar:", preventaData);
-      
-      // Usar una petición directa con axios para depuración
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net/registerPresale',
-        preventaData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          timeout: 10000
-        }
-      );
-      
-      console.log("Respuesta completa:", response);
-      
-      if (response.status === 201) {
+      // Solo si la respuesta es exitosa
+      if (response && response.status === 201) {
       setSuccess(true);
         alert("Preventa creada exitosamente");
-        handleReset();
-        setTimeout(() => navigate("/preventa/historial"), 1500);
+        
+        // Limpiar estados directamente en lugar de llamar a handleReset
+        setClienteInfo(null);
+        setProductosSeleccionados([]);
+        setBusquedaProducto("");
+        setBusquedaCliente("");
+        setError("");
+        setSuccess(false);
+        setZonaSeleccionada(null);
+        
+        // Redirigir inmediatamente
+        navigate("/preventa/historial");
+        return; // Finalizar función para evitar ejecución adicional
       }
     } catch (err) {
       console.error("Error completo:", err);
@@ -385,7 +349,6 @@ const NuevaPreventa = () => {
       }
       let mensajeError = "";
       
-      // Manejo específico según la documentación
       if (err.response) {
         switch (err.response.status) {
           case 401:
@@ -395,27 +358,22 @@ const NuevaPreventa = () => {
             mensajeError = "No tiene permisos para realizar esta acción.";
             break;
           case 422:
-            // Error de validación según documentación
             const validationError = err.response.data.errors?.[0];
             mensajeError = validationError ? 
               `Error de validación: ${validationError.msg}` : 
               "Error de validación en los datos enviados.";
             break;
           case 500:
-            // Error interno del servidor puede contener más detalles
-            mensajeError = err.response.data?.details || 
-                          "Error interno del servidor. Por favor, intente nuevamente más tarde.";
-            // Log específico para depurar errores 500
-            console.error("Respuesta completa del error 500:", err.response.data);
+            mensajeError = "Error interno del servidor. Por favor, intente más tarde.";
             break;
           default:
             mensajeError = err.response.data?.message || 
                           "Error al procesar la solicitud. Por favor, intente nuevamente.";
         }
       } else if (err.message?.includes('Network Error')) {
-        mensajeError = "Error de conexión con el servidor. Por favor, verifique su conexión a internet o contacte al administrador.";
+        mensajeError = "Error de conexión con el servidor. Verifique su conexión a internet.";
       } else {
-        mensajeError = "Error desconocido. Por favor, intente nuevamente más tarde.";
+        mensajeError = "Error inesperado. Por favor, intente nuevamente más tarde.";
       }
       
       setError(mensajeError);
@@ -442,49 +400,20 @@ const NuevaPreventa = () => {
     setClienteInfo(null);
   };
 
-  // Función para manejar el reinicio del componente
-  const handleReset = () => {
-    setClienteInfo(null);
-    setProductosSeleccionados([]);
-    setBusquedaProducto("");
-    setBusquedaCliente("");
-    setError("");
-    setSuccess(false);
-    setZonaSeleccionada(null);
-    // Recargar los datos iniciales
-    if (user.rol === "COLABORADOR") {
-      fetchZonasAsignadas();
-    }
-    fetchProductos();
-  };
-
   if (loading && !productos.length) {
     return <Loading message="Cargando datos..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-orange-600 shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Tipografia 
-              variant="h1" 
-              className="text-white text-2xl font-bold"
-            >
-              Nueva Preventa
-            </Tipografia>
-            <button 
-        onClick={() => navigate("/perfil")}
-              className="text-white hover:bg-orange-700 p-2 rounded-full transition-colors duration-200"
-            >
-              <Icono name="perfil" size={24} />
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
+      <div className="w-full bg-white shadow-sm mb-4">
+        <div className="px-2 sm:px-4 lg:px-8 py-2">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nueva Preventa</h1>
         </div>
       </div>
 
-      <SidebarAdm />
-      <div className="container mx-auto px-4 py-6">
+      <SidebarAdm/>
+      <div className="container mx-auto px-2 sm:px-4 py-2">
         {/* Alertas */}
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -504,11 +433,11 @@ const NuevaPreventa = () => {
           </div>
         )}
 
-        {/* Nueva sección de Zonas Asignadas con información detallada */}
+        {/* Zonas Asignadas */}
         {user.rol === "COLABORADOR" && (
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
-              <Tipografia variant="h2" size="lg" className="text-orange-700 font-bold">
+              <Tipografia variant="h2" className="text-orange-700 font-bold text-lg">
                 Zonas Asignadas
               </Tipografia>
               <div className="text-sm text-gray-600">
@@ -633,9 +562,9 @@ const NuevaPreventa = () => {
         )}
 
         {/* Información del cliente */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <div className="flex justify-between items-center mb-4">
-            <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold">
+            <Tipografia variant="h2" className="text-orange-700 font-bold text-lg">
               Información del Cliente
             </Tipografia>
             {clienteInfo && (
@@ -713,8 +642,8 @@ const NuevaPreventa = () => {
         </div>
 
         {/* Búsqueda de productos */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+          <Tipografia variant="h2" className="text-orange-700 font-bold text-lg mb-4">
             Productos Disponibles
           </Tipografia>
           
@@ -792,8 +721,8 @@ const NuevaPreventa = () => {
         </div>
 
         {/* Productos seleccionados */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+          <Tipografia variant="h2" className="text-orange-700 font-bold text-lg mb-4">
             Productos Seleccionados
           </Tipografia>
           {productosSeleccionados.length > 0 ? (

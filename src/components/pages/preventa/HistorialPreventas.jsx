@@ -408,6 +408,12 @@ const HistorialPreventas = () => {
                           {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                             <>
                               <button
+                                onClick={() => confirmarPreventa(preventa.id_preventa)}
+                                className="text-green-600 hover:text-green-900 text-xs sm:text-sm"
+                              >
+                                Confirmar
+                              </button>
+                              <button
                                 onClick={() => handleCancelarPreventa(preventa.id_preventa)}
                                 className="text-red-600 hover:text-red-900 text-xs sm:text-sm"
                               >
@@ -453,6 +459,12 @@ const HistorialPreventas = () => {
                             
                             {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                               <>
+                                <button
+                                  onClick={() => confirmarPreventa(preventa.id_preventa)}
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  Confirmar
+                                </button>
                                 <button
                                   onClick={() => handleCancelarPreventa(preventa.id_preventa)}
                                   className="text-red-600 hover:text-red-900"

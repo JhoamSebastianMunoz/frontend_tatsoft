@@ -15,7 +15,7 @@ const NavegacionAdministrador = () => {
     const path = window.location.pathname;
     const routes = {
       "gest-usuarios": path.includes("/gestion/usuarios") || path.includes("/ver/usuario") || path.includes("/editar/usuario") || path.includes("/registrar/usuario"),
-      "gest-clientes": path.includes("/gestion/clientes") || path.includes("/ver/cliente") || path.includes("/editar/cliente") || path.includes("/registro/cliente"),
+      "gest-clientes": path.includes("/gestion/clientes") || path.includes("/ver/cliente") || path.includes("/editar/cliente") || path.includes("/registro/cliente") || path.includes("/solicitudes"),
       "gest-productos": path.includes("/productos") || path.includes("/registrar-producto") || path.includes("/editar-producto") || path.includes("/gestion-productos"),
       "inventario": path.includes("/inventario"),
       "gest-zonas": path.includes("/zonas") || path.includes("/gestion-zonas") || path.includes("/editar-zona") || path.includes("/registrar-zona"),
@@ -64,7 +64,8 @@ const NavegacionAdministrador = () => {
       isActive: activeRoutes["gest-clientes"],
       subItems: [
         { label: "Lista de Clientes", route: "/gestion/clientes" },
-        { label: "Nuevo Cliente", route: "/registro/cliente" }
+        { label: "Nuevo Cliente", route: "/registro/cliente" },
+        { label: "Solicitudes", route: "/solicitudes" }
       ],
     },
     {

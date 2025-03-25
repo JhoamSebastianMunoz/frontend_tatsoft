@@ -143,14 +143,14 @@ const GestionUsuarios = () => {
                 
                     <div className="flex flex-col gap-2">
                       <div className="w-full">
-                        <Tipografia className="text-gray-800 mb-1 px-1 text-sm">
-                      Filtrar por rol:
-                    </Tipografia>
-                        <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2">
-                      {["Todos", "COLABORADOR", "ADMINISTRADOR"].map((opcion) => (
-                        <button
-                          key={opcion}
-                          onClick={() => handleFiltroChange(opcion)}
+                        <Tipografia className="text-gray-800 mb-1 px-1 text-base">
+                          Filtrar por rol:
+                        </Tipografia>
+                        <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 mt-2">
+                          {["Todos", "COLABORADOR", "ADMINISTRADOR"].map((opcion) => (
+                            <button
+                              key={opcion}
+                              onClick={() => handleFiltroChange(opcion)}
                               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm transition-all duration-200 ${
                             filtro === opcion
                               ? 'bg-gradient-to-r from-orange-600 to-orange-400 text-white shadow-md'
