@@ -203,13 +203,13 @@ const EditarZona = () => {
                 <Boton
                   onClick={handleCancelar}
                   label="Cancelar"
-                  tipo="cancelar"
+                  tipo="secundario"
                   className="w-full sm:w-auto"
                 />
                 <Boton
                   onClick={handleGuardarClick}
                   label="Guardar cambios"
-                  tipo="secundario"
+                  tipo="primario"
                   className="w-full sm:w-auto"
                 />
               </div>
@@ -224,28 +224,28 @@ const EditarZona = () => {
             <div className="px-6 py-5">
               <div className="text-center">
                 <Tipografia>
-                  <Icono name="confirmar" size="50" />
-                  <h3 className="text-lg font-medium text-black mb-3">
+                  <Icono name="confirmar" size="70" />
+                  <h3 className="text-xl font-medium text-black mb-2">
                     ¿Desea guardar los cambios?
                   </h3>
-                  <p className="text-sm text-black mb-4">
+                  <p className="text-base text-black">
                     Esta acción actualizará la información de la zona. ¿Estás
                     seguro de continuar?
                   </p>
                 </Tipografia>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex flex-col gap-3">
+            <div className="bg-gray-50 px-6 py-4 flex gap-3">
               <Boton
                 onClick={handleConfirmarGuardar}
                 label="Confirmar"
-                tipo="secundario"
+                tipo="primario"
                 className="w-full"
               />
               <Boton
                 onClick={() => setMostrarAlerta(false)}
                 label="Cancelar"
-                tipo="cancelar"
+                tipo="secundario"
                 className="w-full"
               />
             </div>

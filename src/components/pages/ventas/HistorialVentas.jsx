@@ -333,14 +333,14 @@ const HistorialVentas = () => {
                               </td>
                               <td className="px-3 md:px-6 py-4 whitespace-nowrap text-right text-xs md:text-sm font-medium">
                                 {venta.id_preventa !== "N/A" && (
-                                  <button
+                                  <Boton
+                                  label="Ver Detalles"
                                     onClick={() =>
                                       verDetallesVenta(venta.id_preventa)
                                     }
                                     className="text-[#F78220] hover:text-[#F78220]/80"
-                                  >
-                                    Ver Detalles
-                                  </button>
+                                  />
+                                   
                                 )}
                               </td>
                             </tr>
