@@ -120,10 +120,10 @@ const GestionZonas = () => {
           <Sidebar />
         </div>
       </div>
-      <div className="flex-1 pl-4 md:pl-20 w-full px-3 sm:px-4 md:px-6 lg:px-8 ml-10 pl-7">
+      <div className="flex-1 w-full sm:pl-16 md:pl-20 md:px-6 lg:ml-2 pl-16 pr-2">
         <Tipografia>
           <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de Zonas</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-2">Gestión de Zonas</h1>
           </div>
           
           <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
@@ -266,25 +266,16 @@ const GestionZonas = () => {
                         <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
                           <ul className="py-1 text-sm text-gray-600">
                             <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                               onClick={() => {
                                 navigate(`/ver/zona/${zona.id_zona_de_trabajo}`);
-                                setMenuAbierto(null);pa
+                                setMenuAbierto(null);
                               }}
                             >
                               Ver
                             </li>
                             <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
-                              onClick={() => {
-                                navigate(`/asignar-zona/${zona.id_zona_de_trabajo}`);
-                                setMenuAbierto(null);
-                              }}
-                            >
-                              Asignar
-                            </li>
-                            <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                               onClick={() => {
                                 handleEliminarClick(zona);
                                 setMenuAbierto(null);

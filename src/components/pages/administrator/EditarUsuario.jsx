@@ -243,12 +243,24 @@ const EditarUsuario = () => {
                       onEdit={() => {}}
                       type="email"
                     />
-                    <CampoTextoProfile
-                      label="Rol en la Empresa"
-                      value={userData.rol}
-                      onChange={(e) => handleChange("rol", e)}
-                      onEdit={() => {}}
-                    />
+                    <div className="space-y-2 relative">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Rol en la Empresa
+                      </label>
+                      <select
+                        value={userData.rol}
+                        onChange={(e) => handleChange("rol", e.target.value)}
+                        className="w-full px-4 pr-8 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#F78220] focus:border-transparent transition duration-150 ease-in-out text-gray-700 appearance-none"
+                      >
+                        <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                        <option value="COLABORADOR">COLABORADOR</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pt-6 pointer-events-none mt-7">
+                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

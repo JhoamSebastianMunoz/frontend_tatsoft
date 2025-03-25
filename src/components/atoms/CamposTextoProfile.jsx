@@ -36,7 +36,7 @@ const CampoTextoProfile = ({
           {...(onChange
             ? { value: safeValue, onChange }
             : { defaultValue: value })}
-          className={`bg-purple-50 border border-purple-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 block w-full p-1.5 pr-10 ${
+          className={`bg-purple-50 border border-orange-500  text-gray-900 text-sm rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 block w-full p-1.5 pr-10 ${
             disabled ? "opacity-70 cursor-not-allowed" : ""
           } ${className}`}
           aria-label={placeholder}
