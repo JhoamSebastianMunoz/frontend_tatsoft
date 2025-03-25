@@ -108,8 +108,8 @@ const Sidebar = () => {
       label: "Gestión de Clientes",
       path: "/gestion/clientes",
       icon: "clients",
-      subItems: [ "Lista de Clientes", "Nuevo Cliente"],
-      subPaths: ["/gestion/clientes", "/registro/cliente"],
+      subItems: [ "Lista de Clientes", "Nuevo Cliente", "Solicitudes"],
+      subPaths: ["/gestion/clientes", "/registro/cliente", "/solicitudes"],
     },
     {
       name: "gest-productos",
