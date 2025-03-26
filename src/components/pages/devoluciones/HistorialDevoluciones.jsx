@@ -36,30 +36,13 @@ const HistorialDevoluciones = () => {
         // Validar y transformar los datos según la estructura de la API
         data = data.map(devolucion => {
           console.log("Procesando devolución:", devolucion);
-          
-          // Calcular el total de la devolución
-          const total = devolucion.total ? 
-            parseFloat(devolucion.total) : 
-            (devolucion.productos || []).reduce((sum, producto) => {
-              return sum + (parseFloat(producto.subtotal) || 0);
-            }, 0);
-
           return {
             id_preventa: devolucion.id_preventa || null,
-            fecha_confirmacion: new Date().toISOString(), // Por ahora usamos fecha actual
-            nombre_colaborador: devolucion.colaborador?.nombre || 'No disponible',
-            nombre_zona: devolucion.cliente?.razon_social || 'No especificada',
-            total_devuelto: total,
-            cliente: {
-              nombre: devolucion.cliente?.nombre || 'No disponible',
-              razon_social: devolucion.cliente?.razon_social || 'No especificada'
-            },
-            productos: (devolucion.productos || []).map(producto => ({
-              nombre: producto.nombre,
-              precio: parseFloat(producto.precio) || 0,
-              cantidad: parseInt(producto.cantidad) || 0,
-              subtotal: parseFloat(producto.subtotal) || 0
-            }))
+            fecha_confirmacion: devolucion.fecha_confirmacion || new Date().toISOString(),
+            nombre_colaborador: devolucion.nombre_colaborador?.nombreCompleto || 'No disponible',
+            nombre_zona: devolucion.nombre_zona || 'No especificada',
+            total_devuelto: parseFloat(devolucion.total_devuelto) || 0,
+            razon_social: devolucion.razon_social || 'No especificada'
           };
         });
         
@@ -272,29 +255,26 @@ const HistorialDevoluciones = () => {
                           <div className="text-sm text-gray-900">
                             {devolucion.nombre_colaborador}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {devolucion.cliente?.nombre}
-                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm">
-                            <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                              {devolucion.cliente?.razon_social || 'No especificada'}
+                            <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                              Zona {devolucion.nombre_zona}
+                              {devolucion.razon_social && 
+                                <span className="ml-1">- {devolucion.razon_social}</span>
+                              }
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-red-600">
-                            ${Number(devolucion.total_devuelto).toLocaleString('es-CO')}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {devolucion.productos?.length || 0} productos
+                            ${devolucion.total_devuelto.toLocaleString('es-CO')}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
                             onClick={() => verDetallesDevolucion(devolucion.id_preventa)}
-                            className="text-indigo-600 hover:text-indigo-900"
+                            className="text-orange-600 hover:text-orange-900"
                           >
                             Ver Detalles
                           </button>
