@@ -58,9 +58,13 @@ const EditarCliente = (props) => {
           const cliente = response.data[0];
           console.log("Cliente extraído:", cliente);
           
+          const clienteIdReal = cliente.id_cliente;
+          console.log("ID real del cliente:", clienteIdReal);
+          
           const nombreCompleto = cliente.nombre_completo_cliente ? cliente.nombre_completo_cliente.split(' ') : ['', ''];
           
           const mappedData = {
+            id_cliente: clienteIdReal,
             razonSocial: cliente.razon_social || '',
             nombre: nombreCompleto[0] || '',
             apellido: nombreCompleto.slice(1).join(' ') || '',
@@ -164,6 +168,13 @@ const EditarCliente = (props) => {
 
   const handleSave = async () => {
     try {
+      const clienteIdReal = clienteData.id_cliente;
+      console.log("ID real del cliente para actualización:", clienteIdReal);
+      
+      if (!clienteIdReal) {
+        throw new Error("No se pudo determinar el ID real del cliente para actualizar");
+      }
+      
       const clienteToUpdate = {
         cedula: clienteData.cedula,
         nombre_completo_cliente: `${clienteData.nombre} ${clienteData.apellido}`.trim(),
@@ -171,67 +182,44 @@ const EditarCliente = (props) => {
         telefono: clienteData.celular,
         rut_nit: clienteData.nit || "",
         razon_social: clienteData.razonSocial || "",
-        email: clienteData.correo || "",
-        id_zona_de_trabajo: clienteData.id_zona_de_trabajo || 1,
-        estado: "Activo"
+        estado: "Activo",
+        id_zona_de_trabajo: clienteData.id_zona_de_trabajo || 1
       };
 
-      console.log("Enviando datos al servidor:", clienteToUpdate);
-
-      const token = localStorage.getItem('token');
+      console.log("Enviando datos al servidor (formato ajustado):", clienteToUpdate);
       
-      const response = await fetch(`https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/update-client/${id}`, {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const response = await fetch(`https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/update-client/${clienteIdReal}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: headers,
         body: JSON.stringify(clienteToUpdate)
       });
       
       const responseText = await response.text();
-      console.log("Respuesta completa (texto):", responseText);
+      console.log("Respuesta completa:", responseText);
       
-      let responseData;
-      try {
-        responseData = JSON.parse(responseText);
-        console.log("Respuesta parseada:", responseData);
-      } catch (e) {
-        console.log("No se pudo parsear la respuesta como JSON");
-      }
-      
-      if (!response.ok) {
-        if (responseData && responseData.errors) {
-          console.log("Errores detallados:", responseData.errors);
-          
-          responseData.errors.forEach((error, index) => {
-            console.log(`Error ${index + 1}:`, error);
-            console.log("  - Ruta:", error.path || error.param);
-            console.log("  - Mensaje:", error.msg);
-            console.log("  - Valor:", error.value);
-          });
-          
-          const errorMessages = responseData.errors
-            .map(e => `${e.path || e.param || 'campo'}: ${e.msg}`)
-            .join(", ");
-          
-          throw new Error(`Validación fallida: ${errorMessages}`);
-        }
+      if (response.ok) {
+        console.log("Cliente actualizado correctamente");
+        setOriginalData({...clienteData});
+        setDataModified(false);
+        setShowSuccessAlert(true);
         
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        setTimeout(() => {
+          window.location.href = "/gestion/clientes";
+        }, 2000);
+      } else {
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(`Error ${response.status}: ${errorData.error || response.statusText}`);
+        } catch (e) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
       }
-      
-      console.log("Cliente actualizado correctamente");
-      setOriginalData({...clienteData});
-      setDataModified(false);
-      
-      setShowSuccessAlert(true);
-      
-      setTimeout(() => {
-        console.log("Redirigiendo automáticamente después de la actualización exitosa");
-        navigate("/gestion/clientes", { replace: true });
-      }, 2000);
-      
     } catch (err) {
       console.error("Error completo:", err);
       setError(err.message || "Error al actualizar cliente");
@@ -280,7 +268,7 @@ const EditarCliente = (props) => {
   const handleCloseSuccessAlert = () => {
     setShowSuccessAlert(false);
     console.log("Redirigiendo después de cerrar alerta de éxito");
-    navigate("/gestion/clientes", { replace: true });
+    window.location.href = "/gestion/clientes";
   };
 
   const nombreStr = clienteData.nombre || '';
@@ -368,7 +356,7 @@ const EditarCliente = (props) => {
                     onChange={(value) => handleChange("apellido", value)}
                   />
                   <CampoTextoProfile
-                    label="NIT" 
+                    label="RUNT o NIT" 
                     value={clienteData.nit}
                     editable={true}
                     onChange={(value) => handleChange("nit", value)}
@@ -393,13 +381,6 @@ const EditarCliente = (props) => {
                     value={clienteData.celular}
                     editable={true}
                     onChange={(value) => handleChange("celular", value)}
-                    type="text"
-                  />
-                  <CampoTextoProfile 
-                    label="Correo Electrónico" 
-                    value={clienteData.correo}
-                    editable={true}
-                    onChange={(value) => handleChange("correo", value)}
                     type="text"
                   />
                 </div>
@@ -488,3 +469,4 @@ const EditarCliente = (props) => {
 };
 
 export default EditarCliente;
+//
