@@ -60,9 +60,9 @@ const GestionUsuarios = () => {
     
   
     if (busqueda) {
-      const searchTerm = busqueda.toLowerCase();
+      const searchTerm = busqueda.toLowerCase().trim();
       results = results.filter(
-        usuario => usuario.nombreCompleto.toLowerCase().includes(searchTerm)
+        usuario => usuario.nombreCompleto?.toLowerCase().includes(searchTerm)
       );
     }
     
@@ -171,10 +171,28 @@ const GestionUsuarios = () => {
                   
                       <div className="w-full mt-1">
                     <Buscador
-                      placeholder="Buscar Usuarios"
+                      placeholder="Buscar usuarios por nombre"
                       onChange={handleBusquedaChange}
+                      value={busqueda}
                     />
                   </div>
+
+                  {busqueda && (
+                    <div className="mt-2 flex items-center">
+                      <span className="text-xs text-gray-500 mr-2">Filtrando por:</span>
+                      <div className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center">
+                        <span>{busqueda}</span>
+                        <button 
+                          onClick={() => setBusqueda("")} 
+                          className="ml-1 text-orange-600 hover:text-orange-800"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -245,7 +263,7 @@ const GestionUsuarios = () => {
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
                                     <Tipografia className="text-gray-600 text-sm">
-                                      Dueño: {usuario.nombreCompleto}
+                                      Usuario: {usuario.nombreCompleto}
                                     </Tipografia>
                                   </div>
 

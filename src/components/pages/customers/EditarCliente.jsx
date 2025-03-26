@@ -205,8 +205,8 @@ const EditarCliente = (props) => {
       
       if (response.ok) {
         console.log("Cliente actualizado correctamente");
-        setOriginalData({...clienteData});
-        setDataModified(false);
+    setOriginalData({...clienteData});
+    setDataModified(false);
         setShowSuccessAlert(true);
         
         setTimeout(() => {
