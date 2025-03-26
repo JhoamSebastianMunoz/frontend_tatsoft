@@ -178,6 +178,7 @@ const Acumulados = () => {
     }
   };
   
+  
   const actualizarResumenTotal = (datos) => {
     // Calcular totales para ventas (valores positivos)
     const ventasData = datos.filter(item => item.tipo_venta === "Venta");
@@ -355,16 +356,15 @@ const Acumulados = () => {
     }
   };
   
-  // Función para ver detalles (redireccionar según el tipo)
-  const verDetalles = (item) => {
-    if (item.tipo_venta === "Venta") {
-      // Redireccionar a la vista de detalles de venta
-      window.location.href = `/venta/detalles/${item.id_venta}`;
-    } else {
-      // Redireccionar a la vista de detalles de devolución
-      window.location.href = `/devolucion/detalles/${item.id_venta}`;
-    }
-  };
+
+const verDetalles = (item) => {
+  if (item.tipo_venta === "Venta") {
+    window.location.href = `/ventas/detalles/${item.id_venta}`;
+  } else if (item.tipo_venta === "Devolución") {
+    window.location.href = `/devoluciones/detalles/${item.id_venta}`;
+  }
+  
+};
   
   return (
     <div className="min-h-screen overflow-x-hidden flex flex-col md:flex-row">
@@ -605,9 +605,8 @@ const Acumulados = () => {
                         <th className="px-3 sm:px-6 py-3 text-right text-base font-medium text-gray-500 uppercase tracking-wider">
                           Total
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-right text-base font-medium text-gray-500 uppercase tracking-wider">
-                          Acciones
-                        </th>
+                        <th></th>
+      
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -653,8 +652,8 @@ const Acumulados = () => {
                             <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-base">
                               <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                                 ${acumulado.tipo_venta === 'Venta' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-orange-100 text-orange-800' 
+                                  : 'bg-slate-100 text-slate-800'
                                 }`}>
                                 {acumulado.tipo_venta}
                               </span>

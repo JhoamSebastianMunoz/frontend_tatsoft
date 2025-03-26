@@ -362,9 +362,6 @@ const HistorialPreventas = () => {
                       Colaborador
                     </div>
                   )}
-                  <div className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                  </div>
                 </div>
 
                 {/* Lista de preventas */}
@@ -394,16 +391,20 @@ const HistorialPreventas = () => {
                           {preventa.estado}
                         </span>
                         </div>
-                        <div className="text-xs sm:text-sm text-gray-500 mb-2">
+                        <div className="text-xs sm:text-sm text-gray-500 mb-3 ">
                           Total: ${Number(preventa.total).toLocaleString('es-CO')}
                         </div>
-                        <div className="flex justify-end space-x-2">
-                          <button
+                        <div className="flex justify-end space-x-2 ">
+                          <Boton
+                          label="Ver"
+                          tipo="primario"
                             onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                            className="text-orange-600 hover:text-orange-900 text-xs sm:text-sm"
-                          >
-                            Ver
-                          </button>
+                            className="text-orange-600 hover:text-orange-900 text-xs sm:text-sm "
+                          />
+                          <Boton
+                          label="Imprimir"
+                          tipo="secundario"
+                          />
                           
                           {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                             <>
@@ -434,8 +435,8 @@ const HistorialPreventas = () => {
                         </div>
                         <div>
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
-                              preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
+                            ${preventa.estado === 'Pendiente' ? 'bg-slate-100 text-slate-800' : 
+                              preventa.estado === 'Confirmada' ? 'bg-orange-100 text-orange-800' : 
                               'bg-red-100 text-red-800'}`}>
                             {preventa.estado}
                           </span>
@@ -450,12 +451,19 @@ const HistorialPreventas = () => {
                         )}
                         <div className="text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
-                            <button
-                              onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              Ver
-                            </button>
+                            <Boton
+                            label="Ver"
+                            tipo="primario"
+                            size="medium"
+                            onClick={() => verDetallesPreventa(preventa.id_preventa)}
+                            className="text-gray-600 hover:text-gray-900"
+                            />
+                            <Boton
+                            label="Imprimir"
+                            tipo="secundario"
+                            size="small"
+                            />
+                            
                             
                             {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                               <>

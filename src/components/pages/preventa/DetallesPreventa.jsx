@@ -348,7 +348,7 @@ const DetallesPreventa = () => {
               No se encontró la preventa solicitada
             </Tipografia>
             <Boton 
-              tipo="secundario"
+              tipo="primario"
               label="Volver al Historial" 
               onClick={handleVolver}
             />
