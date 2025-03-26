@@ -364,7 +364,7 @@ const HistorialVentas = () => {
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 py-1 inline-flex font-medium leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                <span className="text-sm px-2 py-1 inline-flex font-medium leading-5 font-semibold rounded-full bg-green-100 text-green-700">
                                   ${venta.total_vendido.toLocaleString("es-CO")}
                                 </span>
                               </td>
