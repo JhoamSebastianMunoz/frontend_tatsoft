@@ -90,7 +90,7 @@ const VerUsuarioAdm = () => {
       <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
         <Sidebar />
       </div>
-
+      <Tipografia>
       <div className="md:pl-64 pl-14 pt-0 md:pt-4">
         <div className="px-4 sm:px-6 lg:px-8 py-6">
           <div className="max-w-5xl mx-auto">
@@ -248,6 +248,7 @@ const VerUsuarioAdm = () => {
       />
 
       {loading && <Loading message="Cargando información del usuario..." />}
+      </Tipografia>
     </div>
   );
 };

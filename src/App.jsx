@@ -69,6 +69,7 @@ import Profile from "./components/pages/collaborator/profile";
 import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
 import Loading from "./components/Loading/Loading";
 import Pagina404 from "./components/pages/alert/page404";
+import Tipografia from "./components/atoms/Tipografia";
 
 // Componente de rutas protegidas
 const ProtectedRoute = ({ element, allowedRoles }) => {
