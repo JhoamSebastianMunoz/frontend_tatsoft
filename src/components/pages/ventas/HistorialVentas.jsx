@@ -21,6 +21,33 @@ const HistorialVentas = () => {
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
+  const [filtro, setFiltro] = useState("Todos");
+
+  const aplicarFiltro = (tipoFiltro) => {
+    setFiltro(tipoFiltro);
+    const hoy = new Date();
+    let inicio = new Date();
+    let fin = new Date();
+
+    switch (tipoFiltro) {
+      case "Semana":
+        inicio.setDate(hoy.getDate() - 7);
+        setFechaInicio(inicio.toISOString().split('T')[0]);
+        setFechaFin(hoy.toISOString().split('T')[0]);
+        break;
+      case "Mes":
+        inicio.setMonth(hoy.getMonth() - 1);
+        setFechaInicio(inicio.toISOString().split('T')[0]);
+        setFechaFin(hoy.toISOString().split('T')[0]);
+        break;
+      case "Todos":
+        setFechaInicio("");
+        setFechaFin("");
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     const fetchVentas = async () => {
@@ -195,44 +222,73 @@ const HistorialVentas = () => {
               </div>
             </div>
 
-            {/* Filtros y búsqueda */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <div className="mb-4">
-                <Tipografia variant="h3" className="text-gray-700 font-medium">
-                  Filtros
-                </Tipografia>
+            {/* Filtros de periodo */}
+            <div className="flex overflow-x-auto pb-1 no-scrollbar p-3 bg-white rounded-lg mb-4">
+              <div className="flex gap-2 min-w-max px-1">
+                <button
+                  className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                    filtro === "Todos"
+                      ? "bg-orange-100 text-orange-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => aplicarFiltro("Todos")}
+                >
+                  Todas
+                </button>
+                <button
+                  className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                    filtro === "Semana"
+                      ? "bg-orange-100 text-orange-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => aplicarFiltro("Semana")}
+                >
+                  Última Semana
+                </button>
+                <button 
+                  className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                    filtro === "Mes"
+                      ? "bg-orange-100 text-orange-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => aplicarFiltro("Mes")}
+                >
+                  Último Mes
+                </button>
               </div>
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-4 items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">Fecha Inicio:</span>
-                      <input
-                        type="date"
-                        className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        value={fechaInicio}
-                        onChange={(e) => setFechaInicio(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Fecha Fin:</span>
-                    <input
-                      type="date"
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      value={fechaFin}
-                      onChange={(e) => setFechaFin(e.target.value)}
-                    />
-                  </div>
-                  {/* Búsqueda */}
-                  <div className="flex-1 flex gap-2">
-                    <CampoTexto
-                      placeholder="Buscar por colaborador"
-                      value={filtroBusqueda}
-                      onChange={(e) => setFiltroBusqueda(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
+            </div>
+
+            {/* Filtros */}
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-600 mb-1">Buscar</label>
+                  <CampoTexto
+                    placeholder="Buscar por cliente o número de venta"
+                    value={filtroBusqueda}
+                    onChange={(e) => setFiltroBusqueda(e.target.value)}
+                    className="w-full rounded-full border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-600 mb-1">Fecha Inicio</label>
+                  <input
+                    type="date"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-600 mb-1">Fecha Fin</label>
+                  <input
+                    type="date"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
