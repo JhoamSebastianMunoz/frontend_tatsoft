@@ -70,6 +70,7 @@ import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
 import Loading from "./components/Loading/Loading";
 import Pagina404 from "./components/pages/alert/page404";
 import Tipografia from "./components/atoms/Tipografia";
+import EstadisticasVentas from "./components/pages/estadisticas/EstadisticasVentas";
 
 // Componente de rutas protegidas
 const ProtectedRoute = ({ element, allowedRoles }) => {
@@ -102,6 +103,17 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<Profile />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+
+      {/* Rutas Estadisticas */}
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute
+            element={<EstadisticasVentas />}
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
