@@ -57,6 +57,29 @@ const areasApi = createApiClient(apiUrls.areas);
 const productsApi = createApiClient(apiUrls.products);
 const presalesApi = createApiClient(apiUrls.presales);
 
+// Interceptor para manejar errores de autenticación
+areasApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Si recibimos un 403 o 401 y no hemos intentado renovar el token
+    if ((error.response.status === 403 || error.response.status === 401) && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Aquí podrías implementar una renovación de token si tu API lo soporta
+      console.log("Intentando renovar token...");
+      
+      // Por ahora, simplemente mostrar información de depuración
+      const token = localStorage.getItem('token');
+      console.log("Token actual:", token ? token.substring(0, 15) + "..." : "No hay token");
+      
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Servicios de usuarios
 export const userService = {
   getAllUsers: () => usersApi.get('/api/usuarios'),
@@ -114,9 +137,28 @@ export const areaService = {
 // Servicios de clientes
 export const clientService = {
   getAllClients: () => areasApi.get('/get-clients'),
-  getClientById: (id) => areasApi.get(`/get-client/${id}`),
+  getClientById: (id) => {
+    console.log(`Obteniendo cliente con ID: ${id}`);
+    return areasApi.get(`/get-client/${id}`);
+  },
   createClient: (clientData) => areasApi.post('/register-client', clientData),
-  updateClient: (id, clientData) => areasApi.put(`/update-client/${id}`, clientData),
+  updateClient: (id, clientData) => {
+    console.log(`Actualizando cliente ${id} con datos:`, clientData);
+    
+    // Usar directamente la URL completa sin pasar por el proxy
+    const token = localStorage.getItem('token');
+    
+    // Usar la URL directa en lugar del proxy
+    return axios({
+      method: 'put',
+      url: `${AREAS_DIRECT_URL}/update-client/${id}`,
+      data: clientData,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
   deleteClient: (id) => areasApi.delete(`/delete-client/${id}`),
   requestCreateClient: (clientData) => areasApi.post('/request-create-cliente', clientData),
   getPendingRequests: () => areasApi.get('/get-Pending-Request'),
