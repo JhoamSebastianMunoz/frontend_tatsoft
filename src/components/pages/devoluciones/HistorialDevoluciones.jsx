@@ -7,6 +7,7 @@ import { useAuth } from "../../../context/AuthContext";
 import Sidebar from "../../organisms/Sidebar";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
+import Botones from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 import CampoTexto from "../../atoms/CamposTexto";
 import Loading from "../../Loading/Loading";
@@ -18,8 +19,9 @@ const HistorialDevoluciones = () => {
   const [devoluciones, setDevoluciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState("");
 
   useEffect(() => {
     const fetchDevoluciones = async () => {
@@ -28,25 +30,29 @@ const HistorialDevoluciones = () => {
         console.log("Iniciando petición de devoluciones...");
         const response = await presaleService.getAllRefund();
         console.log("Respuesta del servidor:", response);
-        
+
         // Asegurarnos de que tenemos un array de devoluciones
-        let data = Array.isArray(response.data) ? response.data : [response.data];
+        let data = Array.isArray(response.data)
+          ? response.data
+          : [response.data];
         console.log("Datos sin procesar:", data);
-        
+
         // Validar y transformar los datos según la estructura de la API
-        data = data.map(devolucion => {
+        data = data.map((devolucion) => {
           console.log("Procesando devolución:", devolucion);
           return {
             id_preventa: devolucion.id_preventa || null,
-            fecha_confirmacion: devolucion.fecha_confirmacion || new Date().toISOString(),
-            nombre_colaborador: devolucion.nombre_colaborador?.nombreCompleto || 'No disponible',
-            nombre_zona: devolucion.nombre_zona || 'No especificada',
+            fecha_confirmacion:
+              devolucion.fecha_confirmacion || new Date().toISOString(),
+            nombre_colaborador:
+              devolucion.nombre_colaborador?.nombreCompleto || "No disponible",
+            nombre_zona: devolucion.nombre_zona || "No especificada",
             total_devuelto: parseFloat(devolucion.total_devuelto) || 0,
-            razon_social: devolucion.razon_social || 'No especificada'
+            razon_social: devolucion.razon_social || "No especificada",
           };
         });
-        
-        console.log('Datos procesados:', data);
+
+        console.log("Datos procesados:", data);
         setDevoluciones(data);
       } catch (err) {
         console.error("Error detallado al cargar devoluciones:", err);
@@ -63,25 +69,32 @@ const HistorialDevoluciones = () => {
 
   // Aplicar filtros
   const devolucionesFiltradas = devoluciones.filter((devolucion) => {
-    // Filtro por búsqueda
+    // Filtro por búsqueda de colaborador
     const terminoBusqueda = filtroBusqueda.toLowerCase();
     const cumpleBusqueda =
       filtroBusqueda === "" ||
-      (devolucion.id_preventa &&
-        devolucion.id_preventa.toString().includes(terminoBusqueda)) ||
       (devolucion.nombre_colaborador &&
         devolucion.nombre_colaborador.toLowerCase().includes(terminoBusqueda));
 
-    // Filtro por fecha
-    let cumpleFecha = true;
-    if (filtroFecha) {
-      const fechaFiltro = new Date(filtroFecha);
+    // Filtro por rango de fechas
+    let cumpleFechas = true;
+    if (fechaInicio || fechaFin) {
       const fechaDevolucion = new Date(devolucion.fecha_confirmacion);
-      cumpleFecha =
-        fechaFiltro.toDateString() === fechaDevolucion.toDateString();
+      
+      if (fechaInicio) {
+        const inicio = new Date(fechaInicio);
+        inicio.setHours(0, 0, 0, 0);
+        cumpleFechas = cumpleFechas && fechaDevolucion >= inicio;
+      }
+      
+      if (fechaFin) {
+        const fin = new Date(fechaFin);
+        fin.setHours(23, 59, 59, 999);
+        cumpleFechas = cumpleFechas && fechaDevolucion <= fin;
+      }
     }
 
-    return cumpleBusqueda && cumpleFecha;
+    return cumpleBusqueda && cumpleFechas;
   });
 
   // Formatear fecha para mostrar
@@ -130,8 +143,8 @@ const HistorialDevoluciones = () => {
 
           {/* Total ventas */}
           <div className="rounded-lg w-64 shadow-md overflow-hidden mb-6 mx-auto">
-            {/* Cabecera con fondo naranja */}
-            <div className="bg-[#F78220] p-4">
+            {/* Cabecera con fondo naranjo */}
+            <div className="bg-red-500 p-4">
               <h2 className="text-white text-lg md:text-xl font-medium">
                 Total devoluciones
               </h2>
@@ -153,66 +166,76 @@ const HistorialDevoluciones = () => {
               {/* Etiqueta de porcentaje y "Total" alineados a la izquierda */}
               <div className="flex items-center gap-2">
                 {/* Círculo naranja a la derecha */}
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center ml-auto">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-orange-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center ml-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
                   </svg>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Filtros y búsqueda */}
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-            <div className="flex flex-col md:flex-row gap-4 justify-between">
-              <div className="w-full md:w-1/2">
-                <CampoTexto
-                  placeholder="Buscar por ID o colaborador..."
-                  value={filtroBusqueda}
-                  onChange={(e) => setFiltroBusqueda(e.target.value)}
-                />
+          {/* Filtros */}
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+          <div className="mb-4">
+                <Tipografia variant="h3" className="text-gray-700 font-medium">
+                  Filtros
+                </Tipografia>
               </div>
-
-              <div className="flex items-center gap-4">
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-4 items-center">
                 <div className="flex items-center gap-2">
-                  <Tipografia className="whitespace-nowrap">Fecha:</Tipografia>
+                  <span className="text-sm text-gray-600">Fecha Inicio:</span>
                   <input
                     type="date"
                     className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    value={filtroFecha}
-                    onChange={(e) => setFiltroFecha(e.target.value)}
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
                   />
                 </div>
 
-                <Boton
-                  tipo="primario"
-                  label="Volver a Ventas"
-                  onClick={() => navigate("/ventas/historial")}
-                />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Fecha Fin:</span>
+                  <input
+                    type="date"
+                    className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex-1 flex gap-2">
+                  <CampoTexto
+                    placeholder="Buscar por colaborador"
+                    value={filtroBusqueda}
+                    onChange={(e) => setFiltroBusqueda(e.target.value)}
+                    className="w-full focus:ring-orange-500"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Lista de devoluciones */}
           <div className="bg-white rounded-lg shadow-md p-4">
-            <Tipografia
-              variant="h2"
-              size="lg"
-              className="text-orange-700 font-bold mb-6"
-            >
-              Devoluciones Registradas
-            </Tipografia>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <Tipografia
+                variant="h2"
+                size="lg"
+                className="text-lg md:text-xl font-semibold text-gray-900"
+              >
+                Devoluciones Registradas
+              </Tipografia>
+              {devolucionesFiltradas.length > 0 && (
+                <div className="px-3 py-1 bg-[#F78220]/10 rounded-full">
+                  <span className="text-sm text-[#F78220]">
+                    {devolucionesFiltradas.length}{" "}
+                    {devolucionesFiltradas.length === 1 ? "devolución" : "devoluciones"}
+                  </span>
+                </div>
+              )}
+            </div>
+
             {devolucionesFiltradas.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -228,22 +251,25 @@ const HistorialDevoluciones = () => {
                         Colaborador
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zona
+                        Cliente
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Total Devuelto
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Acciones
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {devolucionesFiltradas.map((devolucion) => (
-                      <tr key={devolucion.id_preventa} className="hover:bg-gray-50">
+                      <tr
+                        key={devolucion.id_preventa}
+                        className="hover:bg-gray-50"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            #{devolucion.id_preventa || 'N/A'}
+                            #{devolucion.id_preventa || "N/A"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -258,26 +284,25 @@ const HistorialDevoluciones = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm">
-                            <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                              Zona {devolucion.nombre_zona}
-                              {devolucion.razon_social && 
-                                <span className="ml-1">- {devolucion.razon_social}</span>
-                              }
+                            <span className="text-sm text-gray-900">
+                              {devolucion.razon_social}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-red-600">
-                            ${devolucion.total_devuelto.toLocaleString('es-CO')}
+                          <div className="px-2 py-1 inline-flex font-medium leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                            ${devolucion.total_devuelto.toLocaleString("es-CO")}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => verDetallesDevolucion(devolucion.id_preventa)}
-                            className="text-orange-600 hover:text-orange-900"
-                          >
-                            Ver Detalles
-                          </button>
+                          <Botones
+                            tipo="primario"
+                            label="Ver Detalles"
+                            size="medium"
+                            onClick={() =>
+                              verDetallesDevolucion(devolucion.id_preventa)
+                            }
+                          />
                         </td>
                       </tr>
                     ))}

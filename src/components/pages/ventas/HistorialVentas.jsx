@@ -174,13 +174,23 @@ const HistorialVentas = () => {
 
                 {/* Etiqueta de porcentaje y "Total" alineados a la izquierda */}
                 <div className="flex items-center gap-2">
-
                   {/* Círculo naranja a la derecha */}
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center ml-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-orange-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
@@ -192,62 +202,43 @@ const HistorialVentas = () => {
                   Filtros
                 </Tipografia>
               </div>
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row gap-4 justify-between">
-                  {/* Filtros de fecha */}
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                      <div className="w-full sm:w-auto">
-                        <Tipografia className="text-sm mb-1 sm:mb-0">
-                          Fecha Inicio:{" "}
-                        </Tipografia>
-                        <input
-                          type="date"
-                          className="w-full sm:w-auto p-2 border border-[#F78220] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F78220] focus:border-[#F78220] text-gray-700"
-                          value={fechaInicio}
-                          onChange={(e) => setFechaInicio(e.target.value)}
-                        />
-                      </div>
-                      <div className="w-full sm:w-auto">
-                        <Tipografia className="text-sm mb-1 sm:mb-0">
-                          Fecha Fin:{" "}
-                        </Tipografia>
-                        <input
-                          type="date"
-                          className="w-full sm:w-auto p-2 border border-[#F78220] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F78220] focus:border-[#F78220] text-gray-700"
-                          value={fechaFin}
-                          onChange={(e) => setFechaFin(e.target.value)}
-                        />
-                      </div>
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-4 items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Fecha Inicio:</span>
+                      <input
+                        type="date"
+                        className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        value={fechaInicio}
+                        onChange={(e) => setFechaInicio(e.target.value)}
+                      />
                     </div>
                   </div>
-
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Fecha Fin:</span>
+                    <input
+                      type="date"
+                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      value={fechaFin}
+                      onChange={(e) => setFechaFin(e.target.value)}
+                    />
+                  </div>
                   {/* Búsqueda */}
-                  <div className="w-full md:w-[320px]">
+                  <div className="flex-1 flex gap-2">
                     <CampoTexto
                       placeholder="Buscar por colaborador"
                       value={filtroBusqueda}
                       onChange={(e) => setFiltroBusqueda(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                 </div>
-
-                {/* Botón Nueva Preventa */}
-                {user?.rol !== "ADMINISTRADOR" && (
-                  <div className="flex justify-end">
-                    <Boton
-                      tipo="primario"
-                      label="Nueva Preventa"
-                      onClick={() => navigate("/preventa/nueva")}
-                      className="w-full sm:w-auto whitespace-nowrap"
-                    />
-                  </div>
-                )}
               </div>
             </div>
 
             {/* Lista de ventas */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+            <div className="bg-white rounded-lg shadow-md p-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <Tipografia
                   variant="h2"
@@ -266,31 +257,26 @@ const HistorialVentas = () => {
               </div>
 
               {ventasFiltradas.length > 0 ? (
-                <div className="overflow-x-auto -mx-4 md:mx-0">
-                  <div className="min-w-full inline-block align-middle">
-                    <div className="overflow-hidden">
+                <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                           <tr>
-                            <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               ID
                             </th>
-                            <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Fecha
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Fecha de Venta
                             </th>
-                            <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Colaborador
                             </th>
-                            <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Cliente
                             </th>
-                            <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Zona
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Total de venta
                             </th>
-                            <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Total
-                            </th>
-                            <th className="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Acciones
                             </th>
                           </tr>
@@ -301,61 +287,50 @@ const HistorialVentas = () => {
                               key={`${venta.id_preventa}-${index}`}
                               className="hover:bg-gray-50"
                             >
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                <span className="text-xs md:text-sm font-medium text-gray-900">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-medium text-gray-900">
                                   #{venta.id_preventa}
                                 </span>
                               </td>
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                <span className="text-xs md:text-sm text-gray-500">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm text-gray-500">
                                   {formatearFecha(venta.fecha_confirmacion)}
                                 </span>
                               </td>
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                <span className="text-xs md:text-sm text-gray-500">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm text-gray-900">
                                   {venta.nombre_colaborador}
                                 </span>
                               </td>
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                <span className="text-xs md:text-sm text-gray-500">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm text-gray-900">
                                   {venta.razon_social || "Cliente General"}
                                 </span>
                               </td>
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                <span className="text-xs md:text-sm text-gray-500">
-                                  Zona {venta.nombre_zona}
-                                </span>
-                              </td>
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                <span className="text-xs md:text-sm font-medium text-green-600">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="px-2 py-1 inline-flex font-medium leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
                                   ${venta.total_vendido.toLocaleString("es-CO")}
                                 </span>
                               </td>
-                              <td className="px-3 md:px-6 py-4 whitespace-nowrap text-right text-xs md:text-sm font-medium">
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 {venta.id_preventa !== "N/A" && (
                                   <Boton
-                                  label="Ver Detalles"
+                                    label="Ver Detalles"
                                     onClick={() =>
                                       verDetallesVenta(venta.id_preventa)
                                     }
-                                    className="text-[#F78220] hover:text-[#F78220]/80"
                                   />
-                                   
                                 )}
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
-                    </div>
-                  </div>
                 </div>
               ) : (
-                <div className="text-center py-10">
-                  <Tipografia className="text-gray-500 text-sm md:text-base">
+                <div className="text-center py-10 text-gray-500">
                     No se encontraron ventas con los criterios de búsqueda
                     actuales
-                  </Tipografia>
                 </div>
               )}
             </div>

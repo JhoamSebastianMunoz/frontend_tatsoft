@@ -357,7 +357,8 @@ const Acumulados = () => {
   };
   
 
-const verDetalles = (item) => {
+const 
+verDetalles = (item) => {
   if (item.tipo_venta === "Venta") {
     window.location.href = `/ventas/detalles/${item.id_venta}`;
   } else if (item.tipo_venta === "Devolución") {
