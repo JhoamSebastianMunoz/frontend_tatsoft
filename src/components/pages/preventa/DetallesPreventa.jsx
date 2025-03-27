@@ -4,11 +4,10 @@ import { presaleService } from "../../../context/services/ApiService";
 import { useAuth } from "../../../context/AuthContext";
 
 // Componentes
-import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
-import SidebarAdm from "../../organisms/Sidebar";
+import Sidebar from "../../organisms/Sidebar";
 import Loading from "../../Loading/Loading";
 
 const DetallesPreventa = () => {
@@ -142,13 +141,14 @@ const DetallesPreventa = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 ml-10 pl-6">
-      <div className="w-full bg-white shadow-sm mb-4">
+      <Tipografia>
+      <div className="w-full mb-4">
         <div className="px-2 sm:px-4 lg:px-8 py-2">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalles de Preventa</h1>
         </div>
+       
       </div>
-
-      <SidebarAdm/>
+      <Sidebar/>
       <div className="container mx-auto px-2 sm:px-4 py-2">
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -342,9 +342,8 @@ const DetallesPreventa = () => {
             </div>
           </div>
         ) : !loading && (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <Icono name="eliminarAlert" size={50} className="mx-auto mb-4" />
-            <Tipografia size="lg" className="text-gray-700 mb-4">
+          <div className="bg-white rounded-lg shadow-md  text-center  ">
+            <Tipografia size="lg" className="text-gray-700  ">
               No se encontró la preventa solicitada
             </Tipografia>
             <Boton 
@@ -355,6 +354,7 @@ const DetallesPreventa = () => {
           </div>
         )}
       </div>
+      </Tipografia>
     </div>
   );
 };

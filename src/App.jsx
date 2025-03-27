@@ -2,6 +2,10 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
+
+// página de perfil
+import EditarPerfil from "./components/pages/collaborator/editarPerfil";
+
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
 import RecuperarPassword from "./components/pages/loginPage/RecuperarPassword";
@@ -105,6 +109,19 @@ const App = () => {
           />
         }
       />
+
+      <Route
+      path="editar/perfil"
+      element={
+        <ProtectedRoute
+        element={<EditarPerfil />}
+        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
+      
+      />
+
+
 
       {/* Rutas de administrador - Gestión de usuarios */}
       <Route

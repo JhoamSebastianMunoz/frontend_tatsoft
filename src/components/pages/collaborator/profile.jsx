@@ -120,7 +120,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-slate-100 overflow-x-hidden">
       <Tipografia>
-        <div className="fixed top-0 left-0 z-50 h-full ml-64" >
+        <div className="fixed top-0 left-0 z-50 h-full ml-64">
           <Sidebar />
         </div>
         <div className="flex justify-center px-4 py-6 pt-5 transition-all duration-300 ml-16">
@@ -167,26 +167,12 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="mt-4 md:mt-0">
-                  <button
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-                    disabled={true}
-                  >
-                    <svg
-                      className="-ml-0.5 mr-2 h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                      />
-                    </svg>
-                    Editar Perfil
-                  </button>
+                  <Botones
+                    label="Editar perfil"
+                    tipo="primario"
+                    onClick={() => navigate("/editar/perfil")}
+                    className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md focus:outline-none"
+                  />
                 </div>
               </div>
             </div>

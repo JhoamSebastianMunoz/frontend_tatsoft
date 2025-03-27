@@ -93,7 +93,7 @@ const Sidebar = () => {
       path: "/perfil",
       icon: "profile",
       subItems: ["Editar Perfil"],
-      subPaths: ["/editar/usuario/:id"],
+      subPaths: ["/editar/perfil"],
     },
     {
       name: "gest-usuarios",
@@ -148,8 +148,6 @@ const Sidebar = () => {
       label: "Historial de Preventa",
       path: "/preventa/historial",
       icon: "presale",
-      subItems: ["Detalles de preventa"],
-      subPaths: ["/preventa/detalles/:id"],
     },
    
   ];
