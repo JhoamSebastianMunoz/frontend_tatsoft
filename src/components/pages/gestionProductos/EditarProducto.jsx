@@ -58,17 +58,24 @@ const EditarProducto = () => {
     const fetchProductAndCategories = async () => {
       try {
         setLoading(true);
+        setError("");
        
         // Obtener categorías
         const categoriasResponse = await productService.getAllCategories();
+        console.log('Categorías cargadas:', categoriasResponse.data);
+        
         if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
           setCategorias(categoriasResponse.data);
         }
        
         // Obtener datos del producto
         const productResponse = await productService.getProductById(id);
+        console.log('Datos del producto cargados:', productResponse.data);
+        
         if (productResponse.data) {
-          const producto = productResponse.data;
+          const producto = Array.isArray(productResponse.data) 
+            ? productResponse.data[0] 
+            : productResponse.data;
          
           // Encontrar el nombre de la categoría
           let nombreCategoria = "";
@@ -79,30 +86,48 @@ const EditarProducto = () => {
             nombreCategoria = categoriaEncontrada ? categoriaEncontrada.nombre_categoria : "";
           }
          
-          setFormData({
+          // Formatear los datos del producto
+          const formattedData = {
             nombre_producto: producto.nombre_producto || "",
-            precio: producto.precio || "",
-            cantidad_ingreso: producto.cantidad_ingreso || "",
+            precio: producto.precio?.toString() || "",
+            cantidad_ingreso: producto.cantidad_ingreso?.toString() || "",
             descripcion: producto.descripcion || "",
             id_categoria: producto.id_categoria || "",
             categoria: nombreCategoria,
             id_imagen: producto.id_imagen || ""
-          });
+          };
+          
+          console.log('Datos formateados para el formulario:', formattedData);
+          setFormData(formattedData);
          
           // Cargar la imagen actual si existe
           if (producto.id_imagen) {
+            try {
             const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+              console.log('URL de imagen cargada:', imageUrl);
             setCurrentImageUrl(imageUrl);
+            } catch (imageError) {
+              console.error('Error cargando imagen:', imageError);
+              setError("No se pudo cargar la imagen del producto, pero puede continuar editando.");
           }
+          }
+        } else {
+          setError("No se encontraron datos del producto.");
         }
       } catch (error) {
         console.error("Error cargando datos:", error);
-        setError("No se pudieron cargar los datos del producto. Por favor, intenta de nuevo más tarde.");
+        setError(
+          error.response?.data?.message || 
+          "No se pudieron cargar los datos del producto. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
     };
+
+    if (id) {
     fetchProductAndCategories();
+    }
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -267,8 +292,33 @@ const EditarProducto = () => {
     }
   };
 
-  if (loading && !formData.nombre_producto) {
-    return <Loading message="Cargando datos del producto..." />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <Loading message="Cargando datos del producto..." />
+      </div>
+    );
+  }
+
+  if (!formData.nombre_producto && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <Tipografia variant="h2" size="xl" className="text-red-600 mb-4">
+            Error al cargar el producto
+          </Tipografia>
+          <Tipografia size="base">
+            {error || "No se encontró el producto solicitado"}
+          </Tipografia>
+          <Boton
+            tipo="primario"
+            label="Volver"
+            onClick={() => navigate("/gestion-productos")}
+            className="mt-4"
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -367,7 +417,7 @@ const EditarProducto = () => {
                 </div>
                
                 <div>
-                  <Tipografia size="sm" className="block text-gray-700 mb-1">Stock</Tipografia>
+                  <Tipografia size="sm" className="block text-gray-700 mb-1">Cantidad de Ingreso*</Tipografia>
                   <input
                     type="number"
                     name="cantidad_ingreso"
