@@ -317,9 +317,6 @@ const GestionClientes = () => {
                       <p className="text-gray-600 break-words text-sm mb-2">
                         <strong>Teléfono:</strong> {cliente.telefono}
                       </p>
-                      <p className="text-gray-600 break-words text-sm mb-2">
-                        <strong>Email:</strong> {cliente.email}
-                      </p>
                       <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                         {cliente.descripcion}
                       </p>

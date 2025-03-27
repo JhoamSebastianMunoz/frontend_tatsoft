@@ -460,7 +460,7 @@ const RegistrarProducto = () => {
               <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-3">
                 <Boton
                   tipo="primario"
-                  label="Seguir editando"
+                  label="Continuar"
                   size="small"
                   onClick={() => setShowCancelarAlerta(false)}
                   className="w-full sm:w-[200px] h-[45px] order-2 sm:order-1"

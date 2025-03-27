@@ -19,7 +19,6 @@ const EditarProducto = () => {
     nombre_producto: "",
     categoria: "",
     precio: "",
-    cantidad_ingreso: "",
     descripcion: "",
     id_categoria: "",
     id_imagen: ""
@@ -58,17 +57,24 @@ const EditarProducto = () => {
     const fetchProductAndCategories = async () => {
       try {
         setLoading(true);
+        setError("");
        
         // Obtener categorías
         const categoriasResponse = await productService.getAllCategories();
+        console.log('Categorías cargadas:', categoriasResponse.data);
+        
         if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
           setCategorias(categoriasResponse.data);
         }
        
         // Obtener datos del producto
         const productResponse = await productService.getProductById(id);
+        console.log('Datos del producto cargados:', productResponse.data);
+        
         if (productResponse.data) {
-          const producto = productResponse.data;
+          const producto = Array.isArray(productResponse.data) 
+            ? productResponse.data[0] 
+            : productResponse.data;
          
           // Encontrar el nombre de la categoría
           let nombreCategoria = "";
@@ -79,30 +85,47 @@ const EditarProducto = () => {
             nombreCategoria = categoriaEncontrada ? categoriaEncontrada.nombre_categoria : "";
           }
          
-          setFormData({
+          // Formatear los datos del producto
+          const formattedData = {
             nombre_producto: producto.nombre_producto || "",
-            precio: producto.precio || "",
-            cantidad_ingreso: producto.cantidad_ingreso || "",
+            precio: producto.precio?.toString() || "",
             descripcion: producto.descripcion || "",
             id_categoria: producto.id_categoria || "",
             categoria: nombreCategoria,
             id_imagen: producto.id_imagen || ""
-          });
+          };
+          
+          console.log('Datos formateados para el formulario:', formattedData);
+          setFormData(formattedData);
          
           // Cargar la imagen actual si existe
           if (producto.id_imagen) {
+            try {
             const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+              console.log('URL de imagen cargada:', imageUrl);
             setCurrentImageUrl(imageUrl);
+            } catch (imageError) {
+              console.error('Error cargando imagen:', imageError);
+              setError("No se pudo cargar la imagen del producto, pero puede continuar editando.");
           }
+          }
+        } else {
+          setError("No se encontraron datos del producto.");
         }
       } catch (error) {
         console.error("Error cargando datos:", error);
-        setError("No se pudieron cargar los datos del producto. Por favor, intenta de nuevo más tarde.");
+        setError(
+          error.response?.data?.message || 
+          "No se pudieron cargar los datos del producto. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
     };
+
+    if (id) {
     fetchProductAndCategories();
+    }
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -166,6 +189,15 @@ const EditarProducto = () => {
         setLoading(false);
         return;
       }
+
+      // Validar que el precio sea un número válido
+      const precioNumerico = parseFloat(formData.precio);
+      if (isNaN(precioNumerico) || precioNumerico <= 0) {
+        setError("Por favor ingrese un precio válido mayor a 0.");
+        setLoading(false);
+        return;
+      }
+
       // Subir nueva imagen si se seleccionó una
       let imageId = formData.id_imagen;
       if (imageFile) {
@@ -179,7 +211,6 @@ const EditarProducto = () => {
           // Subir la nueva imagen
           const uploadResponse = await imageService.uploadImage(imageFile);
           if (uploadResponse && uploadResponse.url) {
-            // Extraer el ID de la imagen de la URL o respuesta
             imageId = uploadResponse.fileName || uploadResponse.url.split('/').pop();
           }
         } catch (imageError) {
@@ -192,15 +223,19 @@ const EditarProducto = () => {
 
       // Preparar los datos del producto
       const productData = {
-        nombre_producto: formData.nombre_producto,
-        precio: parseFloat(formData.precio),
-        descripcion: formData.descripcion,
-        cantidad_ingreso: parseInt(formData.cantidad_ingreso) || 0,
+        id_producto: parseInt(id),
+        nombre_producto: formData.nombre_producto.trim(),
+        precio: precioNumerico,
+        descripcion: formData.descripcion.trim(),
         id_imagen: imageId,
-        id_categoria: formData.id_categoria
+        id_categoria: parseInt(formData.id_categoria)
       };
+
+      console.log("Datos a enviar al servidor:", productData);
+
       // Actualizar el producto
-      await productService.updateProduct(id, productData);
+      const response = await productService.updateProduct(id, productData);
+      console.log("Respuesta del servidor:", response);
      
       // Mostrar alerta de éxito
       setShowExitosoAlerta(true);
@@ -210,8 +245,9 @@ const EditarProducto = () => {
       }, 2000);
      
     } catch (error) {
-      console.error("Error actualizando producto:", error);
+      console.error("Error completo al actualizar producto:", error);
       setError(
+        error.response?.data?.message || 
         error.response?.data?.error ||
         "Ocurrió un error al actualizar el producto. Por favor, intenta de nuevo."
       );
@@ -267,32 +303,51 @@ const EditarProducto = () => {
     }
   };
 
-  if (loading && !formData.nombre_producto) {
-    return <Loading message="Cargando datos del producto..." />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <Loading message="Cargando datos del producto..." />
+      </div>
+    );
+  }
+
+  if (!formData.nombre_producto && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <Tipografia variant="h2" size="xl" className="text-red-600 mb-4">
+            Error al cargar el producto
+          </Tipografia>
+          <Tipografia size="base">
+            {error || "No se encontró el producto solicitado"}
+          </Tipografia>
+          <Boton
+            tipo="primario"
+            label="Volver"
+            onClick={() => navigate("/gestion-productos")}
+            className="mt-4"
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen flex bg-slate-100">
+      <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
+        <Sidebar />
+      </div>
       
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        !collapsed ? "md:ml-70" : "md:ml-16"
-      }`}>
+      <Tipografia>
+      <div className="flex-1 md:pl-20 w-full max-w-screen-xl mx-auto lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">
         {/* Header  */}
-        <div className="text-black p-4 ">
-          <Tipografia 
-            variant="h1" 
-            size="xl" 
-            className="text-black font-medium ml-4 md:ml-6"
-          >
-            Editar Producto
-          </Tipografia>
+        <div className="mt-2 mb-4 ml-10">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Editar Producto</h1>
         </div>
        
         {/* Contenido principal */}
-        <div className="flex-1 p-6 flex justify-center">
-          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl">
+        <div className="md:pl-[350px] pl-4 pt-10 md:pt-4">
+          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl mx-auto">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
                 <Tipografia size="base" className="font-medium">Error</Tipografia>
@@ -366,18 +421,6 @@ const EditarProducto = () => {
                   />
                 </div>
                
-                <div>
-                  <Tipografia size="sm" className="block text-gray-700 mb-1">Stock</Tipografia>
-                  <input
-                    type="number"
-                    name="cantidad_ingreso"
-                    value={formData.cantidad_ingreso}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    min="0"
-                  />
-                </div>
-               
                 <div className="md:col-span-2">
                   <Tipografia size="sm" className="block text-gray-700 mb-1">Descripción</Tipografia>
                   <textarea
@@ -439,7 +482,7 @@ const EditarProducto = () => {
                 </div>
               </div>
              
-              <div className="flex justify-center space-x-4 mt-6">
+              <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mt-6">
                 <Boton
                   tipo="secundario"
                   label="Cancelar"
@@ -545,6 +588,7 @@ const EditarProducto = () => {
           </div>
         </div>
       )}
+      </Tipografia>
     </div>
   );
 };

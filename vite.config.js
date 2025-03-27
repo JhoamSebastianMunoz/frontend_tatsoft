@@ -34,7 +34,6 @@ export default defineConfig({
       '/presales-api': {
         target: 'https://backendpresalessalereturns-g2cghudwf2emhnf4.eastus-01.azurewebsites.net',
         changeOrigin: true,
-        secure: false,
         rewrite: (path) => path.replace(/^\/presales-api/, '')
       },
       // Las rutas en el backend están montadas sin prefijo

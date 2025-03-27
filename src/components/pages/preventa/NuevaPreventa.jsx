@@ -344,7 +344,9 @@ const NuevaPreventa = () => {
       }
     } catch (err) {
       console.error("Error completo:", err);
-      
+      if (err.response && err.response.data) {
+        console.log("Respuesta del servidor:", JSON.stringify(err.response.data, null, 2));
+      }
       let mensajeError = "";
       
       if (err.response) {

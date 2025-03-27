@@ -68,11 +68,14 @@ import Acumulados from "./components/pages/Acumulado/Acumulados";
 
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
+import EditarPerfil from "./components/pages/collaborator/editarPerfil";
 
 // Componente para rutas no autorizadas y errores
 import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
 import Loading from "./components/Loading/Loading";
 import Pagina404 from "./components/pages/alert/page404";
+import Tipografia from "./components/atoms/Tipografia";
+import EstadisticasVentas from "./components/pages/estadisticas/EstadisticasVentas";
 
 // Componente de rutas protegidas
 const ProtectedRoute = ({ element, allowedRoles }) => {
@@ -111,17 +114,25 @@ const App = () => {
       />
 
       <Route
-      path="editar/perfil"
+      path="/editar/perfil"
       element={
         <ProtectedRoute
         element={<EditarPerfil />}
         allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
         />
       }
-      
       />
 
-
+      {/* Rutas Estadisticas */}
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute
+            element={<EstadisticasVentas />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
 
       {/* Rutas de administrador - Gestión de usuarios */}
       <Route

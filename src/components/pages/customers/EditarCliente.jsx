@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { clientService } from "../../../context/services/ApiService";
 import CampoTextoProfile from "../../atoms/CamposTextoProfile";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
@@ -8,18 +9,9 @@ import AlertaEdicion from "../../pages/administrator/AlertaEdicion";
 import Icono from "../../atoms/Iconos";
 
 const EditarCliente = (props) => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const datosEjemplo = {
-    razonSocial: "Empresa ABC S.A.S.",
-    nombre: "Juan",
-    apellido: "Pérez",
-    celular: "3101234567",
-    nit: "900123456-7",
-    direccion: "Calle 123 # 45-67, Bogotá",
-    correo: "info@empresaabc.com",
-  };
 
   const {
     razonSocial: propRazonSocial,
@@ -33,13 +25,16 @@ const EditarCliente = (props) => {
   } = props;
   
   const [clienteData, setClienteData] = useState({
-    razonSocial: propRazonSocial || datosEjemplo.razonSocial,
-    nombre: propNombre || datosEjemplo.nombre,
-    apellido: propApellido || datosEjemplo.apellido,
-    celular: propCelular || datosEjemplo.celular,
-    nit: propNit || datosEjemplo.nit,
-    direccion: propDireccion || datosEjemplo.direccion,
-    correo: propCorreo || datosEjemplo.correo,
+    razonSocial: "",
+    nombre: "",
+    apellido: "",
+    celular: "",
+    nit: "",
+    direccion: "",
+    correo: "",
+    cedula: "",
+    estado: "Activo",
+    id_zona_de_trabajo: 1
   });
 
   const [originalData, setOriginalData] = useState({});
@@ -49,10 +44,58 @@ const EditarCliente = (props) => {
   const [origenRuta, setOrigenRuta] = useState("/gestion/clientes"); 
   const [dataModified, setDataModified] = useState(false);
   const [navigateAfterCancel, setNavigateAfterCancel] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setOriginalData({...clienteData});
-  }, []);
+    const fetchClientData = async () => {
+      try {
+        setLoading(true);
+        const response = await clientService.getClientById(id);
+        console.log("Datos del cliente recibidos:", response.data);
+        
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          const cliente = response.data[0];
+          console.log("Cliente extraído:", cliente);
+          
+          const clienteIdReal = cliente.id_cliente;
+          console.log("ID real del cliente:", clienteIdReal);
+          
+          const nombreCompleto = cliente.nombre_completo_cliente ? cliente.nombre_completo_cliente.split(' ') : ['', ''];
+          
+          const mappedData = {
+            id_cliente: clienteIdReal,
+            razonSocial: cliente.razon_social || '',
+            nombre: nombreCompleto[0] || '',
+            apellido: nombreCompleto.slice(1).join(' ') || '',
+            celular: cliente.telefono || '',
+            nit: cliente.rut_nit || '',
+            direccion: cliente.direccion || '',
+            correo: cliente.email || '',
+            cedula: cliente.cedula || '',
+            estado: cliente.estado || 'Activo',
+            id_zona_de_trabajo: cliente.id_zona_de_trabajo || 1
+          };
+          
+          console.log("Datos mapeados:", mappedData);
+          setClienteData(mappedData);
+          setOriginalData(mappedData);
+        } else {
+          console.error("No se encontraron datos de cliente válidos");
+          setError("No se pudieron encontrar los datos del cliente");
+        }
+      } catch (err) {
+        console.error("Error al cargar datos del cliente:", err);
+        setError("Error al cargar los datos del cliente: " + (err.message || "Error desconocido"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchClientData();
+    }
+  }, [id]);
 
   useEffect(() => {
     try {
@@ -87,10 +130,6 @@ const EditarCliente = (props) => {
   }, [clienteData, originalData]);
 
   const handleChange = (field, value) => {
-    if (field === "nit") {
-      return;
-    }
-    
     let stringValue = '';
     if (value && typeof value === 'object' && value.target) {
       stringValue = value.target.value;
@@ -115,17 +154,76 @@ const EditarCliente = (props) => {
       }
     }
     
+    if (field === "cedula" && stringValue !== '') {
+      if (!/^\d*$/.test(stringValue)) {
+        return;
+      }
+    }
+    
     setClienteData(prev => ({
       ...prev,
       [field]: stringValue
     }));
   };
 
-  const handleSave = () => {
-    console.log("Guardando cambios:", clienteData);
+  const handleSave = async () => {
+    try {
+      const clienteIdReal = clienteData.id_cliente;
+      console.log("ID real del cliente para actualización:", clienteIdReal);
+      
+      if (!clienteIdReal) {
+        throw new Error("No se pudo determinar el ID real del cliente para actualizar");
+      }
+      
+      const clienteToUpdate = {
+        cedula: clienteData.cedula,
+        nombre_completo_cliente: `${clienteData.nombre} ${clienteData.apellido}`.trim(),
+        direccion: clienteData.direccion,
+        telefono: clienteData.celular,
+        rut_nit: clienteData.nit || "",
+        razon_social: clienteData.razonSocial || "",
+        estado: "Activo",
+        id_zona_de_trabajo: clienteData.id_zona_de_trabajo || 1
+      };
+
+      console.log("Enviando datos al servidor (formato ajustado):", clienteToUpdate);
+      
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const response = await fetch(`https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/update-client/${clienteIdReal}`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(clienteToUpdate)
+      });
+      
+      const responseText = await response.text();
+      console.log("Respuesta completa:", responseText);
+      
+      if (response.ok) {
+        console.log("Cliente actualizado correctamente");
     setOriginalData({...clienteData});
     setDataModified(false);
-    setShowSaveAlert(true);
+        setShowSuccessAlert(true);
+        
+        setTimeout(() => {
+          window.location.href = "/gestion/clientes";
+        }, 2000);
+      } else {
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(`Error ${response.status}: ${errorData.error || response.statusText}`);
+        } catch (e) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+      }
+    } catch (err) {
+      console.error("Error completo:", err);
+      setError(err.message || "Error al actualizar cliente");
+    }
   };
 
   const handleConfirmSave = () => {
@@ -134,18 +232,11 @@ const EditarCliente = (props) => {
   };
 
   const handleCancel = () => {
-    if (dataModified) {
-      // Cuando se hace clic en el botón "Cancelar", queremos navegar después
-      setNavigateAfterCancel(true);
-      setShowCancelAlert(true);
-    } else {
-      navigate(origenRuta);
-    }
+    navigate("/gestion/clientes", { replace: true });
   };
 
   const handleVolver = () => {
     if (dataModified) {
-      // Cuando se hace clic en el ícono "Volver", queremos navegar después
       setNavigateAfterCancel(true);
       setShowCancelAlert(true);
     } else {
@@ -154,16 +245,14 @@ const EditarCliente = (props) => {
   };
 
   const confirmCancel = () => {
-    // Restablecer los datos a los valores originales
     setClienteData({...originalData});
     setDataModified(false);
     setShowCancelAlert(false);
     
-    // Solo navegar si viene desde el botón Cancelar o el ícono Volver
-    if (navigateAfterCancel) {
-      navigate(origenRuta);
-    }
-    setNavigateAfterCancel(false);
+    setTimeout(() => {
+      console.log("Redirigiendo a la ruta de gestión de clientes después de descartar cambios");
+      navigate("/gestion/clientes", { replace: true });
+    }, 100);
   };
 
   const closeCancelAlert = () => {
@@ -178,12 +267,33 @@ const EditarCliente = (props) => {
 
   const handleCloseSuccessAlert = () => {
     setShowSuccessAlert(false);
-    navigate(origenRuta);
+    console.log("Redirigiendo después de cerrar alerta de éxito");
+    window.location.href = "/gestion/clientes";
   };
 
   const nombreStr = clienteData.nombre || '';
   const apellidoStr = clienteData.apellido || '';
   const fullName = clienteData.razonSocial || `${nombreStr} ${apellidoStr}`.trim();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <Tipografia>Cargando datos del cliente...</Tipografia>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center text-red-600">
+          <Tipografia>{error}</Tipografia>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-slate-50">  
@@ -222,6 +332,12 @@ const EditarCliente = (props) => {
                 </Tipografia>
                 <div className="space-y-5">
                   <CampoTextoProfile 
+                    label="Cédula" 
+                    value={clienteData.cedula}
+                    editable={true}
+                    onChange={(value) => handleChange("cedula", value)}
+                  />
+                  <CampoTextoProfile 
                     label="Razón Social" 
                     value={clienteData.razonSocial}
                     editable={true}
@@ -239,12 +355,11 @@ const EditarCliente = (props) => {
                     editable={true}
                     onChange={(value) => handleChange("apellido", value)}
                   />
-                  <CampoTexto
-                    label="NIT" 
+                  <CampoTextoProfile
+                    label="RUNT o NIT" 
                     value={clienteData.nit}
-                    readOnly={true}
-                    disabled={true}
-                    type="text"
+                    editable={true}
+                    onChange={(value) => handleChange("nit", value)}
                   />
                 </div>
               </div>
@@ -266,13 +381,6 @@ const EditarCliente = (props) => {
                     value={clienteData.celular}
                     editable={true}
                     onChange={(value) => handleChange("celular", value)}
-                    type="text"
-                  />
-                  <CampoTextoProfile 
-                    label="Correo Electrónico" 
-                    value={clienteData.correo}
-                    editable={true}
-                    onChange={(value) => handleChange("correo", value)}
                     type="text"
                   />
                 </div>
@@ -312,7 +420,10 @@ const EditarCliente = (props) => {
               <div className="flex items-center justify-center mb-4">
                <Icono name="confirmar" size="65"/>
               </div>
-              <Tipografia size="lg" className="font-bold mb-2">¡Cambios guardados exitosamente!</Tipografia>
+              <Tipografia size="lg" className="font-bold mb-2">¡Cliente actualizado exitosamente!</Tipografia>
+              <Tipografia className="text-gray-600 mb-4">
+                Los cambios se han guardado correctamente. Serás redirigido a la lista de clientes.
+              </Tipografia>
               <Boton
                 tipo="primario"
                 label="Aceptar"
@@ -338,13 +449,7 @@ const EditarCliente = (props) => {
                   tipo="primario"
                   label="Descartar cambios"
                   size="small"
-                  onClick={() => {
-                    // Restablecer datos a valores originales sin navegar
-                    setClienteData({...originalData});
-                    setDataModified(false);
-                    setShowCancelAlert(false);
-                    setNavigateAfterCancel(false);
-                  }}
+                  onClick={confirmCancel}
                   className="w-full"
                 />
                 <Boton
@@ -364,3 +469,4 @@ const EditarCliente = (props) => {
 };
 
 export default EditarCliente;
+//

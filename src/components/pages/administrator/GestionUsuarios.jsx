@@ -30,7 +30,7 @@ const GestionUsuarios = () => {
   // Agregar estado para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(9); // Para mostrar 3x3 en pantallas grandes
-  
+
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
@@ -60,9 +60,9 @@ const GestionUsuarios = () => {
     
   
     if (busqueda) {
-      const searchTerm = busqueda.toLowerCase();
+      const searchTerm = busqueda.toLowerCase().trim();
       results = results.filter(
-        usuario => usuario.nombreCompleto.toLowerCase().includes(searchTerm)
+        usuario => usuario.nombreCompleto?.toLowerCase().includes(searchTerm)
       );
     }
     
@@ -114,33 +114,33 @@ const GestionUsuarios = () => {
       
       <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
         <div className="max-w-[1600px] mx-auto">
-          <Tipografia>
+      <Tipografia>
             <div className="w-full">
               <div className="mt-2 mb-4">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Gestión de usuarios</h1>
-              </div>
+          </div>
 
-              {error && (
+          {error && (
                 <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md">
                   <Tipografia className="text-red-700 text-sm">{error}</Tipografia>
-                </div>
-              )}
-              
+            </div>
+          )}
+          
               <div className="flex flex-col space-y-3 w-full">
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
-                  <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-1">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1">
                       <div className="flex justify-start w-full sm:w-auto">
-                        <Boton
-                          label="Registrar Usuario"
-                          tipo="primario"
-                          onClick={handleRegistrarUsuario}
-                          size="small"
+                    <Boton
+                      label="Registrar Usuario"
+                      tipo="primario"
+                      onClick={handleRegistrarUsuario}
+                      size="small"
                           className="w-full sm:w-auto"
-                        />
-                      </div>
-                    </div>
-                    
+                    />
+                  </div>
+                </div>
+                
                     <div className="flex flex-col gap-2">
                       <div className="w-full">
                         <Tipografia className="text-gray-800 mb-1 px-1 text-base">
@@ -152,51 +152,69 @@ const GestionUsuarios = () => {
                               key={opcion}
                               onClick={() => handleFiltroChange(opcion)}
                               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm transition-all duration-200 ${
-                                filtro === opcion
-                                  ? 'bg-gradient-to-r from-orange-600 to-orange-400 text-white shadow-md'
-                                  : 'bg-white border border-orange-200 hover:border-orange-400 text-black hover:shadow-sm'
-                              }`}
-                            >
-                              <Tipografia className={`${
-                                filtro === opcion
-                                  ? 'text-white'
-                                  : 'text-orange-700'
+                            filtro === opcion
+                              ? 'bg-gradient-to-r from-orange-600 to-orange-400 text-white shadow-md'
+                              : 'bg-white border border-orange-200 hover:border-orange-400 text-black hover:shadow-sm'
+                          }`}
+                        >
+                          <Tipografia className={`${
+                            filtro === opcion
+                              ? 'text-white'
+                              : 'text-orange-700'
                               } text-sm`}>
-                                {opcion}
-                              </Tipografia>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="w-full mt-1">
-                        <Buscador
-                          placeholder="Buscar Usuarios"
-                          onChange={handleBusquedaChange}
-                        />
-                      </div>
+                            {opcion}
+                          </Tipografia>
+                        </button>
+                      ))}
                     </div>
                   </div>
+                  
+                      <div className="w-full mt-1">
+                    <Buscador
+                      placeholder="Buscar usuarios por nombre"
+                      onChange={handleBusquedaChange}
+                      value={busqueda}
+                    />
+                  </div>
+
+                  {busqueda && (
+                    <div className="mt-2 flex items-center">
+                      <span className="text-xs text-gray-500 mr-2">Filtrando por:</span>
+                      <div className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center">
+                        <span>{busqueda}</span>
+                        <button 
+                          onClick={() => setBusqueda("")} 
+                          className="ml-1 text-orange-600 hover:text-orange-800"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
+              </div>
+            </div>
+            
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
-                  <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center">
                     <Tipografia variant="subtitle" className="text-black font-medium text-sm sm:text-base">
-                      Lista de Usuarios
-                    </Tipografia>
-                    {filteredUsuarios.length > 0 && (
+                  Lista de Usuarios
+                </Tipografia>
+                {filteredUsuarios.length > 0 && (
                       <div className="px-2 py-1 bg-orange-200 rounded-full text-center min-w-[60px]">
                         <Tipografia className="text-xs text-orange-800">
-                          {filteredUsuarios.length} {filteredUsuarios.length === 1 ? "usuario" : "usuarios"}
-                        </Tipografia>
-                      </div>
-                    )}
+                      {filteredUsuarios.length} {filteredUsuarios.length === 1 ? "usuario" : "usuarios"}
+                    </Tipografia>
                   </div>
-                </div>
-                
+                )}
+              </div>
+            </div>
+            
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 flex-1 w-full">
-                  <div className="w-full">
-                    {filteredUsuarios.length > 0 ? (
+              <div className="w-full">
+                {filteredUsuarios.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {currentItems.map((usuario) => (
                           <div key={usuario.id_usuario} className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -208,7 +226,7 @@ const GestionUsuarios = () => {
                               >
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-                                </svg>
+                                  </svg>
                               </button>
                               {menuAbierto === usuario.id_usuario && (
                                 <div className="absolute top-6 right-0 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-10">
@@ -245,7 +263,7 @@ const GestionUsuarios = () => {
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
                                     <Tipografia className="text-gray-600 text-sm">
-                                      Dueño: {usuario.nombreCompleto}
+                                      Usuario: {usuario.nombreCompleto}
                                     </Tipografia>
                                   </div>
 
@@ -266,44 +284,44 @@ const GestionUsuarios = () => {
                                       Inactivo
                                     </div>
                                   )}
-                                </div>
-                              </div>
-
-                              <div className="mt-4">
-                                <Boton 
-                                  label="Editar"
-                                  size="small"
-                                  tipo="primario"
-                                  onClick={() => navigate(`/editar/usuario/${usuario.id_usuario}`)}
-                                  className="w-full bg-[#F78220] hover:bg-[#e67316] text-white py-2 rounded-md"
-                                />
-                              </div>
                             </div>
                           </div>
-                        ))}
+                          
+                              <div className="mt-4">
+                            <Boton 
+                              label="Editar"
+                                  size="small"
+                              tipo="primario"
+                              onClick={() => navigate(`/editar/usuario/${usuario.id_usuario}`)}
+                                  className="w-full bg-[#F78220] hover:bg-[#e67316] text-white py-2 rounded-md"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    ) : (
+                    ))}
+                  </div>
+                ) : (
                       <div className="flex flex-col items-center justify-center text-center py-8">
                         <div className="bg-orange-50 p-4 rounded-full mb-3">
                           <svg className="w-12 h-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                        </div>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
                         <Tipografia className="text-black mb-2 text-sm">
-                          No se encontraron usuarios
-                        </Tipografia>
+                      No se encontraron usuarios
+                    </Tipografia>
                         <Tipografia className="text-gray-500 mb-3 text-xs">
-                          Intenta cambiando los filtros o la búsqueda
-                        </Tipografia>
-                        <Boton
-                          label="Registrar Usuario"
-                          tipo="primario"
-                          onClick={handleRegistrarUsuario}
-                          size="small"
-                          className="mt-2"
-                        />
-                      </div>
-                    )}
+                      Intenta cambiando los filtros o la búsqueda
+                    </Tipografia>
+                    <Boton
+                      label="Registrar Usuario"
+                      tipo="primario"
+                      onClick={handleRegistrarUsuario}
+                      size="small"
+                      className="mt-2"
+                    />
+                  </div>
+                )}
                   
                     {filteredUsuarios.length > 0 && (
                       <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
@@ -366,11 +384,11 @@ const GestionUsuarios = () => {
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
               </div>
             </div>
-          </Tipografia>
+          </div>
+        </div>
+      </Tipografia>
         </div>
       </div>
     </div>

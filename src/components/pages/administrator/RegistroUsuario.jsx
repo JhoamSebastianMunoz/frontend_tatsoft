@@ -525,7 +525,7 @@ const RegistroUsuario = () => {
                                 <li>Use al menos 8 caracteres</li>
                                 <li>Incluya letras mayúsculas y minúsculas</li>
                                 <li>Incluya al menos un número</li>
-                                <li>Incluya al menos un carácter especial</li>
+                                <li>Incluya al menos un carácter especial (!@#$%^&amp;*(),.?&quot;:{}|&lt;&gt;)</li>
                               </ul>
                             </div>
                           </div>
