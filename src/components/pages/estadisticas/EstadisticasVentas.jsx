@@ -247,6 +247,7 @@ const EstadisticasVentas = () => {
         <Sidebar />
       </div>
       
+      <Tipografia>
       <main className="w-full md:pl-[100px] pl-20 pr-2 pt-[80px] md:pt-6 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
@@ -555,6 +556,7 @@ const EstadisticasVentas = () => {
           </div>
         </div>
       </main>
+      </Tipografia>
     </div>
   );
 };

@@ -19,7 +19,6 @@ const EditarProducto = () => {
     nombre_producto: "",
     categoria: "",
     precio: "",
-    cantidad_ingreso: "",
     descripcion: "",
     id_categoria: "",
     id_imagen: ""
@@ -58,51 +57,70 @@ const EditarProducto = () => {
     const fetchProductAndCategories = async () => {
       try {
         setLoading(true);
+        setError("");
+        
+        console.log("ID del producto a cargar:", id);
+       
+        // Obtener datos del producto primero
+        const productResponse = await productService.getProductById(id);
+        console.log("Respuesta del producto:", productResponse);
+
+        if (!productResponse || !productResponse.data || !productResponse.data[0]) {
+          console.error("No se recibieron datos del producto");
+          setError("No se encontró el producto especificado.");
+          setLoading(false);
+          return;
+        }
+
+        const producto = productResponse.data[0];
+        console.log("Datos del producto:", producto);
        
         // Obtener categorías
         const categoriasResponse = await productService.getAllCategories();
+        console.log("Respuesta de categorías:", categoriasResponse);
+
         if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
           setCategorias(categoriasResponse.data);
         }
        
-        // Obtener datos del producto
-        const productResponse = await productService.getProductById(id);
-        if (productResponse.data) {
-          const producto = productResponse.data;
-         
-          // Encontrar el nombre de la categoría
-          let nombreCategoria = "";
-          if (producto.id_categoria && categoriasResponse.data) {
-            const categoriaEncontrada = categoriasResponse.data.find(
-              cat => cat.id_categoria === producto.id_categoria
-            );
-            nombreCategoria = categoriaEncontrada ? categoriaEncontrada.nombre_categoria : "";
-          }
-         
-          setFormData({
-            nombre_producto: producto.nombre_producto || "",
-            precio: producto.precio || "",
-            cantidad_ingreso: producto.cantidad_ingreso || "",
-            descripcion: producto.descripcion || "",
-            id_categoria: producto.id_categoria || "",
-            categoria: nombreCategoria,
-            id_imagen: producto.id_imagen || ""
-          });
-         
-          // Cargar la imagen actual si existe
-          if (producto.id_imagen) {
+        // Encontrar el nombre de la categoría
+        let nombreCategoria = producto.nombre_categoria || "";
+       
+        // Actualizar el estado con los datos del producto
+        const nuevoFormData = {
+          nombre_producto: producto.nombre_producto || "",
+          precio: producto.precio?.toString() || "",
+          descripcion: producto.descripcion || "",
+          id_categoria: producto.id_categoria || "",
+          categoria: nombreCategoria,
+          id_imagen: producto.id_imagen || ""
+        };
+        
+        console.log("Datos a establecer en el formulario:", nuevoFormData);
+        setFormData(nuevoFormData);
+       
+        // Cargar la imagen actual si existe
+        if (producto.id_imagen) {
+          try {
             const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+            console.log("URL de la imagen cargada:", imageUrl);
             setCurrentImageUrl(imageUrl);
+          } catch (imageError) {
+            console.error("Error cargando imagen:", imageError);
           }
         }
       } catch (error) {
-        console.error("Error cargando datos:", error);
-        setError("No se pudieron cargar los datos del producto. Por favor, intenta de nuevo más tarde.");
+        console.error("Error completo al cargar datos:", error);
+        setError("No se pudieron cargar los datos del producto. Por favor, intente nuevamente.");
       } finally {
         setLoading(false);
       }
     };
-    fetchProductAndCategories();
+
+    if (id) {
+      console.log("Iniciando carga de datos para ID:", id);
+      fetchProductAndCategories();
+    }
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -166,6 +184,15 @@ const EditarProducto = () => {
         setLoading(false);
         return;
       }
+
+      // Validar que el precio sea un número válido
+      const precioNumerico = parseFloat(formData.precio);
+      if (isNaN(precioNumerico) || precioNumerico <= 0) {
+        setError("Por favor ingrese un precio válido mayor a 0.");
+        setLoading(false);
+        return;
+      }
+
       // Subir nueva imagen si se seleccionó una
       let imageId = formData.id_imagen;
       if (imageFile) {
@@ -179,7 +206,6 @@ const EditarProducto = () => {
           // Subir la nueva imagen
           const uploadResponse = await imageService.uploadImage(imageFile);
           if (uploadResponse && uploadResponse.url) {
-            // Extraer el ID de la imagen de la URL o respuesta
             imageId = uploadResponse.fileName || uploadResponse.url.split('/').pop();
           }
         } catch (imageError) {
@@ -192,15 +218,19 @@ const EditarProducto = () => {
 
       // Preparar los datos del producto
       const productData = {
-        nombre_producto: formData.nombre_producto,
-        precio: parseFloat(formData.precio),
-        descripcion: formData.descripcion,
-        cantidad_ingreso: parseInt(formData.cantidad_ingreso) || 0,
+        id_producto: parseInt(id),
+        nombre_producto: formData.nombre_producto.trim(),
+        precio: precioNumerico,
+        descripcion: formData.descripcion.trim(),
         id_imagen: imageId,
-        id_categoria: formData.id_categoria
+        id_categoria: parseInt(formData.id_categoria)
       };
+
+      console.log("Datos a enviar al servidor:", productData);
+
       // Actualizar el producto
-      await productService.updateProduct(id, productData);
+      const response = await productService.updateProduct(id, productData);
+      console.log("Respuesta del servidor:", response);
      
       // Mostrar alerta de éxito
       setShowExitosoAlerta(true);
@@ -210,8 +240,9 @@ const EditarProducto = () => {
       }, 2000);
      
     } catch (error) {
-      console.error("Error actualizando producto:", error);
+      console.error("Error completo al actualizar producto:", error);
       setError(
+        error.response?.data?.message || 
         error.response?.data?.error ||
         "Ocurrió un error al actualizar el producto. Por favor, intenta de nuevo."
       );
@@ -267,31 +298,27 @@ const EditarProducto = () => {
     }
   };
 
-  if (loading && !formData.nombre_producto) {
+  if (loading) {
+    console.log("Estado de carga:", { loading, formData });
     return <Loading message="Cargando datos del producto..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar />
+      <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
+        <Sidebar />
+      </div>
       
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        !collapsed ? "md:ml-70" : "md:ml-16"
-      }`}>
+      <div className="flex-1 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">
         {/* Header  */}
         <div className="text-black p-4 ">
-          <Tipografia 
-            variant="h1" 
-            size="xl" 
-            className="text-black font-medium ml-4 md:ml-6"
-          >
-            Editar Producto
-          </Tipografia>
+        <div className="mt-2 mb-4">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Editar Producto</h1>
+          </div>
         </div>
        
         {/* Contenido principal */}
-        <div className="flex-1 p-6 flex justify-center">
+        <div className="flex-1 flex justify-center">
           <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -366,18 +393,6 @@ const EditarProducto = () => {
                   />
                 </div>
                
-                <div>
-                  <Tipografia size="sm" className="block text-gray-700 mb-1">Stock</Tipografia>
-                  <input
-                    type="number"
-                    name="cantidad_ingreso"
-                    value={formData.cantidad_ingreso}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    min="0"
-                  />
-                </div>
-               
                 <div className="md:col-span-2">
                   <Tipografia size="sm" className="block text-gray-700 mb-1">Descripción</Tipografia>
                   <textarea
@@ -439,7 +454,7 @@ const EditarProducto = () => {
                 </div>
               </div>
              
-              <div className="flex justify-center space-x-4 mt-6">
+              <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mt-6">
                 <Boton
                   tipo="secundario"
                   label="Cancelar"
