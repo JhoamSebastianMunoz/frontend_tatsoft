@@ -45,6 +45,10 @@ const Acumulados = () => {
     periodo: "Total"
   });
 
+  // Agregar estos estados para manejar la impresión
+  const [imprimiendoItem, setImprimiendoItem] = useState(null);
+  const [detalleParaImprimir, setDetalleParaImprimir] = useState(null);
+
   useEffect(() => {
     fetchDatos();
   }, []);
@@ -367,6 +371,379 @@ verDetalles = (item) => {
   
 };
   
+  // Nueva función para manejar la impresión
+  const handleImprimir = async (item) => {
+    try {
+      setImprimiendoItem(item.id_venta);
+      console.log(`Preparando impresión para ${item.tipo_venta} ID: ${item.id_venta}`);
+      
+      let response;
+      // Obtener los detalles según el tipo (venta o devolución)
+      if (item.tipo_venta === "Venta") {
+        response = await presaleService.getSaleDetails(item.id_venta);
+      } else if (item.tipo_venta === "Devolución") {
+        response = await presaleService.getRefundDetails(item.id_venta);
+      }
+      
+      if (!response || !response.data) {
+        throw new Error(`No se pudieron obtener los detalles del ${item.tipo_venta.toLowerCase()} para imprimir`);
+      }
+      
+      const detalle = response.data;
+      setDetalleParaImprimir(detalle);
+      
+      // Dar tiempo al estado para actualizarse
+      setTimeout(() => {
+        imprimirDetalle(detalle, item.tipo_venta);
+      }, 300);
+      
+    } catch (error) {
+      console.error("Error al preparar la impresión:", error);
+      mostrarError(`No se pudo generar la impresión para el ${item.tipo_venta.toLowerCase()}. Intente nuevamente.`);
+    } finally {
+      setImprimiendoItem(null);
+    }
+  };
+  
+  // Función para generar e imprimir el documento
+  const imprimirDetalle = (detalle, tipo) => {
+    // Crear una nueva ventana para la impresión
+    const ventanaImpresion = window.open('', '_blank', 'height=600,width=800');
+    
+    // Formatear la fecha
+    const fechaFormateada = formatearFecha(tipo === "Venta" ? detalle.fecha_confirmacion : detalle.fecha_confirmacion);
+    
+    // Construir el HTML para la impresión según el tipo
+    if (tipo === "Venta") {
+      // Plantilla para ventas
+      ventanaImpresion.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Factura Venta #${detalle.id_preventa}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              color: #333;
+            }
+            .factura {
+              max-width: 800px;
+              margin: 0 auto;
+              border: 1px solid #ddd;
+              padding: 20px;
+            }
+            .encabezado {
+              text-align: center;
+              margin-bottom: 20px;
+              border-bottom: 2px solid #ED6C02;
+              padding-bottom: 10px;
+            }
+            .info-empresa {
+              margin-bottom: 20px;
+            }
+            .info-cliente {
+              margin-bottom: 20px;
+              padding: 10px;
+              border: 1px solid #eee;
+              background-color: #f9f9f9;
+            }
+            .detalles {
+              margin-bottom: 20px;
+            }
+            .detalles-titulo {
+              font-weight: bold;
+              margin-bottom: 10px;
+              color: #ED6C02;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              padding: 8px;
+              text-align: left;
+              border-bottom: 1px solid #ddd;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            .total {
+              text-align: right;
+              font-weight: bold;
+              font-size: 16px;
+              margin-top: 20px;
+            }
+            .total span {
+              color: #ED6C02;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+            }
+            @media print {
+              body {
+                padding: 0;
+                margin: 0;
+              }
+              .no-print {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="factura">
+            <div class="encabezado">
+              <h1>FACTURA DE VENTA</h1>
+              <h2>#${detalle.id_preventa}</h2>
+            </div>
+            
+            <div class="info-empresa">
+              <h3>INFORMACIÓN DE LA EMPRESA</h3>
+              <p>TAT-SOFT</p>
+              <p>Sistema de Gestión para Ventas</p>
+            </div>
+            
+            <div class="info-cliente">
+              <h3>INFORMACIÓN DEL CLIENTE</h3>
+              <p><strong>Cliente:</strong> ${detalle.cliente?.razon_social || detalle.cliente?.nombre || "No especificado"}</p>
+              <p><strong>Dirección:</strong> ${detalle.cliente?.direccion || "No especificado"}</p>
+              <p><strong>Teléfono:</strong> ${detalle.cliente?.telefono || "No especificado"}</p>
+            </div>
+            
+            <div class="detalles">
+              <div class="detalles-titulo">DETALLES DE LA VENTA</div>
+              <p><strong>Fecha de Emisión:</strong> ${fechaFormateada}</p>
+              <p><strong>Estado:</strong> ${detalle.estado || "Confirmada"}</p>
+              <p><strong>Colaborador:</strong> ${detalle.colaborador?.nombre || "No especificado"}</p>
+            </div>
+            
+            <div class="productos">
+              <div class="detalles-titulo">PRODUCTOS</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${detalle.productos && detalle.productos.map(producto => `
+                    <tr>
+                      <td>${producto.nombre}</td>
+                      <td>${producto.cantidad}</td>
+                      <td>$${formatearMoneda(producto.precio)}</td>
+                      <td>$${formatearMoneda(producto.subtotal || producto.precio * producto.cantidad)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              
+              <div class="total">
+                TOTAL: <span>$${formatearMoneda(detalle.total)}</span>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p>Gracias por su compra</p>
+              <p>Fecha de impresión: ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+          
+          <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print();" style="padding: 10px 20px; background-color: #ED6C02; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Imprimir Factura
+            </button>
+            <button onclick="window.close();" style="padding: 10px 20px; background-color: #ccc; color: black; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;">
+              Cerrar
+            </button>
+          </div>
+        </body>
+        </html>
+      `);
+    } else {
+      // Plantilla para devoluciones
+      ventanaImpresion.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Recibo de Devolución #${detalle.id_preventa}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              color: #333;
+            }
+            .factura {
+              max-width: 800px;
+              margin: 0 auto;
+              border: 1px solid #ddd;
+              padding: 20px;
+            }
+            .encabezado {
+              text-align: center;
+              margin-bottom: 20px;
+              border-bottom: 2px solid #ED6C02;
+              padding-bottom: 10px;
+            }
+            .info-empresa {
+              margin-bottom: 20px;
+            }
+            .info-cliente {
+              margin-bottom: 20px;
+              padding: 10px;
+              border: 1px solid #eee;
+              background-color: #f9f9f9;
+            }
+            .detalles {
+              margin-bottom: 20px;
+            }
+            .detalles-titulo {
+              font-weight: bold;
+              margin-bottom: 10px;
+              color: #ED6C02;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              padding: 8px;
+              text-align: left;
+              border-bottom: 1px solid #ddd;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            .total {
+              text-align: right;
+              font-weight: bold;
+              font-size: 16px;
+              margin-top: 20px;
+            }
+            .total span {
+              color: #ED6C02;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+            }
+            @media print {
+              body {
+                padding: 0;
+                margin: 0;
+              }
+              .no-print {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="factura">
+            <div class="encabezado">
+              <h1>RECIBO DE DEVOLUCIÓN</h1>
+              <h2>#${detalle.id_preventa}</h2>
+            </div>
+            
+            <div class="info-empresa">
+              <h3>INFORMACIÓN DE LA EMPRESA</h3>
+              <p>TAT-SOFT</p>
+              <p>Sistema de Gestión para Ventas</p>
+            </div>
+            
+            <div class="info-cliente">
+              <h3>INFORMACIÓN DEL CLIENTE</h3>
+              <p><strong>Cliente:</strong> ${detalle.cliente?.razon_social || detalle.cliente?.nombre || "No especificado"}</p>
+              <p><strong>Dirección:</strong> ${detalle.cliente?.direccion || "No especificado"}</p>
+              <p><strong>Teléfono:</strong> ${detalle.cliente?.telefono || "No especificado"}</p>
+            </div>
+            
+            <div class="detalles">
+              <div class="detalles-titulo">DETALLES DE LA DEVOLUCIÓN</div>
+              <p><strong>Fecha de Devolución:</strong> ${fechaFormateada}</p>
+              <p><strong>Estado:</strong> Devuelto</p>
+              <p><strong>Colaborador:</strong> ${detalle.colaborador?.nombre || "No especificado"}</p>
+            </div>
+            
+            <div class="productos">
+              <div class="detalles-titulo">PRODUCTOS DEVUELTOS</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${detalle.productos && detalle.productos.map(producto => `
+                    <tr>
+                      <td>${producto.nombre}</td>
+                      <td>${producto.cantidad}</td>
+                      <td>$${formatearMoneda(producto.precio)}</td>
+                      <td>$${formatearMoneda(producto.subtotal || producto.precio * producto.cantidad)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              
+              <div class="total">
+                TOTAL DEVUELTO: <span>$${formatearMoneda(detalle.total)}</span>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p>Este documento confirma la devolución de los productos listados.</p>
+              <p>Fecha de impresión: ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+          
+          <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print();" style="padding: 10px 20px; background-color: #ED6C02; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Imprimir Recibo
+            </button>
+            <button onclick="window.close();" style="padding: 10px 20px; background-color: #ccc; color: black; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;">
+              Cerrar
+            </button>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+    
+    ventanaImpresion.document.close();
+    
+    // Esperar a que se cargue el contenido antes de mostrar la ventana de impresión
+    ventanaImpresion.onload = function() {
+      // Para navegadores modernos
+      if (ventanaImpresion.window.matchMedia) {
+        let mediaQueryList = ventanaImpresion.window.matchMedia('print');
+        mediaQueryList.addListener(function(mql) {
+          if (!mql.matches) {
+            // Se ha terminado la impresión o se ha cancelado
+            console.log("Impresión finalizada o cancelada");
+          }
+        });
+      }
+      
+      // Dar tiempo para que se carguen los estilos
+      setTimeout(() => {
+        ventanaImpresion.focus(); // Enfocar la ventana para preparar la impresión
+      }, 500);
+    };
+};
+  
   return (
     <div className="min-h-screen overflow-x-hidden flex flex-col md:flex-row">
       <div className="w-full md:w-auto md:fixed md:top-0 md:left-0 md:h-full z-10">
@@ -674,8 +1051,10 @@ verDetalles = (item) => {
                                 />
                                 <Botones 
                                   tipo="secundario" 
-                                  label="Imprimir" 
+                                  label={imprimiendoItem === acumulado.id_venta ? "Cargando..." : "Imprimir"} 
                                   size="small"
+                                  onClick={() => handleImprimir(acumulado)}
+                                  disabled={imprimiendoItem === acumulado.id_venta}
                                 />
                               </div>
                             </td>
