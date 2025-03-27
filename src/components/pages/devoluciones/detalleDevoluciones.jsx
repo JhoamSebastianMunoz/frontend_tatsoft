@@ -203,7 +203,7 @@ const DetallesDevolucion = () => {
                   </div>
 
               {/* Botones de acción */}
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end pb-4">
                 <Boton
                   tipo="primario"
                   label="Volver"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { saleService } from "../../../context/services/ApiService";
 
 // Componentes
@@ -9,6 +9,7 @@ import Loading from "../../Loading/Loading";
 
 const DetallesVenta = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [venta, setVenta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,6 +41,7 @@ const DetallesVenta = () => {
       <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar />
       </div>
+      <Tipografia>
       <main className="w-full md:pl-[100px] pt-[40px] pl-[80px] md:pt-6 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
@@ -106,9 +108,17 @@ const DetallesVenta = () => {
 
           {/* Tabla de Productos */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-orange-700 text-lg font-medium mb-4">
-              Productos
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-orange-600 text-lg font-medium">
+                Productos
+              </h2>
+              <button
+                onClick={() => window.print()}
+                className="text-orange-500 hover:text-orange-600 border border-orange-500 hover:border-orange-600 font-medium py-1 px-4 rounded-md transition-colors"
+              >
+                Imprimir Recibo
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
@@ -158,8 +168,19 @@ const DetallesVenta = () => {
               </table>
             </div>
           </div>
+
+          {/* Botón Volver */}
+          <div className="flex justify-end mt-6 pb-4">
+            <button
+              onClick={() => navigate('/ventas/historial')}
+              className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-md transition-colors"
+            >
+              Volver
+            </button>
+          </div>
         </div>
       </main>
+      </Tipografia>
     </div>
   );
 };
