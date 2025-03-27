@@ -22,6 +22,8 @@ const HistorialPreventas = () => {
   const [filtroEstado, setFiltroEstado] = useState("Todos");
   const [filtroColaborador, setFiltroColaborador] = useState("Todos");
   const [colaboradores, setColaboradores] = useState([]);
+  const [imprimiendoPreventa, setImprimiendoPreventa] = useState(null);
+  const [detalleParaImprimir, setDetalleParaImprimir] = useState(null);
 
   // Formatear fecha para mostrar
   const formatearFecha = (fechaString) => {
@@ -271,6 +273,218 @@ const HistorialPreventas = () => {
     }
   };
 
+  // Nueva función para manejar la impresión
+  const handleImprimir = async (id) => {
+    try {
+      setImprimiendoPreventa(id);
+      console.log("Preparando impresión para preventa:", id);
+      
+      // Obtener los detalles de la preventa
+      const response = await presaleService.getPresaleDetails(id);
+      
+      if (!response || !response.data) {
+        throw new Error("No se pudieron obtener los detalles para imprimir");
+      }
+      
+      const detalle = response.data;
+      setDetalleParaImprimir(detalle);
+      
+      // Dar tiempo al estado para actualizarse
+      setTimeout(() => {
+        imprimirDetalle(detalle);
+      }, 300);
+      
+    } catch (error) {
+      console.error("Error al preparar la impresión:", error);
+      alert("No se pudo generar la impresión. Intente nuevamente.");
+    } finally {
+      setImprimiendoPreventa(null);
+    }
+  };
+  
+  // Función para generar e imprimir el documento
+  const imprimirDetalle = (detalle) => {
+    // Crear una nueva ventana para la impresión
+    const ventanaImpresion = window.open('', '_blank', 'height=600,width=800');
+    
+    // Formatear la fecha
+    const fechaFormateada = formatearFecha(detalle.fecha_creacion);
+    
+    // Construir el HTML para la impresión
+    ventanaImpresion.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Factura Preventa #${detalle.id_preventa}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+          }
+          .factura {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+          }
+          .encabezado {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ED6C02;
+            padding-bottom: 10px;
+          }
+          .info-empresa {
+            margin-bottom: 20px;
+          }
+          .info-cliente {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+          }
+          .detalles {
+            margin-bottom: 20px;
+          }
+          .detalles-titulo {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ED6C02;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+          .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+          }
+          .total span {
+            color: #ED6C02;
+          }
+          .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+          }
+          @media print {
+            body {
+              padding: 0;
+              margin: 0;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="factura">
+          <div class="encabezado">
+            <h1>FACTURA DE PREVENTA</h1>
+            <h2>#${detalle.id_preventa}</h2>
+          </div>
+          
+          <div class="info-empresa">
+            <h3>INFORMACIÓN DE LA EMPRESA</h3>
+            <p>TAT-SOFT</p>
+            <p>Sistema de Gestión para Ventas</p>
+          </div>
+          
+          <div class="info-cliente">
+            <h3>INFORMACIÓN DEL CLIENTE</h3>
+            <p><strong>Cliente:</strong> ${detalle.cliente?.razon_social || detalle.cliente?.nombre || "No especificado"}</p>
+            <p><strong>Dirección:</strong> ${detalle.cliente?.direccion || "No especificado"}</p>
+            <p><strong>Teléfono:</strong> ${detalle.cliente?.telefono || "No especificado"}</p>
+          </div>
+          
+          <div class="detalles">
+            <div class="detalles-titulo">DETALLES DE LA PREVENTA</div>
+            <p><strong>Fecha de Emisión:</strong> ${fechaFormateada}</p>
+            <p><strong>Estado:</strong> ${detalle.estado}</p>
+            <p><strong>Colaborador:</strong> ${detalle.colaborador?.nombre || "No especificado"}</p>
+          </div>
+          
+          <div class="productos">
+            <div class="detalles-titulo">PRODUCTOS</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${detalle.productos && detalle.productos.map(producto => `
+                  <tr>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>$${Number(producto.precio).toLocaleString('es-CO')}</td>
+                    <td>$${Number(producto.subtotal).toLocaleString('es-CO')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            
+            <div class="total">
+              TOTAL: <span>$${Number(detalle.total).toLocaleString('es-CO')}</span>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>Esta factura es un documento informativo para la preventa.</p>
+            <p>Fecha de impresión: ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+        
+        <div class="no-print" style="text-align: center; margin-top: 20px;">
+          <button onclick="window.print();" style="padding: 10px 20px; background-color: #ED6C02; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Imprimir Factura
+          </button>
+          <button onclick="window.close();" style="padding: 10px 20px; background-color: #ccc; color: black; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;">
+            Cerrar
+          </button>
+        </div>
+      </body>
+      </html>
+    `);
+    
+    ventanaImpresion.document.close();
+    
+    // Esperar a que se cargue el contenido antes de mostrar la ventana de impresión
+    ventanaImpresion.onload = function() {
+      // Para navegadores modernos
+      if (ventanaImpresion.window.matchMedia) {
+        let mediaQueryList = ventanaImpresion.window.matchMedia('print');
+        mediaQueryList.addListener(function(mql) {
+          if (!mql.matches) {
+            // Se ha terminado la impresión o se ha cancelado
+            console.log("Impresión finalizada o cancelada");
+          }
+        });
+      }
+      
+      // Dar tiempo para que se carguen los estilos
+      setTimeout(() => {
+        ventanaImpresion.focus(); // Enfocar la ventana para preparar la impresión
+      }, 500);
+    };
+  };
+
   if (loading && preventas.length === 0) {
     return <Loading message="Cargando historial de preventas" />;
   }
@@ -399,12 +613,15 @@ const HistorialPreventas = () => {
                           label="Ver"
                           tipo="primario"
                             onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                            className="text-orange-600 hover:text-orange-900 text-xs sm:text-sm "
+                            className="text-orange-600 hover:text-orange-900 text-xs sm:text-sm"
                           />
                           <Boton
-                          label="Imprimir"
+                          label={imprimiendoPreventa === preventa.id_preventa ? "Cargando..." : "Imprimir"}
                           tipo="secundario"
-                          />
+                          onClick={() => handleImprimir(preventa.id_preventa)}
+                          disabled={imprimiendoPreventa === preventa.id_preventa}
+                          className="text-xs sm:text-sm"
+                        />
                           
                           {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                             <>
@@ -459,10 +676,12 @@ const HistorialPreventas = () => {
                             className="text-gray-600 hover:text-gray-900"
                             />
                             <Boton
-                            label="Imprimir"
+                            label={imprimiendoPreventa === preventa.id_preventa ? "Cargando..." : "Imprimir"}
                             tipo="secundario"
                             size="small"
-                            />
+                            onClick={() => handleImprimir(preventa.id_preventa)}
+                            disabled={imprimiendoPreventa === preventa.id_preventa}
+                          />
                             
                             
                             {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (

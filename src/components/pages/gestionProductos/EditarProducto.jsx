@@ -58,68 +58,73 @@ const EditarProducto = () => {
       try {
         setLoading(true);
         setError("");
-        
-        console.log("ID del producto a cargar:", id);
-       
-        // Obtener datos del producto primero
-        const productResponse = await productService.getProductById(id);
-        console.log("Respuesta del producto:", productResponse);
-
-        if (!productResponse || !productResponse.data || !productResponse.data[0]) {
-          console.error("No se recibieron datos del producto");
-          setError("No se encontró el producto especificado.");
-          setLoading(false);
-          return;
-        }
-
-        const producto = productResponse.data[0];
-        console.log("Datos del producto:", producto);
        
         // Obtener categorías
         const categoriasResponse = await productService.getAllCategories();
-        console.log("Respuesta de categorías:", categoriasResponse);
-
+        console.log('Categorías cargadas:', categoriasResponse.data);
+        
         if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
           setCategorias(categoriasResponse.data);
         }
        
-        // Encontrar el nombre de la categoría
-        let nombreCategoria = producto.nombre_categoria || "";
-       
-        // Actualizar el estado con los datos del producto
-        const nuevoFormData = {
-          nombre_producto: producto.nombre_producto || "",
-          precio: producto.precio?.toString() || "",
-          descripcion: producto.descripcion || "",
-          id_categoria: producto.id_categoria || "",
-          categoria: nombreCategoria,
-          id_imagen: producto.id_imagen || ""
-        };
+        // Obtener datos del producto
+        const productResponse = await productService.getProductById(id);
+        console.log('Datos del producto cargados:', productResponse.data);
         
-        console.log("Datos a establecer en el formulario:", nuevoFormData);
-        setFormData(nuevoFormData);
-       
-        // Cargar la imagen actual si existe
-        if (producto.id_imagen) {
-          try {
-            const imageUrl = await imageService.getImageUrl(producto.id_imagen);
-            console.log("URL de la imagen cargada:", imageUrl);
-            setCurrentImageUrl(imageUrl);
-          } catch (imageError) {
-            console.error("Error cargando imagen:", imageError);
+        if (productResponse.data) {
+          const producto = Array.isArray(productResponse.data) 
+            ? productResponse.data[0] 
+            : productResponse.data;
+         
+          // Encontrar el nombre de la categoría
+          let nombreCategoria = "";
+          if (producto.id_categoria && categoriasResponse.data) {
+            const categoriaEncontrada = categoriasResponse.data.find(
+              cat => cat.id_categoria === producto.id_categoria
+            );
+            nombreCategoria = categoriaEncontrada ? categoriaEncontrada.nombre_categoria : "";
           }
+         
+          // Formatear los datos del producto
+          const formattedData = {
+            nombre_producto: producto.nombre_producto || "",
+            precio: producto.precio?.toString() || "",
+            descripcion: producto.descripcion || "",
+            id_categoria: producto.id_categoria || "",
+            categoria: nombreCategoria,
+            id_imagen: producto.id_imagen || ""
+          };
+          
+          console.log('Datos formateados para el formulario:', formattedData);
+          setFormData(formattedData);
+         
+          // Cargar la imagen actual si existe
+          if (producto.id_imagen) {
+            try {
+            const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+              console.log('URL de imagen cargada:', imageUrl);
+            setCurrentImageUrl(imageUrl);
+            } catch (imageError) {
+              console.error('Error cargando imagen:', imageError);
+              setError("No se pudo cargar la imagen del producto, pero puede continuar editando.");
+          }
+          }
+        } else {
+          setError("No se encontraron datos del producto.");
         }
       } catch (error) {
-        console.error("Error completo al cargar datos:", error);
-        setError("No se pudieron cargar los datos del producto. Por favor, intente nuevamente.");
+        console.error("Error cargando datos:", error);
+        setError(
+          error.response?.data?.message || 
+          "No se pudieron cargar los datos del producto. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
     };
 
     if (id) {
-      console.log("Iniciando carga de datos para ID:", id);
-      fetchProductAndCategories();
+    fetchProductAndCategories();
     }
   }, [id]);
 
@@ -299,27 +304,50 @@ const EditarProducto = () => {
   };
 
   if (loading) {
-    console.log("Estado de carga:", { loading, formData });
-    return <Loading message="Cargando datos del producto..." />;
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <Loading message="Cargando datos del producto..." />
+      </div>
+    );
+  }
+
+  if (!formData.nombre_producto && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <Tipografia variant="h2" size="xl" className="text-red-600 mb-4">
+            Error al cargar el producto
+          </Tipografia>
+          <Tipografia size="base">
+            {error || "No se encontró el producto solicitado"}
+          </Tipografia>
+          <Boton
+            tipo="primario"
+            label="Volver"
+            onClick={() => navigate("/gestion-productos")}
+            className="mt-4"
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen flex bg-slate-100">
       <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
         <Sidebar />
       </div>
       
-      <div className="flex-1 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">
+      <Tipografia>
+      <div className="flex-1 md:pl-20 w-full max-w-screen-xl mx-auto lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">
         {/* Header  */}
-        <div className="text-black p-4 ">
-        <div className="mt-2 mb-4">
+        <div className="mt-2 mb-4 ml-10">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Editar Producto</h1>
-          </div>
         </div>
        
         {/* Contenido principal */}
-        <div className="flex-1 flex justify-center">
-          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl">
+        <div className="md:pl-[350px] pl-4 pt-10 md:pt-4">
+          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl mx-auto">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
                 <Tipografia size="base" className="font-medium">Error</Tipografia>
@@ -560,6 +588,7 @@ const EditarProducto = () => {
           </div>
         </div>
       )}
+      </Tipografia>
     </div>
   );
 };
