@@ -4,7 +4,6 @@ import { presaleService } from "../../../context/services/ApiService";
 import { useAuth } from "../../../context/AuthContext";
 
 // Componentes
-import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";

@@ -137,16 +137,7 @@ const HistorialIngresos = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full p-2 pl-4 pr-10 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                   />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <Icono name="buscar" size={18} />
-                  </div>
                 </div>
-                <Botones
-                  label="Buscar"
-                  tipo="primario"
-                  size="small"
-                  onClick={handleSearch}
-                />
               </div>
 
               <div className="grid grid-cols-3 gap-4">
