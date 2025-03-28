@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
-import Encabezado from "../../molecules/Encabezado";
+import Sidebar from "../../organisms/Sidebar"
 import AlertaInhabilitar from "../../pages/administrator/AlertaInhabilitar";
 
 const VerCliente = () => {
@@ -49,11 +49,11 @@ const VerCliente = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Encabezado ruta="/gestion/clientes" mensaje="Detalle de cliente" />
+      <Sidebar />
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:gap-6">
           <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-4 relative">
+            <div className="bg-gradient-to-r from-orange-600 to-orange-800 p-4 relative">
               <div className="flex flex-col items-center pt-5 pb-4">
                 <Tipografia
                   variant="h2"
@@ -63,13 +63,13 @@ const VerCliente = () => {
                 </Tipografia>
                 <div className="mt-2 w-full flex flex-col sm:flex-row gap-2">
                   <Botones 
-                    tipo={clienteStatus === "activo" ? "cancelar" : "alerta"}
+                    tipo={clienteStatus === "activo" ? "cancelar" : "secundario"}
                     label={buttonText} 
                     onClick={handleShowAlert}
                     className="w-full py-2"
                   />
                   <Botones
-                    variant="primary"
+                    tipo="primario"
                     label="Editar Cliente"
                     onClick={handleEditarCliente}
                     className="w-full py-2"
@@ -135,7 +135,7 @@ const VerCliente = () => {
             </div>
           </div>
           <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden md:w-1/3 lg:w-1/4">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-900 p-8">
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-8">
               <div className="flex flex-col items-center">
                 <Tipografia
                   variant="h2"
@@ -145,7 +145,7 @@ const VerCliente = () => {
                 </Tipografia>
                 <Tipografia
                   variant="body"
-                  className="text-purple-200 mt-5 text-center"
+                  className="text-orange-200 mt-5 text-center"
                 >
                   {clienteData.rol}
                 </Tipografia>
@@ -153,7 +153,7 @@ const VerCliente = () => {
             </div>
             <div className="p-5 flex flex-col items-center">
               <Botones 
-                tipo="secundario"
+                tipo="primario"
                 label="Editar Cliente"
                 onClick={handleEditarCliente}
                 className="w-full py-2"
@@ -170,7 +170,7 @@ const VerCliente = () => {
           <div className="hidden md:block md:w-2/3 lg:w-3/4 bg-white rounded-xl shadow-lg p-6 lg:p-7">
             <Tipografia
               variant="h2"
-              className="text-xl font-semibold mb-5 text-purple-900"
+              className="text-xl font-semibold mb-5 text-orange-500"
             >
               Información del cliente
             </Tipografia>
@@ -183,7 +183,7 @@ const VerCliente = () => {
                 >
                   Razon Social
                 </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
+                <div className="border border-orange-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
                     {clienteData.RazonSocial}
                   </Tipografia>
@@ -197,7 +197,7 @@ const VerCliente = () => {
                 >
                   Nombre
                 </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
+                <div className="border border-orange-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
                     {clienteData.nombre}
                   </Tipografia>
@@ -211,7 +211,7 @@ const VerCliente = () => {
                 >
                   Apellidos
                 </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
+                <div className="border border-orange-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">{clienteData.apellido}</Tipografia>
                 </div>
               </div>
@@ -223,7 +223,7 @@ const VerCliente = () => {
                 >
                   Teléfono Celular
                 </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
+                <div className="border border-orange-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
                     {clienteData.celular}
                   </Tipografia>
@@ -237,7 +237,7 @@ const VerCliente = () => {
                 >
                   Nit
                 </Tipografia>
-                <div className="border border-gray-300 rounded-lg p-2 lg:p-3 bg-gray-50">
+                <div className="border border-orange-300 rounded-lg p-2 lg:p-3 bg-gray-50">
                   <Tipografia className="font-medium">
                     {clienteData.nit}
                   </Tipografia>
@@ -254,7 +254,7 @@ const VerCliente = () => {
                 <div
                   className={`border rounded-lg p-2 lg:p-3 ${
                     clienteData.estado === "activo"
-                      ? "border-green-400 bg-green-100"
+                      ? "border-slate-400 bg-slate-100"
                       : "border-red-300 bg-red-50"
                   }`}
                 >
