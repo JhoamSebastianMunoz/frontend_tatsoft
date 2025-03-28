@@ -19,7 +19,7 @@ const NavegacionUsuario = () => {
       "gest-clientes": path.includes("/gestion/clientes") || path.includes("/ver/cliente") || path.includes("/editar/cliente") || path.includes("/registro/cliente"),
       "gest-acumulados": path.includes("/acumulados"),
       "preventa": path.includes("/preventa"),
-      "catalogo": path.includes("/catalogo") || path.includes("/productos"),
+      
     };
     
     setActiveRoutes(routes);
@@ -76,10 +76,9 @@ const NavegacionUsuario = () => {
   const menuItems = [
     {
       name: "gest-clientes",
-      label: "Gestión de Clientes",
+      label: "Registro de clientes",
       isActive: activeRoutes["gest-clientes"],
       subItems: [
-        { label: "Lista de Clientes", route: "/gestion/clientes" },
         { label: "Solicitud de creación", route: "/registro/cliente" }
       ],
     },
@@ -98,14 +97,6 @@ const NavegacionUsuario = () => {
       subItems: [
         { label: "Nueva Preventa", route: "/preventa/nueva" },
         { label: "Historial de Preventas", route: "/preventa/historial" }
-      ],
-    },
-    {
-      name: "catalogo",
-      label: "Gestión de Catálogo",
-      isActive: activeRoutes["catalogo"],
-      subItems: [
-        { label: "Ver Catálogo", route: "/productos" }
       ],
     },
   ];

@@ -162,12 +162,20 @@ const Sidebar = () => {
       subPaths: ["/perfil"],
     },
     {
+      name: "preventa",
+      label: "Gestión de Preventa",
+      path: "/preventa/historial",
+      icon: "presale",
+      subItems: ["Nueva Preventa", "Historial de Preventas"],
+      subPaths: ["/preventa/nueva", "/preventa/historial"],
+    },
+    {
       name: "gest-clientes",
-      label: "Gestión de Clientes",
-      path: "/gestion/clientes",
+      label: "Registro de clientes",
+      path: "/registro/cliente",
       icon: "clients",
-      subItems: ["Lista de Clientes", "Solicitud de creación"],
-      subPaths: ["/gestion/clientes", "/registro/cliente"],
+      subItems: [ "Solicitud de creación"],
+      subPaths: ["/registro/cliente"],
     },
     {
       name: "gest-acumulados",
@@ -177,28 +185,7 @@ const Sidebar = () => {
       subItems: ["Reporte Acumulado"],
       subPaths: ["/reporte-acumulado"],
     },
-    {
-      name: "preventa",
-      label: "Gestión de Preventa",
-      path: "/preventa/historial",
-      icon: "presale",
-      subItems: ["Nueva Preventa", "Historial de Preventas"],
-      subPaths: ["/preventa/nueva", "/preventa/historial"],
-    },
-    {
-      name: "catalogo",
-      label: "Catálogo",
-      path: "/productos",
-      icon: "catalog",
-      subPaths: ["/productos"],
-    },
-    {
-      name: "gest-zonas",
-      label: "Mis Zonas",
-      path: "/gestion-zonas",
-      icon: "zones",
-      subPaths: ["/gestion-zonas", "/registrar-zona"],
-    }
+
   ];
 
   const renderIcon = (iconName, className = "") => {
