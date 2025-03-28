@@ -584,61 +584,67 @@ const HistorialPreventas = () => {
                     <div key={preventa.id_preventa} className="hover:bg-gray-50">
                  
                       <div className="md:hidden p-3 sm:p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <span className="text-sm font-medium text-gray-900">
-                          #{preventa.id_preventa}
-                            </span>
-                            <div className="text-xs sm:text-sm text-gray-500">
-                          {formatearFecha(preventa.fecha_creacion)}
-                        </div>
-                            {user.rol === "ADMINISTRADOR" && (
-                              <div className="text-sm text-gray-500">
-                                Colaborador: {preventa.nombre_colaborador}
+                        <div className="flex flex-col">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <span className="text-sm font-medium text-gray-900">
+                                #{preventa.id_preventa}
+                              </span>
+                              <div className="text-xs sm:text-sm text-gray-500">
+                                {formatearFecha(preventa.fecha_creacion)}
                               </div>
+                              {user.rol === "ADMINISTRADOR" && (
+                                <div className="text-sm text-gray-500">
+                                  Colaborador: {preventa.nombre_colaborador}
+                                </div>
+                              )}
+                            </div>
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                              ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                                preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
+                                'bg-red-100 text-red-800'}`}>
+                              {preventa.estado}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-2 mt-2">
+                          <div className="text-base font-semibold text-gray-900 mb-3">
+                            Total: ${Number(preventa.total).toLocaleString('es-CO')}
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2">
+                            <Boton
+                              label="Ver"
+                              tipo="primario"
+                              onClick={() => verDetallesPreventa(preventa.id_preventa)}
+                              className="text-xs sm:text-sm"
+                            />
+                            <Boton
+                              label={imprimiendoPreventa === preventa.id_preventa ? "Cargando..." : "Imprimir"}
+                              tipo="secundario"
+                              onClick={() => handleImprimir(preventa.id_preventa)}
+                              disabled={imprimiendoPreventa === preventa.id_preventa}
+                              className="text-xs sm:text-sm"
+                            />
+                            
+                            {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
+                              <>
+                                <Boton
+                                  label="Confirmar"
+                                  tipo="success"
+                                  onClick={() => confirmarPreventa(preventa.id_preventa)}
+                                  className="text-xs sm:text-sm"
+                                />
+                                <Boton
+                                  label="Cancelar"
+                                  tipo="danger"
+                                  onClick={() => handleCancelarPreventa(preventa.id_preventa)}
+                                  className="text-xs sm:text-sm"
+                                />
+                              </>
                             )}
                           </div>
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${preventa.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
-                            preventa.estado === 'Confirmada' ? 'bg-green-100 text-green-800' : 
-                            'bg-red-100 text-red-800'}`}>
-                          {preventa.estado}
-                        </span>
-                        </div>
-                        <div className="text-xs sm:text-sm text-gray-500 mb-3 ">
-                          Total: ${Number(preventa.total).toLocaleString('es-CO')}
-                        </div>
-                        <div className="flex justify-end space-x-2 ">
-                          <Boton
-                          label="Ver"
-                          tipo="primario"
-                            onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                            className="text-orange-600 hover:text-orange-900 text-xs sm:text-sm"
-                          />
-                          <Boton
-                          label={imprimiendoPreventa === preventa.id_preventa ? "Cargando..." : "Imprimir"}
-                          tipo="secundario"
-                          onClick={() => handleImprimir(preventa.id_preventa)}
-                          disabled={imprimiendoPreventa === preventa.id_preventa}
-                          className="text-xs sm:text-sm"
-                        />
-                          
-                          {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
-                            <>
-                              <button
-                                onClick={() => confirmarPreventa(preventa.id_preventa)}
-                                className="text-green-600 hover:text-green-900 text-xs sm:text-sm"
-                              >
-                                Confirmar
-                              </button>
-                              <button
-                                onClick={() => handleCancelarPreventa(preventa.id_preventa)}
-                                className="text-red-600 hover:text-red-900 text-xs sm:text-sm"
-                              >
-                                Cancelar
-                              </button>
-                            </>
-                          )}
                         </div>
                       </div>
 
@@ -667,24 +673,8 @@ const HistorialPreventas = () => {
                           </div>
                         )}
                         <div className="text-right text-sm font-medium">
-                          <div className="flex justify-end space-x-2">
-                            <Boton
-                            label="Ver"
-                            tipo="primario"
-                            size="medium"
-                            onClick={() => verDetallesPreventa(preventa.id_preventa)}
-                            className="text-gray-600 hover:text-gray-900"
-                            />
-                            <Boton
-                            label={imprimiendoPreventa === preventa.id_preventa ? "Cargando..." : "Imprimir"}
-                            tipo="secundario"
-                            size="small"
-                            onClick={() => handleImprimir(preventa.id_preventa)}
-                            disabled={imprimiendoPreventa === preventa.id_preventa}
-                          />
-                            
-                            
-                            {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
+                          <div className="flex justify-end space-x-2 gap-2">
+                          {preventa.estado === 'Pendiente' && user.rol === 'COLABORADOR' && (
                               <>
                                 <button
                                   onClick={() => confirmarPreventa(preventa.id_preventa)}
@@ -700,6 +690,20 @@ const HistorialPreventas = () => {
                                 </button>
                               </>
                             )}
+                            <Boton
+                            label="Ver"
+                            tipo="primario"
+                            size="medium"
+                            onClick={() => verDetallesPreventa(preventa.id_preventa)}
+                            className="text-gray-600 hover:text-gray-900"
+                            />
+                            <Boton
+                            label={imprimiendoPreventa === preventa.id_preventa ? "Cargando..." : "Imprimir"}
+                            tipo="secundario"
+                            size="small"
+                            onClick={() => handleImprimir(preventa.id_preventa)}
+                            disabled={imprimiendoPreventa === preventa.id_preventa}
+                          />
                           </div>
                         </div>
                       </div>
