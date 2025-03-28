@@ -40,7 +40,7 @@ const EditarPerfil = () => {
         if (user && Object.keys(user).length > 0) {
           // Prepare the formData from user object
           const { nombre, apellido } = parseFullName(user.nombreCompleto || "");
-          
+
           setFormData({
             nombreCompleto: user.nombreCompleto || "",
             nombre: nombre,
@@ -50,7 +50,7 @@ const EditarPerfil = () => {
             correo: user.correo || "",
             rol: user.rol || "",
           });
-          
+
           setLoading(false);
           return;
         }
@@ -59,8 +59,10 @@ const EditarPerfil = () => {
           const response = await userService.getUserProfile();
           if (response && response.data) {
             const userData = response.data;
-            const { nombre, apellido } = parseFullName(userData.nombreCompleto || "");
-            
+            const { nombre, apellido } = parseFullName(
+              userData.nombreCompleto || ""
+            );
+
             setFormData({
               nombreCompleto: userData.nombreCompleto || "",
               nombre: nombre,
@@ -79,7 +81,9 @@ const EditarPerfil = () => {
         }
       } catch (err) {
         console.error("Error al cargar datos del perfil:", err);
-        setError("Error al cargar información del perfil. Por favor, intenta de nuevo más tarde.");
+        setError(
+          "Error al cargar información del perfil. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
@@ -99,9 +103,9 @@ const EditarPerfil = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -115,18 +119,18 @@ const EditarPerfil = () => {
       // Prepare data for submission
       const updatedUserData = {
         ...formData,
-        nombreCompleto: `${formData.nombre} ${formData.apellido}`.trim()
+        nombreCompleto: `${formData.nombre} ${formData.apellido}`.trim(),
       };
 
       // Aquí iría la llamada a la API para actualizar el perfil
       // const response = await userService.updateProfile(updatedUserData);
-      
+
       // Simulando una respuesta exitosa
       console.log("Datos a enviar:", updatedUserData);
-      
+
       setSuccessMessage("Perfil actualizado exitosamente");
       setShowSuccessAlert(true);
-      
+
       setTimeout(() => {
         setShowSuccessAlert(false);
         // Opcional: redirigir al usuario de vuelta al perfil después de actualizar
@@ -135,7 +139,7 @@ const EditarPerfil = () => {
     } catch (err) {
       setError(err.message || "Error al actualizar el perfil");
       setShowErrorAlert(true);
-      
+
       setTimeout(() => {
         setShowErrorAlert(false);
       }, 3000);
@@ -160,18 +164,26 @@ const EditarPerfil = () => {
               <Link to="/profile" className="mr-4">
                 <IoArrowBack className="text-gray-600 text-xl" />
               </Link>
-              <h1 className="text-2xl font-semibold text-gray-800">Editar Perfil</h1>
+              <h1 className="text-2xl font-semibold text-gray-800">
+                Editar Perfil
+              </h1>
             </div>
 
             {showErrorAlert && (
-              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
+              <div
+                className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded"
+                role="alert"
+              >
                 <p className="font-medium">Error</p>
                 <p>{error}</p>
               </div>
             )}
-            
+
             {showSuccessAlert && (
-              <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+              <div
+                className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded"
+                role="alert"
+              >
                 <p className="font-medium">¡Operación exitosa!</p>
                 <p>{successMessage}</p>
               </div>
@@ -181,14 +193,20 @@ const EditarPerfil = () => {
               <div className="p-4 md:p-6 flex flex-col md:flex-row items-center">
                 <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
                   <AvatarTexto
-                    nombre={formData.nombreCompleto || `${formData.nombre} ${formData.apellido}`.trim() || "Usuario"}
+                    nombre={
+                      formData.nombreCompleto ||
+                      `${formData.nombre} ${formData.apellido}`.trim() ||
+                      "Usuario"
+                    }
                     size="large"
                     showEditButton={true}
                   />
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <h2 className="text-lg md:text-xl font-semibold text-gray-800">
-                    {formData.nombreCompleto || `${formData.nombre} ${formData.apellido}`.trim() || "Usuario"}
+                    {formData.nombreCompleto ||
+                      `${formData.nombre} ${formData.apellido}`.trim() ||
+                      "Usuario"}
                   </h2>
                   <p className="text-sm md:text-base text-gray-500 mb-2">
                     {formData.correo || "Sin correo"}
@@ -288,14 +306,15 @@ const EditarPerfil = () => {
                       />
                     </div>
                   </div>
-                  
-                  <div className="mt-6 flex justify-center item-center gap-4">
-                    <Link to="/perfil">
+
+                  <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <Link to="/perfil" className="w-full sm:w-auto">
                       <Botones
                         tipo="secundario"
                         label="Cancelar"
                         size="medium"
-                        onClick={()=> navigate("/perfil")}
+                        onClick={() => navigate("/perfil")}
+                        className="w-full sm:w-auto"
                       />
                     </Link>
                     <Botones
@@ -304,6 +323,7 @@ const EditarPerfil = () => {
                       disabled={submitting}
                       type="submit"
                       size="medium"
+                      className="w-full sm:w-auto"
                     />
                   </div>
                 </div>

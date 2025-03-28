@@ -86,10 +86,10 @@ const GestionClientes = () => {
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
-                  <span className="bg-green-200 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
+                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {clientes.length} Total
                   </span>
-                  <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                  <span className="bg-transparent text-orange-800  border border-orange-400 text-xs font-medium px-3 py-0.5 rounded-full">
                     {clientesFiltrados.length} Filtrados
                   </span>
                 </div>
@@ -389,7 +389,7 @@ const GestionClientes = () => {
                               className={`px-2 py-1 text-xs font-medium rounded-full ${
                                 cliente.tipo === "Mayorista"
                                   ? "bg-orange-100 text-orange-800"
-                                  : "bg-green-100 text-green-800"
+                                  : "bg-orange-100 text-orange-800"
                               }`}
                             >
                               {cliente.tipo || "Cliente"}
