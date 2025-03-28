@@ -3,6 +3,24 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Tipografia from "../atoms/Tipografia";
 
+// Agrega el componente HomeIcon
+const HomeIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-5 h-5"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+    />
+  </svg>
+);
+
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
     const savedState = localStorage.getItem("sidebarCollapsed");
@@ -88,12 +106,18 @@ const Sidebar = () => {
 
   const adminMenuItems = [
     {
+      name: "home",
+      label: "Home",
+      path: "/home",
+      icon: <HomeIcon />
+    },
+    {
       name: "perfil",
       label: "Mi Perfil",
       path: "/perfil",
       icon: "profile",
       subItems: ["Editar Perfil"],
-      subPaths: ["/editar/usuario/:id"],
+      subPaths: ["/editar/perfil"],
     },
     {
       name: "gest-usuarios",
@@ -148,13 +172,17 @@ const Sidebar = () => {
       label: "Historial de Preventa",
       path: "/preventa/historial",
       icon: "presale",
-      subItems: ["Detalles de preventa"],
-      subPaths: ["/preventa/detalles/:id"],
     },
    
   ];
 
   const collaboratorMenuItems = [
+    {
+      name: "home",
+      label: "Home",
+      path: "/home",
+      icon: <HomeIcon />
+    },
     {
       name: "perfil",
       label: "Mi Perfil",
@@ -162,22 +190,6 @@ const Sidebar = () => {
       icon: "profile",
       subItems: ["Ver Perfil"],
       subPaths: ["/perfil"],
-    },
-    {
-      name: "gest-clientes",
-      label: "Gestión de Clientes",
-      path: "/gestion/clientes",
-      icon: "clients",
-      subItems: ["Lista de Clientes", "Solicitud de creación"],
-      subPaths: ["/gestion/clientes", "/registro/cliente"],
-    },
-    {
-      name: "gest-acumulados",
-      label: "Acumulados",
-      path: "/acumulados",
-      icon: "accumulated",
-      subItems: ["Reporte Acumulado"],
-      subPaths: ["/reporte-acumulado"],
     },
     {
       name: "preventa",
@@ -188,19 +200,22 @@ const Sidebar = () => {
       subPaths: ["/preventa/nueva", "/preventa/historial"],
     },
     {
-      name: "catalogo",
-      label: "Catálogo",
-      path: "/productos",
-      icon: "catalog",
-      subPaths: ["/productos"],
+      name: "gest-clientes",
+      label: "Registro de clientes",
+      path: "/registro/cliente",
+      icon: "clients",
+      subItems: [ "Solicitud de creación"],
+      subPaths: ["/registro/cliente"],
     },
     {
-      name: "gest-zonas",
-      label: "Mis Zonas",
-      path: "/gestion-zonas",
-      icon: "zones",
-      subPaths: ["/gestion-zonas", "/registrar-zona"],
-    }
+      name: "gest-acumulados",
+      label: "Acumulados",
+      path: "/acumulados",
+      icon: "accumulated",
+      subItems: ["Reporte Acumulado"],
+      subPaths: ["/reporte-acumulado"],
+    },
+
   ];
 
   const renderIcon = (iconName, className = "") => {
@@ -495,11 +510,17 @@ const Sidebar = () => {
                       collapsed ? "" : "space-x-3 flex-1"
                     }`}
                   >
-                    {renderIcon(
-                      item.icon,
-                      isActive
-                        ? "text-white"
-                        : "text-gray-500 group-hover:text-gray-700 flex-shrink-0"
+                    {item.icon.type ? (
+                      <span className={isActive ? "text-white" : "text-gray-500 group-hover:text-gray-700"}>
+                        {item.icon}
+                      </span>
+                    ) : (
+                      renderIcon(
+                        item.icon,
+                        isActive
+                          ? "text-white"
+                          : "text-gray-500 group-hover:text-gray-700 flex-shrink-0"
+                      )
                     )}
                     {!collapsed && (
                       <Tipografia className="text-base truncate">
