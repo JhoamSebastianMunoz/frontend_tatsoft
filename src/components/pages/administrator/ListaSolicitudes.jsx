@@ -7,6 +7,7 @@ import Icono from "../../atoms/Iconos";
 import Alerta from "../../molecules/Alertas";
 import Buscador from "../../molecules/Buscador";
 import FiltroOpciones from "../../molecules/FiltroOpciones";
+import Loading from "../../Loading/Loading";
 
 /**
  * Componente para mostrar y gestionar la lista de solicitudes pendientes
@@ -255,17 +256,20 @@ const ListaSolicitudes = () => {
   };
 
   if (loading && solicitudes.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-      </div>
-    );
+    return <Loading message="Cargando solicitudes..." />;
   }
 
   if (error && solicitudes.length === 0) {
     return (
-      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-4 rounded">
-        <p>{error}</p>
+      <div className="min-h-screen flex bg-slate-100">
+        <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
+          <Sidebar />
+        </div>
+        <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4">
+          <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md">
+            <Tipografia className="text-red-700 text-sm">{error}</Tipografia>
+          </div>
+        </div>
       </div>
     );
   }
@@ -352,12 +356,13 @@ const ListaSolicitudes = () => {
                   )}
                   
                   {showAlerta && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
                       <Alerta
                         tipo={alertaConfig.tipo}
                         mensaje={alertaConfig.mensaje}
                         onAceptar={alertaConfig.onAceptar}
                         onCancelar={alertaConfig.onCancelar}
+                        className="bg-white rounded-lg shadow-xl"
                       />
                     </div>
                   )}
