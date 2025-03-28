@@ -393,18 +393,20 @@ const GestionCategorias = () => {
                               <div className="flex flex-col sm:flex-row justify-center gap-2">
                                 {categoriaEnEdicion === categoria.id_categoria ? (
                                   <>
-                                    <button
-                                      className="w-full sm:w-auto px-2 sm:px-4 py-1 sm:py-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
-                                      onClick={() => handleGuardarEdicion(categoria.id_categoria)}
-                                    >
-                                      Guardar
-                                    </button>
-                                    <button
-                                      className="w-full sm:w-auto px-2 sm:px-4 py-1 sm:py-1.5 bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors text-sm"
-                                      onClick={() => handleCancelarEdicion(categoria.id_categoria)}
-                                    >
-                                      Cancelar
-                                    </button>
+                                    <Botones
+                                    label="Guardar"
+                                    tipo="primario"
+                                    size="small"
+                                    className="w-full sm:w-auto px-2 sm:px-4 py-1 sm:py-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
+                                    onClick={() => handleGuardarEdicion(categoria.id_categoria)}
+                                    />
+                                    <Botones
+                                    label="Cancelar"
+                                    tipo="secundario"
+                                    className="w-full sm:w-auto px-2 sm:px-4 py-1 sm:py-1.5  rounded hover:bg-gray-500 transition-colors text-sm"
+                                    onClick={() => handleCancelarEdicion(categoria.id_categoria)}
+                                    />
+                                    
                                   </>
                                 ) : (
                                   <>

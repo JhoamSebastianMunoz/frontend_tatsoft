@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
+
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
 import RecuperarPassword from "./components/pages/loginPage/RecuperarPassword";
@@ -64,6 +65,7 @@ import Acumulados from "./components/pages/Acumulado/Acumulados";
 
 // Páginas de colaborador
 import Profile from "./components/pages/collaborator/profile";
+import EditarPerfil from "./components/pages/collaborator/editarPerfil";
 
 // Componente para rutas no autorizadas y errores
 import Unauthorized from "./components/pages/Unauthorized/Unauthorized";
@@ -106,6 +108,16 @@ const App = () => {
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
+      />
+
+      <Route
+      path="/editar/perfil"
+      element={
+        <ProtectedRoute
+        element={<EditarPerfil />}
+        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+        />
+      }
       />
 
       {/* Rutas Estadisticas */}
