@@ -238,6 +238,11 @@ const RegistroCliente = () => {
       <div className="md:hidden">
         <Sidebar />
       </div>
+      <div className="px-2 sm:px-4 lg:px-8 py-2">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                Historial de Preventas
+              </h1>
+            </div>
 
       <div className="flex justify-center w-full pt-2 md:pt-0 p-8">
         <Tipografia>
