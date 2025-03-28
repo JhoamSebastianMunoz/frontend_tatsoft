@@ -5,23 +5,19 @@ import Tipografia from "../../../components/atoms/Tipografia";
 import Botones from "../../../components/atoms/Botones";
 import Encabezado from "../../../components/molecules/Encabezado";
 import AvatarUsuario from "../../../components/atoms/AvatarUsuario";
-import AlertaInhabilitar from "./AlertaInhabilitar";
 import Loading from "../../../components/Loading/Loading";
 import Sidebar from "../../organisms/Sidebar";
 
 const VerUsuarioAdm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [showAlert, setShowAlert] = useState(false);
-  const [userStatus, setUserStatus] = useState("activo");
   const [userData, setUserData] = useState({
     nombreCompleto: "",
     cedula: "",
     celular: "",
     correo: "",
     rol: "",
-    foto: null,
-    estado: "activo",
+    foto: null
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,9 +27,16 @@ const VerUsuarioAdm = () => {
       try {
         setLoading(true);
         const response = await userService.getUserById(id);
+        console.log("Datos del usuario recibidos:", response.data); // Para debugging
+        
+        // Asegurarse de que todos los datos estén presentes
         setUserData({
-          ...response.data,
-          estado: userStatus, // Estado debe implementarse en el backend
+          nombreCompleto: response.data.nombreCompleto || 'No especificado',
+          cedula: response.data.cedula || 'No especificado',
+          celular: response.data.celular || 'No especificado',
+          correo: response.data.correo || 'No especificado',
+          rol: response.data.rol?.toUpperCase() || 'No especificado',
+          foto: response.data.foto || null
         });
       } catch (error) {
         console.error("Error al cargar los datos del usuario:", error);
@@ -46,40 +49,23 @@ const VerUsuarioAdm = () => {
     if (id) {
       fetchUserData();
     }
-  }, [id, userStatus]);
+  }, [id]);
 
-  const handleShowAlert = () => {
-    setShowAlert(true);
+  // Función para separar nombre y apellido
+  const getNombreApellido = () => {
+    const nombreCompleto = userData.nombreCompleto || '';
+    const partes = nombreCompleto.split(' ');
+    return {
+      nombre: partes[0] || '',
+      apellido: partes.slice(1).join(' ') || ''
+    };
   };
 
-  const handleCloseAlert = () => {
-    setShowAlert(false);
-  };
+  const { nombre, apellido } = getNombreApellido();
 
-  const handleConfirmStatusChange = async () => {
-    try {
-      // Aquí implementaríamos la lógica para cambiar el estado del usuario
-      // Esto dependerá de cómo se maneje en el backend
-      // Por ahora solo cambiamos el estado local
-      const newStatus = userStatus === "activo" ? "inactivo" : "activo";
-      setUserStatus(newStatus);
-      setShowAlert(false);
-    } catch (error) {
-      console.error("Error al cambiar el estado del usuario:", error);
-      setError("Error al cambiar el estado del usuario. Por favor, intenta de nuevo más tarde.");
-    }
-  };
-
-  // Actualizado para incluir el parámetro de origen
   const handleEditarUsuario = () => {
     navigate(`/editar/usuario/${id}`);
-    console.log("Ruta de origen guardada en localStorage: /ver/usuario");
   };
-
-  const buttonText = userStatus === "activo" ? "Inhabilitar" : "Habilitar";
-  const alertText = userStatus === "activo"
-    ? "¿Confirmas la inhabilitación del usuario?"
-    : "¿Confirmas la habilitación del usuario?";
 
   if (loading) {
     return <Loading message="Cargando información del usuario..." />;
@@ -92,6 +78,12 @@ const VerUsuarioAdm = () => {
       </div>
       <Tipografia>
       <div className="md:pl-64 pl-14 pt-0 md:pt-4">
+          {error && (
+            <div className="mx-4 mb-4 bg-red-50 border-l-4 border-red-500 p-4">
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
+          
         <div className="px-4 sm:px-6 lg:px-8 py-6">
           <div className="max-w-5xl mx-auto">
             {/* Tarjeta de Usuario */}
@@ -105,7 +97,10 @@ const VerUsuarioAdm = () => {
                       className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
-                    <AvatarUsuario size="64" />
+                      <AvatarUsuario 
+                        size="64" 
+                        nombre={userData.nombreCompleto} 
+                      />
                   )}
                 </div>
                 
@@ -115,15 +110,8 @@ const VerUsuarioAdm = () => {
                   </h2>
                   <p className="text-gray-600 mb-2">{userData.correo}</p>
                   <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2">
-                    <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                      <span className="px-3 py-1 bg-[#F78220]/10 text-[#F78220] rounded-full text-sm font-medium">
                       {userData.rol}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      userData.estado === "activo" 
-                        ? "bg-green-50 text-green-700" 
-                        : "bg-red-50 text-red-700"
-                    }`}>
-                      {userData.estado === "activo" ? "Activo" : "Inactivo"}
                     </span>
                   </div>
                 </div>
@@ -133,12 +121,6 @@ const VerUsuarioAdm = () => {
                     label="Editar"
                     onClick={handleEditarUsuario}
                     className="w-full sm:w-auto bg-[#F78220] hover:bg-[#F78220]/90 text-white px-4 py-2 rounded-lg"
-                  />
-                  <Botones
-                    label={buttonText}
-                    tipo={userStatus === "activo" ? "secundario" : "alerta"}
-                    onClick={handleShowAlert}
-                    className="w-full sm:w-auto border border-[#F78220] text-[#F78220] hover:bg-[#F78220]/5 px-4 py-2 rounded-lg"
                   />
                 </div>
               </div>
@@ -161,7 +143,7 @@ const VerUsuarioAdm = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </span>
-                    <span className="text-gray-900">{userData.nombreCompleto?.split(' ')[0]}</span>
+                      <span className="text-gray-900">{nombre}</span>
                   </div>
                 </div>
 
@@ -175,7 +157,7 @@ const VerUsuarioAdm = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </span>
-                    <span className="text-gray-900">{userData.nombreCompleto?.split(' ')[1]}</span>
+                      <span className="text-gray-900">{apellido}</span>
                   </div>
                 </div>
 
@@ -239,15 +221,6 @@ const VerUsuarioAdm = () => {
           </div>
         </div>
       </div>
-
-      <AlertaInhabilitar
-        isOpen={showAlert}
-        onClose={handleCloseAlert}
-        onConfirm={handleConfirmStatusChange}
-        message={alertText}
-      />
-
-      {loading && <Loading message="Cargando información del usuario..." />}
       </Tipografia>
     </div>
   );

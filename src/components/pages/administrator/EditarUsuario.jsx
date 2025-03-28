@@ -21,6 +21,7 @@ const EditarUsuario = () => {
     cc: "",
     correo: "",
     rol: "",
+    contrasena: ""
   });
 
   const [originalData, setOriginalData] = useState({});
@@ -48,6 +49,7 @@ const EditarUsuario = () => {
           cc: user.cedula,
           correo: user.correo,
           rol: user.rol,
+          contrasena: user.contrasena
         };
         
         setUserData(formattedData);
@@ -96,6 +98,29 @@ const EditarUsuario = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
+      setError("");
+
+      // Validaciones básicas
+      if (!userData.nombre || !userData.apellido || !userData.celular || !userData.correo || !userData.rol) {
+        setError("Todos los campos son obligatorios");
+        setLoading(false);
+        return;
+      }
+
+      // Validar formato de correo
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userData.correo)) {
+        setError("Por favor ingrese un correo electrónico válido");
+        setLoading(false);
+        return;
+      }
+
+      // Validar formato de celular (10 dígitos)
+      if (!/^\d{10}$/.test(userData.celular)) {
+        setError("El número de celular debe tener 10 dígitos");
+        setLoading(false);
+        return;
+      }
       
       // Formato de los datos para la API
       const updatedUser = {
@@ -103,17 +128,64 @@ const EditarUsuario = () => {
         nombreCompleto: `${userData.nombre} ${userData.apellido}`.trim(),
         celular: userData.celular,
         correo: userData.correo,
-        rol: userData.rol.toLowerCase()
+        rol: userData.rol.toLowerCase(),
+        contrasena: originalData.contrasena || "defaultPassword123"
       };
+
+      console.log('Datos a enviar:', updatedUser);
       
       // Llamada a la API para actualizar el usuario
-      await userService.updateUser(id, updatedUser);
+      const response = await userService.updateUser(id, updatedUser);
       
+      console.log('Respuesta del servidor:', response);
+
+      if (response && response.data) {
+        const updatedData = {
+          nombre: response.data.nombreCompleto.split(' ')[0],
+          apellido: response.data.nombreCompleto.split(' ').slice(1).join(' '),
+          celular: response.data.celular,
+          cc: response.data.cedula,
+          correo: response.data.correo,
+          rol: response.data.rol.toUpperCase(),
+          contrasena: response.data.contrasena
+        };
+        
+        setOriginalData(updatedData);
+        setUserData(updatedData);
       setSuccess(true);
       setShowAlert(true);
+      }
+
     } catch (error) {
-      console.error("Error al guardar los cambios:", error);
-      setError("Error al guardar los cambios. Por favor, inténtalo de nuevo más tarde.");
+      console.error("Error completo:", error);
+
+      if (error.response) {
+        console.log('Error response:', error.response);
+        
+        if (error.response.status === 400 && error.response.data?.contrasena) {
+          setError("Error: " + error.response.data.contrasena);
+        } else {
+        switch (error.response.status) {
+          case 403:
+            setError("No tiene permisos para realizar esta acción");
+            break;
+          case 404:
+            setError("Usuario no encontrado");
+            break;
+          case 500:
+            setError("Error interno del servidor");
+            break;
+          default:
+            setError(error.response.data?.error || "Error al guardar los cambios");
+          }
+        }
+      } else if (error.request) {
+        setError("Error de conexión. Verifique su internet");
+      } else {
+        setError("Error al procesar la solicitud");
+      }
+      
+      setSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -213,11 +285,12 @@ const EditarUsuario = () => {
                       onChange={(e) => handleChange("apellido", e)}
                       onEdit={() => {}}
                     />
-                    <CampoTexto
+                    <CampoTextoProfile
                       label="Documento de Identidad"
                       value={userData.cc}
-                      disabled={true}
-                      className="bg-gray-50 border-gray-200"
+                      readOnly={true}
+                      className="bg-gray-50"
+                      onChange={() => {}}
                     />
                   </div>
                 </div>
@@ -270,15 +343,15 @@ const EditarUsuario = () => {
                   tipo="primario"
                   label={loading ? "Guardando..." : "Guardar Cambios"}
                   onClick={handleSave}
-                  className="w-full sm:w-auto px-6 py-2 cursor-pointer "
-                  // disabled={loading || !isDirty}
+                  className="w-full sm:w-auto px-6 py-2"
+                  disabled={loading || !isDirty}
                 />
                 <Boton
                   tipo="secundario"
                   label="Cancelar Cambios"
                   onClick={handleCancel}
                   className="w-full sm:w-auto px-6 py-2 border border-gray-200 hover:border-[#F78220] text-gray-700 hover:text-[#F78220]"
-                  // disabled={loading || !isDirty}
+                  disabled={loading || !isDirty}
                 />
 
               </div>
