@@ -161,24 +161,6 @@ const DetallesPreventa = () => {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
-      <Tipografia>
-      <div className="w-full mb-4">
-        <div className="px-2 sm:px-4 lg:px-8 py-2">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Detalles de Preventa</h1>
-        </div>
-       
-      </div>
-      <Sidebar/>
-      <div className="container mx-auto px-2 sm:px-4 py-2">
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-            <div className="flex items-center">
-              <Icono name="eliminarAlert" size={20} />
-              <span className="ml-2">{error}</span>
-            </div>
-=======
     <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar />
@@ -189,7 +171,6 @@ const DetallesPreventa = () => {
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
               Detalles de Preventa
             </h1>
->>>>>>> d20c1206ff56c6fa2715489269309e9332449d7a
           </div>
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -377,25 +358,8 @@ const DetallesPreventa = () => {
                 </button>
               </div>
             </div>
-<<<<<<< HEAD
-          </div>
-        ) : !loading && (
-          <div className="bg-white rounded-lg shadow-md  text-center  ">
-            <Tipografia size="lg" className="text-gray-700  ">
-              No se encontró la preventa solicitada
-            </Tipografia>
-            <Boton 
-              tipo="primario"
-              label="Volver al Historial" 
-              onClick={handleVolver}
-            />
-          </div>
-        )}
-      </div>
-=======
           )}
         </div>
->>>>>>> d20c1206ff56c6fa2715489269309e9332449d7a
       </Tipografia>
     </div>
   );

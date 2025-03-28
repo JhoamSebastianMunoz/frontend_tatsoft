@@ -3,9 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 
-// página de perfil
-import EditarPerfil from "./components/pages/collaborator/editarPerfil";
-
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
 import RecuperarPassword from "./components/pages/loginPage/RecuperarPassword";

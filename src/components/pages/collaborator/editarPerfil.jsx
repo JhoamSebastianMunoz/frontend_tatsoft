@@ -294,7 +294,7 @@ const EditarPerfil = () => {
                       <Botones
                         tipo="secundario"
                         label="Cancelar"
-                        size="small"
+                        size="medium"
                         onClick={()=> navigate("/perfil")}
                       />
                     </Link>
@@ -303,7 +303,7 @@ const EditarPerfil = () => {
                       label={submitting ? "Guardando..." : "Guardar"}
                       disabled={submitting}
                       type="submit"
-                      size="small"
+                      size="medium"
                     />
                   </div>
                 </div>
