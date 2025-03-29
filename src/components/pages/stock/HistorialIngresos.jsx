@@ -107,25 +107,27 @@ const HistorialIngresos = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Contenido principal */}
-      <div className="flex-1 pl-20">
-        <div className="text-black p-3 mb-1 ">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      {/* Sidebar - móvil: posición absoluta o fixed para que no desplace el contenido */}
+      <div className="absolute md:relative md:block z-10">
+        <Sidebar />
+      </div>
+  
+      {/* Contenido principal - sin padding left en móvil */}
+      <div className="flex-1 w-full md:ml-16">
+        <div className="text-black pt-6 mb-1 pl-12 sm:pl-10 md:pl-8">
           <Tipografia
             variant="h1"
             size="2xl"
-            className="text-black font-medium pl-2 md:pl-4"
+            className="text-black font-medium text-center md:text-left"
           >
             Historial Ingresos
           </Tipografia>
         </div>
-
+  
         {/* Contenido del historial */}
-        <div className="p-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="pt-4 md:p-6 pl-16 md:pl-8">
+          <div className="bg-white rounded-lg shadow-md p-3 md:p-6">
             {/* Buscador y filtros */}
             <div className="mb-6">
               <div className="flex gap-2 mb-4">
@@ -139,8 +141,8 @@ const HistorialIngresos = () => {
                   />
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-4">
+  
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Tipografia size="sm" className="mb-1">
                     Desde:
@@ -186,7 +188,7 @@ const HistorialIngresos = () => {
                 </div>
               </div>
             </div>
-
+  
             {/* Tabla de ingresos */}
             <div>
               <Tipografia
@@ -196,110 +198,113 @@ const HistorialIngresos = () => {
               >
                 Detalles del ingreso
               </Tipografia>
-
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead className="bg-orange-50">
-                    <tr className="text-left">
-                      <th className="py-2 px-4 font-medium text-orange-800">
-                        Fecha
-                      </th>
-                      <th className="py-2 px-4 font-medium text-orange-800">
-                        Producto
-                      </th>
-                      <th className="py-2 px-4 font-medium text-orange-800">
-                        Cantidad
-                      </th>
-                      <th className="py-2 px-4 font-medium text-orange-800">
-                        Usuario responsable
-                      </th>
-                      <th className="py-2 px-4 font-medium text-orange-800">
-                        Ver más detalle
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historialIngresos.map((ingreso) => (
-                      <React.Fragment key={ingreso.id}>
-                        <tr
-                          className={`border-b ${
-                            expandedRow === ingreso.id
-                              ? "bg-orange-50"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          <td className="py-3 px-4">{ingreso.fecha}</td>
-                          <td className="py-3 px-4">{ingreso.producto}</td>
-                          <td className="py-3 px-4">{ingreso.cantidad}</td>
-                          <td className="py-3 px-4">
-                            {ingreso.usuarioResponsable}
-                          </td>
-                          <td className="py-3 px-4">
-                            <button
-                              onClick={() => toggleDetalles(ingreso.id)}
-                              className="bg-orange-500 hover:bg-orange-600 text-white rounded-md px-3 py-1 flex items-center justify-center transition-colors duration-200"
-                            >
-                             <Icono 
-                                name={expandedRow === ingreso.id ? "eliminarAlert" : "despliegue"} 
-                                size={18} 
-                                className="mr-1"
-                                customColor="white"
-                              />
-                              <Tipografia size="sm" className="text-white">
-                                {expandedRow === ingreso.id
-                                  ? ""
-                                  : ""}
-                              </Tipografia>
-                            </button>
-                          </td>
+  
+              {/* Contenedor con scroll horizontal para tablas en móvil */}
+              <div className="overflow-x-auto pb-2 -mx-3 md:mx-0 pr-2">
+                <div className="min-w-full inline-block align-middle">
+                  <div className="overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-orange-50">
+                        <tr className="text-left">
+                          <th className="py-2 px-4 font-medium text-orange-800 whitespace-nowrap">
+                            Fecha
+                          </th>
+                          <th className="py-2 px-4 font-medium text-orange-800 whitespace-nowrap">
+                            Producto
+                          </th>
+                          <th className="py-2 px-4 font-medium text-orange-800 whitespace-nowrap">
+                            Cantidad
+                          </th>
+                          <th className="py-2 px-4 font-medium text-orange-800 whitespace-nowrap">
+                            Usuario responsable
+                          </th>
+                          <th className="py-2 px-4 font-medium text-orange-800 whitespace-nowrap">
+                            Ver más detalle
+                          </th>
                         </tr>
-
-                        {expandedRow === ingreso.id && (
-                          <tr className="bg-orange-50">
-                            <td colSpan="5" className="p-4">
-                              <div className="grid grid-cols-3 gap-4 text-sm">
-                                <div>
-                                  <p className="font-medium text-orange-800">
-                                    Código de ingreso: {ingreso.codigoIngreso}
-                                  </p>
-                                  <p className="font-medium text-orange-800">
-                                    Código factura proveedor:{" "}
-                                    {ingreso.codigoFacturaProveedor}
-                                  </p>
-                                  <p className="font-medium text-orange-800">
-                                    Fecha de vencimiento:{" "}
-                                    {ingreso.fechaVencimiento}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="font-medium text-orange-800">
-                                    Stock: {ingreso.stock}
-                                  </p>
-                                  <p className="font-medium text-orange-800">
-                                    Costo total: {ingreso.costoTotal}
-                                  </p>
-                                  <p className="font-medium text-orange-800">
-                                    Costo unitario: {ingreso.costoUnitario}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="font-medium text-orange-800">
-                                    Porcentaje venta: {ingreso.porcentajeVenta}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {historialIngresos.map((ingreso) => (
+                          <React.Fragment key={ingreso.id}>
+                            <tr
+                              className={`border-b ${
+                                expandedRow === ingreso.id
+                                  ? "bg-orange-50"
+                                  : "hover:bg-gray-50"
+                              }`}
+                            >
+                              <td className="py-3 px-4 whitespace-nowrap">{ingreso.fecha}</td>
+                              <td className="py-3 px-4 whitespace-nowrap">{ingreso.producto}</td>
+                              <td className="py-3 px-4 whitespace-nowrap">{ingreso.cantidad}</td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                {ingreso.usuarioResponsable}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <button
+                                  onClick={() => toggleDetalles(ingreso.id)}
+                                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-md px-3 py-1 flex items-center justify-center transition-colors duration-200"
+                                >
+                                 <Icono 
+                                    name={expandedRow === ingreso.id ? "eliminarAlert" : "despliegue"} 
+                                    size={18} 
+                                    className="mr-1"
+                                    customColor="white"
+                                  />
+                                  <Tipografia size="sm" className="text-white hidden md:inline">
+                                    {expandedRow === ingreso.id ? "Cerrar" : "Ver"}
+                                  </Tipografia>
+                                </button>
+                              </td>
+                            </tr>
+  
+                            {expandedRow === ingreso.id && (
+                              <tr className="bg-orange-50">
+                                <td colSpan="5" className="p-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div className="mb-2 md:mb-0">
+                                      <p className="font-medium text-orange-800">
+                                        Código de ingreso: {ingreso.codigoIngreso}
+                                      </p>
+                                      <p className="font-medium text-orange-800">
+                                        Código factura proveedor:{" "}
+                                        {ingreso.codigoFacturaProveedor}
+                                      </p>
+                                      <p className="font-medium text-orange-800">
+                                        Fecha de vencimiento:{" "}
+                                        {ingreso.fechaVencimiento}
+                                      </p>
+                                    </div>
+                                    <div className="mb-2 md:mb-0">
+                                      <p className="font-medium text-orange-800">
+                                        Stock: {ingreso.stock}
+                                      </p>
+                                      <p className="font-medium text-orange-800">
+                                        Costo total: {ingreso.costoTotal}
+                                      </p>
+                                      <p className="font-medium text-orange-800">
+                                        Costo unitario: {ingreso.costoUnitario}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-orange-800">
+                                        Porcentaje venta: {ingreso.porcentajeVenta}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
-
+  
             {/* Botón para nuevo ingreso */}
-            <div className="flex justify-end mt-6">
+            <div className="flex justify-center md:justify-end mt-6">
               <Botones
                 label="Nuevo Ingreso"
                 tipo="primario"
