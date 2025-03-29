@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Logo from "../../../components/atoms/Logo";
-import CamposTexto from "../../../components/atoms/CamposTexto";
-import Botones from "../../../components/atoms/Botones";
 import { BallTriangle } from "react-loader-spinner";
 import imagen from "../../../assets/nuevo imagen login.jpg";
 
@@ -42,7 +40,7 @@ const Login = () => {
 
       if (success) {
         console.log("Login exitoso, redirigiendo a /perfil");
-        navigate("/perfil");
+        navigate("/home");
       } else {
         console.log("Login fallido");
         setError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");

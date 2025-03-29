@@ -164,7 +164,7 @@ const GestionProductos = () => {
     setOpenMenuId(null);
   };
 
-  const handleEditarProducto = (id) => {
+  const handleStock = (id) => {
     navigate(`/editar-producto/${id}`);
     setOpenMenuId(null);
   };
@@ -256,9 +256,9 @@ const GestionProductos = () => {
               <ul className="py-1 text-sm text-gray-600">
                 <li
                   className="px-3 py-2 hover:bg-slate-100 cursor-pointer"
-                  onClick={() => handleEditarProducto(producto.id_producto)}
+                  onClick={() => handleStock(producto.id_producto)}
                 >
-                  Editar
+                  Agregar Stock
                 </li>
                 <li
                   className="px-3 py-2 hover:bg-red-50 cursor-pointer text-red-600"

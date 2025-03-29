@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { presaleService, saleService } from "../../../context/services/ApiService";
 import { useAuth } from "../../../context/AuthContext";
 
 // Componentes
-import Encabezado from "../../molecules/Encabezado";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 import Loading from "../../Loading/Loading";
-import SidebarAdm from "../../organisms/Sidebar";
+import Sidebar from "../../organisms/Sidebar";
 import Buscador from "../../molecules/Buscador";
 
 const ComparativaVentasDevoluciones = () => {
@@ -29,6 +28,12 @@ const ComparativaVentasDevoluciones = () => {
   const [busqueda, setBusqueda] = useState("");
   const [filtroZona, setFiltroZona] = useState("Todas");
   const [zonas, setZonas] = useState(["Todas"]);
+
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [currentItems, setCurrentItems] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
 
   // Cargar datos de ventas y devoluciones
   useEffect(() => {
@@ -172,6 +177,36 @@ const ComparativaVentasDevoluciones = () => {
     return cumpleBusqueda && cumpleZona && cumpleFecha;
   });
 
+  // Cálculos para paginación
+  const updateCurrentItems = useCallback(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    setCurrentItems(datosFiltrados.slice(indexOfFirstItem, indexOfLastItem));
+    setTotalPages(Math.ceil(datosFiltrados.length / itemsPerPage));
+  }, [currentPage, itemsPerPage, datosFiltrados]);
+
+  // Actualizar elementos mostrados cuando cambia la página o los filtros
+  useEffect(() => {
+    updateCurrentItems();
+  }, [currentPage, datosFiltrados, updateCurrentItems]);
+
+  // Handlers para paginación
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+  
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+  
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
   // Calcular totales para resumen
   const calcularTotales = () => {
     let totalVentas = 0;
@@ -220,12 +255,8 @@ const ComparativaVentasDevoluciones = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Encabezado
-        mensaje="Comparativa de Ventas y Devoluciones"
-        onClick={() => navigate("/perfil")}
-      />
-      <SidebarAdm />
+    <div className="min-h-screen bg-slate-100">
+      <Sidebar/>
       <div className="container mx-auto px-4 py-6">
         {/* Alertas */}
         {error && (
@@ -240,10 +271,10 @@ const ComparativaVentasDevoluciones = () => {
         {/* Resumen de totales */}
         <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-md p-4 flex-1">
-            <Tipografia variant="h3" className="text-purple-700 font-bold mb-2">
+            <Tipografia variant="h3" className="text-orange-700 font-bold mb-2">
               Ventas
             </Tipografia>
-            <div className="text-2xl font-bold text-green-600 mb-1">
+            <div className="text-2xl font-bold text-orange-400 mb-1">
               ${totales.totalVentas.toLocaleString('es-CO')}
             </div>
             <div className="text-sm text-gray-600">
@@ -252,10 +283,10 @@ const ComparativaVentasDevoluciones = () => {
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-4 flex-1">
-            <Tipografia variant="h3" className="text-purple-700 font-bold mb-2">
+            <Tipografia variant="h3" className="text-orange-700 font-bold mb-2">
               Devoluciones
             </Tipografia>
-            <div className="text-2xl font-bold text-red-600 mb-1">
+            <div className="text-2xl font-bold text-red-700 mb-1">
               ${totales.totalDevoluciones.toLocaleString('es-CO')}
             </div>
             <div className="text-sm text-gray-600">
@@ -264,7 +295,7 @@ const ComparativaVentasDevoluciones = () => {
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-4 flex-1">
-            <Tipografia variant="h3" className="text-purple-700 font-bold mb-2">
+            <Tipografia variant="h3" className="text-orange-700 font-bold mb-2">
               % Devoluciones
             </Tipografia>
             <div className="text-2xl font-bold text-orange-600 mb-1">
@@ -289,7 +320,7 @@ const ComparativaVentasDevoluciones = () => {
               </label>
               <input
                 type="date"
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
               />
@@ -301,7 +332,7 @@ const ComparativaVentasDevoluciones = () => {
               </label>
               <input
                 type="date"
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 value={fechaFin}
                 onChange={(e) => setFechaFin(e.target.value)}
               />
@@ -312,7 +343,7 @@ const ComparativaVentasDevoluciones = () => {
                 Zona:
               </label>
               <select
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 value={filtroZona}
                 onChange={(e) => setFiltroZona(e.target.value)}
               >
@@ -339,13 +370,14 @@ const ComparativaVentasDevoluciones = () => {
           {(fechaInicio || fechaFin || busqueda || filtroZona !== "Todas") && (
             <div className="flex justify-end mt-3">
               <button
+                type="button"
                 onClick={() => {
                   setFechaInicio("");
                   setFechaFin("");
                   setBusqueda("");
                   setFiltroZona("Todas");
                 }}
-                className="text-sm text-purple-600 hover:text-purple-800 flex items-center"
+                className="text-sm text-orange-600 hover:text-orange-800 flex items-center"
               >
                 <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -358,9 +390,18 @@ const ComparativaVentasDevoluciones = () => {
 
         {/* Tabla de datos comparativos */}
         <div className="bg-white rounded-lg shadow-md p-4">
-          <Tipografia variant="h2" size="lg" className="text-purple-700 font-bold mb-4">
-            Comparativa por Cliente
-          </Tipografia>
+          <div className="flex justify-between items-center mb-4">
+            <Tipografia variant="h2" size="lg" className="text-orange-700 font-bold">
+              Comparativa por Cliente
+            </Tipografia>
+            {datosFiltrados.length > 0 && (
+              <div className="px-2 py-1 bg-orange-100 rounded-full text-center min-w-[60px]">
+                <span className="text-xs text-orange-800">
+                  {datosFiltrados.length} {datosFiltrados.length === 1 ? "resultado" : "resultados"}
+                </span>
+              </div>
+            )}
+          </div>
           
           {datosFiltrados.length > 0 ? (
             <div className="overflow-x-auto">
@@ -388,7 +429,7 @@ const ComparativaVentasDevoluciones = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {datosFiltrados.map((item, index) => (
+                  {currentItems.map((item, index) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -396,7 +437,7 @@ const ComparativaVentasDevoluciones = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
                           {item.nombre_zona}
                         </span>
                       </td>
@@ -406,7 +447,7 @@ const ComparativaVentasDevoluciones = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="text-sm font-medium text-red-600">
+                        <div className="text-sm font-medium text-red-800">
                           ${item.total_devoluciones.toLocaleString('es-CO')}
                         </div>
                       </td>
@@ -431,6 +472,72 @@ const ComparativaVentasDevoluciones = () => {
           ) : (
             <div className="text-center py-10 text-gray-500">
               No se encontraron datos que coincidan con los criterios de búsqueda
+            </div>
+          )}
+          
+          {/* Paginación */}
+          {datosFiltrados.length > 0 && (
+            <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
+              <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
+                <p>
+                  Mostrando <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> a{" "}
+                  <span className="font-medium">
+                    {Math.min(currentPage * itemsPerPage, datosFiltrados.length)}
+                  </span>{" "}
+                  de{" "}
+                  <span className="font-medium">
+                    {datosFiltrados.length}
+                  </span>{" "}
+                  resultados
+                </p>
+              </div>
+              <div>
+                <div
+                  className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                  aria-label="Pagination"
+                >
+                  <button 
+                    type="button"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className={`relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                      currentPage === 1 
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-orange-500 hover:bg-orange-50 cursor-pointer'
+                    }`}
+                  >
+                    Anterior
+                  </button>
+
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      type="button"
+                      key={i + 1}
+                      onClick={() => goToPage(i + 1)}
+                      className={`relative inline-flex items-center px-4 py-2 border ${
+                        currentPage === i + 1
+                          ? 'bg-orange-100 border-orange-500 text-orange-700 z-10 font-bold'
+                          : 'border-gray-300 bg-white text-gray-700 hover:bg-orange-50'
+                      } text-sm font-medium`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  
+                  <button 
+                    type="button"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                      currentPage === totalPages 
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-orange-500 hover:bg-orange-50 cursor-pointer'
+                    }`}
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

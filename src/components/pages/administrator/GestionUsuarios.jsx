@@ -29,7 +29,7 @@ const GestionUsuarios = () => {
   
   // Agregar estado para paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(9); // Para mostrar 3x3 en pantallas grandes
+  const [itemsPerPage, setItemsPerPage] = useState(9); 
 
   useEffect(() => {
     const fetchUsuarios = async () => {
