@@ -78,14 +78,26 @@ const VerUsuarioAdm = () => {
       </div>
       <Tipografia>
       <div className="md:pl-50 pl-14 pt-0 md:pt-4">
-          {error && (
-            <div className="mx-4 mb-4 bg-red-50 border-l-4 border-red-500 p-4">
-              <p className="text-red-700">{error}</p>
-            </div>
-          )}
-          
         <div className="px-4 sm:px-6 lg:px-8 py-6">
           <div className="max-w-5xl mx-auto">
+            {/* Encabezado con título y botón */}
+            <div className="flex flex-col mb-6">
+              <h1 className="text-xl font-semibold text-gray-900 mb-4">
+                Ingreso de Stock
+              </h1>
+              <Botones
+                label="Volver al Historial"
+                onClick={() => navigate("/historial-stock")}
+                className="w-full sm:w-auto bg-[#F78220] hover:bg-[#F78220]/90 text-white px-4 py-2 rounded-lg"
+              />
+            </div>
+
+            {error && (
+              <div className="mx-4 mb-4 bg-red-50 border-l-4 border-red-500 p-4">
+                <p className="text-red-700">{error}</p>
+              </div>
+            )}
+            
             {/* Tarjeta de Usuario */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-8">
               <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
@@ -225,5 +237,6 @@ const VerUsuarioAdm = () => {
     </div>
   );
 };
+
 
 export default VerUsuarioAdm;

@@ -25,10 +25,10 @@ const DetallesPreventa = () => {
         setLoading(true);
         setError("");
         console.log("Iniciando carga de detalles de preventa:", id);
-
+        
         const response = await presaleService.getPresaleDetails(id);
         console.log("Respuesta del backend:", response);
-
+        
         if (!response || !response.data) {
           throw new Error(
             "La respuesta del servidor no tiene el formato esperado"
@@ -38,7 +38,7 @@ const DetallesPreventa = () => {
         setDetalles(response.data);
       } catch (err) {
         console.error("Error al cargar detalles de la preventa:", err);
-
+        
         if (err.response) {
           switch (err.response.status) {
             case 401:
@@ -103,19 +103,19 @@ const DetallesPreventa = () => {
       try {
         setLoading(true);
         setError("");
-
+        
         const response = await presaleService.cancelPresale(id);
         console.log("Respuesta de cancelación:", response);
-
+        
         if (response.data?.message) {
-          alert("Preventa cancelada con éxito");
-          navigate("/preventa/historial");
+        alert("Preventa cancelada con éxito");
+        navigate("/preventa/historial");
         } else {
           throw new Error("No se recibió confirmación de la cancelación");
         }
       } catch (err) {
         console.error("Error al cancelar preventa:", err);
-
+        
         if (err.response) {
           switch (err.response.status) {
             case 401:
@@ -172,14 +172,14 @@ const DetallesPreventa = () => {
               Detalles de Preventa
             </h1>
           </div>
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-              <div className="flex items-center">
-                <Icono name="eliminarAlert" size={20} />
-                <span className="ml-2">{error}</span>
-              </div>
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+            <div className="flex items-center">
+              <Icono name="eliminarAlert" size={20} />
+              <span className="ml-2">{error}</span>
             </div>
-          )}
+          </div>
+        )}
 
           {detalles && (
             <div className="space-y-6">
@@ -190,25 +190,25 @@ const DetallesPreventa = () => {
                     Información Cliente
                   </h2>
                   <div className="space-y-3">
-                    <div>
+                  <div>
                       <span className="text-gray-600">Nombre:</span>
                       <span className="ml-2">
                         {detalles.cliente?.nombre ||
                           detalles.cliente?.razon_social}
                       </span>
-                    </div>
-                    <div>
+                  </div>
+                  <div>
                       <span className="text-gray-600">Razón Social:</span>
                       <span className="ml-2">
                         {detalles.cliente?.razon_social || "No disponible"}
-                      </span>
-                    </div>
-                    <div>
+                    </span>
+                  </div>
+                  <div>
                       <span className="text-gray-600">Dirección:</span>
                       <span className="ml-2">
                         {detalles.cliente?.direccion || "No disponible"}
                       </span>
-                    </div>
+                  </div>
                     <div>
                       <span className="text-gray-600">Teléfono:</span>
                       <span className="ml-2">
@@ -227,20 +227,20 @@ const DetallesPreventa = () => {
                     <div>
                       <span className="text-gray-600">Código:</span>
                       <span className="ml-2">#{detalles.id_preventa}</span>
-                    </div>
-                    <div>
+              </div>
+                  <div>
                       <span className="text-gray-600">Colaborador:</span>
                       <span className="ml-2">
                         {detalles.colaborador?.nombre || "No disponible"}
                       </span>
-                    </div>
-                    <div>
+                  </div>
+                  <div>
                       <span className="text-gray-600">Fecha:</span>
                       <span className="ml-2">
                         {formatearFecha(detalles.fecha_creacion)}
                       </span>
-                    </div>
-                    <div>
+                  </div>
+                  <div>
                       <span className="text-gray-600">Estado:</span>
                       <span
                         className={`ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -295,13 +295,13 @@ const DetallesPreventa = () => {
                         {detalles.productos.map((producto, index) => (
                           <tr key={index}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {producto.nombre}
+                                {producto.nombre}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                               ${Number(producto.precio).toLocaleString("es-CO")}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                              {producto.cantidad}
+                                {producto.cantidad}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                               $
@@ -335,18 +335,18 @@ const DetallesPreventa = () => {
               {detalles.estado === "Pendiente" &&
                 user.rol === "COLABORADOR" && (
                   <div className="flex justify-end space-x-4 mt-4">
-                    <Boton
-                      tipo="secundario"
-                      label="Cancelar Preventa"
-                      onClick={handleCancelar}
-                    />
-                    <Boton
-                      tipo="primario"
-                      label="Confirmar Preventa"
-                      onClick={handleConfirmar}
-                    />
-                  </div>
-                )}
+                      <Boton 
+                        tipo="secundario"
+                        label="Cancelar Preventa" 
+                        onClick={handleCancelar}
+                      />
+                      <Boton 
+                        tipo="primario"
+                        label="Confirmar Preventa" 
+                        onClick={handleConfirmar}
+                      />
+                </div>
+              )}
 
               {/* Botón Volver */}
               <div className="flex justify-end mt-6 pb-4">
@@ -357,9 +357,9 @@ const DetallesPreventa = () => {
                   Volver
                 </button>
               </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
       </Tipografia>
     </div>
   );
