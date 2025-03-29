@@ -77,7 +77,7 @@ const VerUsuarioAdm = () => {
         <Sidebar />
       </div>
       <Tipografia>
-      <div className="md:pl-64 pl-14 pt-0 md:pt-4">
+      <div className="md:pl-50 pl-14 pt-0 md:pt-4">
           {error && (
             <div className="mx-4 mb-4 bg-red-50 border-l-4 border-red-500 p-4">
               <p className="text-red-700">{error}</p>
