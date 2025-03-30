@@ -384,10 +384,10 @@ const IngresoStock = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                  <div className="bg-slate-100 p-4 rounded-lg mb-6">
                     <div className="flex">
-                      <Tipografia size="sm" className="text-blue-800">
-                        Los campos marcados con <span className="text-red-500">*</span> son obligatorios.
+                      <Tipografia size="sm" className="text-slate-800">
+                        Los campos marcados con <span className="text-orange-500"> * </span> son obligatorios.
                         El costo unitario se calcula automáticamente dividiendo el costo total entre la cantidad ingresada.
                       </Tipografia>
                     </div>
