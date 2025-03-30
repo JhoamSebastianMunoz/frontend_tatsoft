@@ -12,7 +12,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { saleService } from "../../../context/services/ApiService";
-import "../../../Styles/dashboard-styles.css";
 
 // Componentes
 import Sidebar from "../../organisms/Sidebar";
