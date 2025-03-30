@@ -306,7 +306,61 @@ export const presaleService = {
     } catch (error) {
       throw error;
     }
-  }
+  },
+
+  // Obtener top 10 clientes que más compran
+  getTopClientes: async (fechaInicio, fechaFin) => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/top-clientes`, {
+        params: {
+          fechaInicio,
+          fechaFin
+        },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Obtener top 10 productos más vendidos
+  getTopProductosVendidos: async (fechaInicio, fechaFin) => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/top-productos-vendidos`, {
+        params: {
+          fechaInicio,
+          fechaFin
+        },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Obtener top 10 productos menos vendidos
+  getTopProductosMenosVendidos: async (fechaInicio, fechaFin) => {
+    try {
+      const response = await axios.get(`${PRESALES_DIRECT_URL}/top-productos-menos-vendidos`, {
+        params: {
+          fechaInicio,
+          fechaFin
+        },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 // Servicios de ventas

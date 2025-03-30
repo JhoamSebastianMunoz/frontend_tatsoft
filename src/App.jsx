@@ -2,7 +2,6 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
-
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
 import RecuperarPassword from "./components/pages/loginPage/RecuperarPassword";
@@ -73,6 +72,8 @@ import Loading from "./components/Loading/Loading";
 import Pagina404 from "./components/pages/alert/page404";
 import Tipografia from "./components/atoms/Tipografia";
 import EstadisticasVentas from "./components/pages/estadisticas/EstadisticasVentas";
+import EstadisticasColaborador from "./components/pages/estadisticas/EstadisticasColaborador";
+import RolBasedStats from "./components/pages/estadisticas/RolBasedStats";
 
 // Componente de rutas protegidas
 const ProtectedRoute = ({ element, allowedRoles }) => {
@@ -111,13 +112,13 @@ const App = () => {
       />
 
       <Route
-      path="/editar/perfil"
-      element={
-        <ProtectedRoute
-        element={<EditarPerfil />}
-        allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
-        />
-      }
+        path="/editar/perfil"
+        element={
+          <ProtectedRoute
+            element={<EditarPerfil />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
       />
 
       {/* Rutas Estadisticas */}
@@ -125,7 +126,18 @@ const App = () => {
         path="/home"
         element={
           <ProtectedRoute
-            element={<EstadisticasVentas />}
+            element={<RolBasedStats />}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+
+      {/* Rutas Estadisticas Colaborador */}
+      <Route
+        path="/home/colaborador"
+        element={
+          <ProtectedRoute
+            element={<EstadisticasColaborador />}
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
@@ -177,7 +189,7 @@ const App = () => {
           />
         }
       />
-      
+
       {/* Rutas de solicitudes */}
       <Route
         path="/solicitudes"
@@ -280,7 +292,7 @@ const App = () => {
         element={
           <ProtectedRoute
             element={<GestionProductos />}
-            allowedRoles={["ADMINISTRADOR","COLABORADOR"]}
+            allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
           />
         }
       />
@@ -492,7 +504,7 @@ const App = () => {
           />
         }
       />
-      {/* Rutas de acumulados */} 
+      {/* Rutas de acumulados */}
       <Route
         path="/acumulados"
         element={
@@ -502,9 +514,6 @@ const App = () => {
           />
         }
       />
-      
-
-
 
       {/* Ruta por defecto - Redirige a página de error 404 */}
       <Route path="*" element={<Pagina404 />} />

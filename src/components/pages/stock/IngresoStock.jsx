@@ -176,24 +176,28 @@ const IngresoStock = () => {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       
-      <div className={`flex-1 transition-all duration-300 ${
-        !sidebarCollapsed ? "md:ml-20" : "md:ml-16"
-      }`}>
-        <div className="p-4 md:p-3 max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-          <div className="mt-2 mb-1">
-            <Tipografia className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Ingreso de stock</Tipografia>
-          </div>
-            <Botones
-              label="Volver al Inventario"
-              tipo="terciario"
-              onClick={() => navigate("/inventario")}
-              className="flex items-center"
-              icon="arrow-left"
-            />
+      <Tipografia>
+      <div className="flex-1 transition-all duration-300 pl-2">
+        <div className="pl-4 ml-10 md:ml-[8rem] max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mx-1 pt-4">
+            <div className="w-auto">
+              <Tipografia className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                Ingreso de stock
+              </Tipografia>
+            </div>
+            <div className="w-full sm:w-auto md">
+              <Botones
+                label="Ver Historial"
+                tipo="primario"
+                type="submit"
+                onClick={() => navigate("/inventario")}
+                className="w-full sm:w-auto bg-[#F78220] hover:bg-[#F78220]/90 text-white px-4 py-2 rounded-lg"
+                icon="arrow-left"
+              />
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
             {/* Columna de Producto */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md p-5 h-full">
@@ -415,6 +419,7 @@ const IngresoStock = () => {
       </div>
 
       {renderAlert()}
+      </Tipografia>
     </div>
   );
 };
