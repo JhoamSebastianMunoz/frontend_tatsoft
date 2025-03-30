@@ -22,9 +22,14 @@ const HistorialVentas = () => {
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [filtro, setFiltro] = useState("Todos");
+  
+  // Estados para paginación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const ventasPorPagina = 10; // Número de ventas por página
 
   const aplicarFiltro = (tipoFiltro) => {
     setFiltro(tipoFiltro);
+    setPaginaActual(1); // Resetear a la primera página al cambiar filtros
     const hoy = new Date();
     let inicio = new Date();
     let fin = new Date();
@@ -102,11 +107,13 @@ const HistorialVentas = () => {
     const terminoBusqueda = filtroBusqueda.toLowerCase();
     const idString = String(venta.id_preventa || "").toLowerCase();
     const nombreString = String(venta.nombre_colaborador || "").toLowerCase();
+    const clienteString = String(venta.razon_social || "").toLowerCase();
 
     const cumpleBusqueda =
       filtroBusqueda === "" ||
       idString.includes(terminoBusqueda) ||
-      nombreString.includes(terminoBusqueda);
+      nombreString.includes(terminoBusqueda) ||
+      clienteString.includes(terminoBusqueda);
 
     let cumpleFecha = true;
     if (fechaInicio || fechaFin) {
@@ -130,6 +137,12 @@ const HistorialVentas = () => {
     return cumpleBusqueda && cumpleFecha;
   });
 
+  // Paginación
+  const indexUltimaVenta = paginaActual * ventasPorPagina;
+  const indexPrimeraVenta = indexUltimaVenta - ventasPorPagina;
+  const ventasPaginaActual = ventasFiltradas.slice(indexPrimeraVenta, indexUltimaVenta);
+  const totalPaginas = Math.ceil(ventasFiltradas.length / ventasPorPagina);
+
   const formatearFecha = (fechaString) => {
     if (!fechaString) return "Fecha no disponible";
     try {
@@ -152,6 +165,20 @@ const HistorialVentas = () => {
     }
   };
 
+  const limpiarFiltros = () => {
+    setFiltroBusqueda("");
+    setFechaInicio("");
+    setFechaFin("");
+    setFiltro("Todos");
+    setPaginaActual(1);
+  };
+
+  const cambiarPagina = (numeroPagina) => {
+    if (numeroPagina > 0 && numeroPagina <= totalPaginas) {
+      setPaginaActual(numeroPagina);
+    }
+  };
+
   if (loading) {
     return <Loading message="Cargando historial de ventas..." />;
   }
@@ -165,7 +192,7 @@ const HistorialVentas = () => {
         {/* Contenido principal */}
         <main className="w-full md:pl-[100px] pl-20 pr-2 pt-[80px] md:pt-6 md:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
+            <div className="mb-2">
               <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
                 Historial de Ventas
               </h1>
@@ -179,29 +206,22 @@ const HistorialVentas = () => {
                 </div>
               </div>
             )}
-
-            {/* Total ventas */}
             <div className="rounded-lg w-64 shadow-md overflow-hidden mb-6 mx-auto">
-              {/* Cabecera con fondo naranja */}
-              <div className="bg-[#F78220] p-4">
+              <div className="bg-[#F78220] p-3">
                 <h2 className="text-white text-lg md:text-xl font-medium">
                   Total ventas
                 </h2>
               </div>
 
-              {/* Contenido con fondo blanco */}
-              <div className="bg-white p-4 flex flex-col">
-                {/* Valor grande */}
-                <div className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+              <div className="bg-white p-3 flex flex-col">
+                <div className="text-2xl md:text-3xl font-bold text-gray-800 ">
                   $
                   {ventasFiltradas
                     .reduce((total, venta) => total + venta.total_vendido, 0)
                     .toLocaleString("es-CO")}
                 </div>
 
-                {/* Etiqueta de porcentaje y "Total" alineados a la izquierda */}
                 <div className="flex items-center gap-2">
-                  {/* Círculo naranja a la derecha */}
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center ml-auto">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -277,7 +297,10 @@ const HistorialVentas = () => {
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     value={fechaInicio}
-                    onChange={(e) => setFechaInicio(e.target.value)}
+                    onChange={(e) => {
+                      setFechaInicio(e.target.value);
+                      setPaginaActual(1);
+                    }}
                   />
                 </div>
 
@@ -287,112 +310,204 @@ const HistorialVentas = () => {
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     value={fechaFin}
-                    onChange={(e) => setFechaFin(e.target.value)}
+                    onChange={(e) => {
+                      setFechaFin(e.target.value);
+                      setPaginaActual(1);
+                    }}
                   />
                 </div>
               </div>
+              
+              {(filtroBusqueda || fechaInicio || fechaFin || filtro !== "Todos") && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={limpiarFiltros}
+                    className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Limpiar filtros
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Lista de ventas */}
             <div className="bg-white rounded-lg shadow-md p-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <Tipografia
-                  variant="h2"
-                  className="text-lg md:text-xl font-semibold text-gray-900"
-                >
+              <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <h3 className="font-medium text-gray-900 mb-2 sm:mb-0">
                   Ventas Confirmadas
-                </Tipografia>
+                  <span className="ml-2 text-sm font-normal text-gray-700">
+                    Mostrando {ventasFiltradas.length > 0 ? indexPrimeraVenta + 1 : 0} a{" "}
+                    {Math.min(indexUltimaVenta, ventasFiltradas.length)} de {ventasFiltradas.length}
+                  </span>
+                </h3>
+                
                 {ventasFiltradas.length > 0 && (
-                  <div className="px-3 py-1 bg-[#F78220]/10 rounded-full">
-                    <span className="text-sm text-[#F78220]">
-                      {ventasFiltradas.length}{" "}
-                      {ventasFiltradas.length === 1 ? "venta" : "ventas"}
-                    </span>
+                  <div className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+                    {ventasFiltradas.length} {ventasFiltradas.length === 1 ? "venta" : "ventas"}
                   </div>
                 )}
               </div>
 
               {ventasFiltradas.length > 0 ? (
-                <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              ID
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Fecha de Venta
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Colaborador
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Cliente
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Total de venta
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Acciones
-                            </th>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Fecha de Venta
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Colaborador
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Cliente
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total de venta
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Acciones
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {ventasPaginaActual.map((venta, index) => (
+                          <tr
+                            key={`${venta.id_preventa}-${index}`}
+                            className="hover:bg-gray-50"
+                          >
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className="text-sm font-medium text-gray-900">
+                                #{venta.id_preventa}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className="text-sm text-gray-500">
+                                {formatearFecha(venta.fecha_confirmacion)}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className="text-sm text-gray-900">
+                                {venta.nombre_colaborador}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className="text-sm text-gray-900">
+                                {venta.razon_social || "Cliente General"}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span className="text-sm px-2 py-1 inline-flex font-medium leading-5 font-semibold rounded-full bg-green-100 text-green-700">
+                                ${venta.total_vendido.toLocaleString("es-CO")}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
+                              {venta.id_preventa !== "N/A" && (
+                                <Boton
+                                  label="Ver Detalles"
+                                  tipo="primario"
+                                  size="small"
+                                  onClick={() => verDetallesVenta(venta.id_preventa)}
+                                />
+                              )}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {ventasFiltradas.map((venta, index) => (
-                            <tr
-                              key={`${venta.id_preventa}-${index}`}
-                              className="hover:bg-gray-50"
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm font-medium text-gray-900">
-                                  #{venta.id_preventa}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-500">
-                                  {formatearFecha(venta.fecha_confirmacion)}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900">
-                                  {venta.nombre_colaborador}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900">
-                                  {venta.razon_social || "Cliente General"}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm px-2 py-1 inline-flex font-medium leading-5 font-semibold rounded-full bg-green-100 text-green-700">
-                                  ${venta.total_vendido.toLocaleString("es-CO")}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                {venta.id_preventa !== "N/A" && (
-                                  <Boton
-                                    label="Ver Detalles"
-                                    onClick={() =>
-                                      verDetallesVenta(venta.id_preventa)
-                                    }
-                                  />
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-10 text-gray-500">
-                    No se encontraron ventas con los criterios de búsqueda
-                    actuales
+                  No se encontraron ventas con los criterios de búsqueda actuales
+                </div>
+              )}
+
+              {/* Paginación */}
+              {ventasFiltradas.length > 0 && (
+                <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
+                  <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
+                    <p>
+                      Mostrando <span className="font-medium">{ventasFiltradas.length > 0 ? indexPrimeraVenta + 1 : 0}</span> a{" "}
+                      <span className="font-medium">
+                        {Math.min(indexUltimaVenta, ventasFiltradas.length)}
+                      </span>{" "}
+                      de{" "}
+                      <span className="font-medium">
+                        {ventasFiltradas.length}
+                      </span>{" "}
+                      resultados
+                    </p>
+                  </div>
+                  <div>
+                    <nav
+                      className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                      aria-label="Pagination"
+                    >
+                      <button 
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        onClick={() => cambiarPagina(paginaActual - 1)}
+                        disabled={paginaActual === 1}
+                      >
+                        Anterior
+                      </button>
+                      
+                      {/* Generar botones de página */}
+                      {[...Array(totalPaginas).keys()].map(x => (
+                        <button
+                          key={x + 1}
+                          onClick={() => cambiarPagina(x + 1)}
+                          className={`relative inline-flex items-center px-4 py-2 border ${
+                            paginaActual === x + 1
+                              ? "bg-orange-100 text-orange-700 border-orange-300"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                          } text-sm font-medium`}
+                        >
+                          {x + 1}
+                        </button>
+                      ))}
+                      
+                      <button 
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        onClick={() => cambiarPagina(paginaActual + 1)}
+                        disabled={paginaActual === totalPaginas}
+                      >
+                        Siguiente
+                      </button>
+                    </nav>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </main>
       </Tipografia>
+      
+      <style jsx>{`
+        .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;  /* Chrome, Safari and Opera */
+        }
+      `}</style>
     </div>
   );
 };
