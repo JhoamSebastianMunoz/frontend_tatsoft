@@ -17,7 +17,7 @@ import Loading from "../../Loading/Loading";
 const HistorialPreventas = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-
+  
   const [preventas, setPreventas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -68,7 +68,7 @@ const HistorialPreventas = () => {
         console.log("Iniciando carga de preventas...");
         console.log("Rol del usuario:", user.rol);
         console.log("Datos completos del usuario:", user);
-
+        
         // Validación más robusta del usuario
         if (!user) {
           throw new Error("No se encontró información del usuario");
@@ -91,9 +91,9 @@ const HistorialPreventas = () => {
           console.log("Intentando cargar preventas del colaborador:", userId);
           response = await presaleService.getAllPresales();
         }
-
+        
         console.log("Respuesta completa del backend:", response);
-
+        
         // Validación más robusta de la respuesta
         if (!response || !response.data) {
           throw new Error(
@@ -170,11 +170,11 @@ const HistorialPreventas = () => {
       } catch (err) {
         console.error("Error completo al cargar preventas:", err);
         console.error("Respuesta de error:", err.response);
-
+        
         if (err.response) {
           console.error("Estado del error:", err.response.status);
           console.error("Datos del error:", err.response.data);
-
+          
           switch (err.response.status) {
             case 401:
               setError(
@@ -228,7 +228,7 @@ const HistorialPreventas = () => {
       filtroEstado === "Todos" ||
       (preventa.estado &&
         preventa.estado.toLowerCase() === filtroEstado.toLowerCase());
-
+    
     // Filtro por búsqueda (incluye búsqueda por colaborador)
     const terminoBusqueda = filtroBusqueda.toLowerCase().trim();
     const fechaFormateada = formatearFecha(
@@ -275,7 +275,7 @@ const HistorialPreventas = () => {
       try {
         setLoading(true);
         await presaleService.cancelPresale(id);
-
+        
         // Actualizar la lista de preventas
         const response = await presaleService.getAllPresales();
         const data = Array.isArray(response.data)
@@ -558,79 +558,79 @@ const HistorialPreventas = () => {
     <div className="min-h-screen bg-gray-50 ml-10 pl-6">
       <Tipografia>
         <Sidebar />
-        <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
-          <div className="w-full bg-white shadow-sm mb-4">
-            <div className="px-2 sm:px-4 lg:px-8 py-2">
+      <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
+        <div className="w-full bg-white shadow-sm mb-4">
+          <div className="px-2 sm:px-4 lg:px-8 py-2">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 Historial de Preventas
               </h1>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 sm:p-3 mb-2 rounded">
+            <div className="flex items-center">
+              <Icono name="eliminarAlert" size={20} />
+              <span className="ml-2 text-sm sm:text-base">{error}</span>
             </div>
           </div>
+        )}
 
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 sm:p-3 mb-2 rounded">
-              <div className="flex items-center">
-                <Icono name="eliminarAlert" size={20} />
-                <span className="ml-2 text-sm sm:text-base">{error}</span>
-              </div>
+        {/* Filtros y búsqueda */}
+        <div className="bg-slate-50 rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
+            <div className="w-full sm:w-1/2">
+              <CampoTexto 
+                placeholder="Buscar por ID, fecha, total, estado o colaborador..." 
+                value={filtroBusqueda}
+                onChange={(e) => setFiltroBusqueda(e.target.value)}
+                className="w-full"
+              />
             </div>
-          )}
-
-          {/* Filtros y búsqueda */}
-          <div className="bg-slate-50 rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
-              <div className="w-full sm:w-1/2">
-                <CampoTexto
-                  placeholder="Buscar por ID, fecha, total, estado o colaborador..."
-                  value={filtroBusqueda}
-                  onChange={(e) => setFiltroBusqueda(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
+            
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Tipografia className="whitespace-nowrap text-sm sm:text-base">
                     Estado:
                   </Tipografia>
-                  <select
-                    className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
-                    value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value)}
-                  >
-                    <option value="Todos">Todos</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Confirmada">Confirmada</option>
-                    <option value="Cancelada">Cancelada</option>
-                  </select>
-                </div>
-
-                {user.rol === "COLABORADOR" && (
-                  <Boton
-                    tipo="primario"
-                    label="Nueva Preventa"
-                    onClick={() => navigate("/preventa/nueva")}
-                    className="w-full sm:w-auto"
-                  />
-                )}
+              <select 
+                  className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+              >
+                <option value="Todos">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmada">Confirmada</option>
+                <option value="Cancelada">Cancelada</option>
+              </select>
               </div>
+              
+              {user.rol === "COLABORADOR" && (
+              <Boton 
+                tipo="primario" 
+                label="Nueva Preventa" 
+                onClick={() => navigate("/preventa/nueva")}
+                  className="w-full sm:w-auto"
+              />
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Lista de preventas */}
-          <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+        {/* Lista de preventas */}
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
             <Tipografia
               variant="h2"
               size="lg"
               className="text-orange-700 font-bold mb-4 sm:mb-6 text-lg sm:text-xl"
             >
-              Preventas Registradas
-            </Tipografia>
+            Preventas Registradas
+          </Tipografia>
 
-            {preventasFiltradas.length > 0 ? (
-              <div className="overflow-x-auto w-full">
-                <div className="min-w-full divide-y divide-gray-200">
-                  {/* Encabezados de tabla */}
+          {preventasFiltradas.length > 0 ? (
+            <div className="overflow-x-auto w-full">
+              <div className="min-w-full divide-y divide-gray-200">
+                {/* Encabezados de tabla */}
                   <div
                     className={`hidden md:grid ${
                       user.rol === "ADMINISTRADOR"
@@ -638,51 +638,51 @@ const HistorialPreventas = () => {
                         : "md:grid-cols-5"
                     } bg-gray-50 px-4 sm:px-6 py-3`}
                   >
-                    <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </div>
-                    <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID
+                  </div>
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha de Creación
-                    </div>
-                    <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  </div>
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Estado
-                    </div>
-                    <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  </div>
+                  <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Total
+                  </div>
+                  {user.rol === "ADMINISTRADOR" && (
+                    <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Colaborador
                     </div>
-                    {user.rol === "ADMINISTRADOR" && (
-                      <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Colaborador
-                      </div>
-                    )}
+                  )}
                     <div className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </div>
-                  </div>
+                </div>
 
-                  {/* Lista de preventas */}
-                  <div className="divide-y divide-gray-200">
-                    {preventasFiltradas.map((preventa) => (
+                {/* Lista de preventas */}
+                <div className="divide-y divide-gray-200">
+                  {preventasFiltradas.map((preventa) => (
                       <div
                         key={preventa.id_preventa}
                         className="hover:bg-gray-50"
                       >
-                        <div className="md:hidden p-3 sm:p-4">
+                      <div className="md:hidden p-3 sm:p-4">
                           <div className="flex flex-col">
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <span className="text-sm font-medium text-gray-900">
-                                  #{preventa.id_preventa}
-                                </span>
-                                <div className="text-xs sm:text-sm text-gray-500">
-                                  {formatearFecha(preventa.fecha_creacion)}
-                                </div>
-                                {user.rol === "ADMINISTRADOR" && (
-                                  <div className="text-sm text-gray-500">
-                                    Colaborador: {preventa.nombre_colaborador}
-                                  </div>
-                                )}
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="text-sm font-medium text-gray-900">
+                          #{preventa.id_preventa}
+                            </span>
+                            <div className="text-xs sm:text-sm text-gray-500">
+                          {formatearFecha(preventa.fecha_creacion)}
+                        </div>
+                            {user.rol === "ADMINISTRADOR" && (
+                              <div className="text-sm text-gray-500">
+                                Colaborador: {preventa.nombre_colaborador}
                               </div>
+                            )}
+                          </div>
                               <span
                                 className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${
@@ -693,33 +693,33 @@ const HistorialPreventas = () => {
                           : "bg-red-100 text-red-800"
                       }`}
                               >
-                                {preventa.estado}
-                              </span>
-                            </div>
+                          {preventa.estado}
+                        </span>
+                        </div>
                           </div>
 
                           <div className="border-t border-gray-200 pt-2 mt-2">
                             <div className="text-base font-semibold text-gray-900 mb-3">
                               Total: $
                               {Number(preventa.total).toLocaleString("es-CO")}
-                            </div>
+                        </div>
 
                             <div className="flex flex-wrap gap-2">
-                              <Boton
-                                label="Ver"
-                                tipo="primario"
+                          <Boton
+                          label="Ver"
+                          tipo="primario"
                                 onClick={() =>
                                   verDetallesPreventa(preventa.id_preventa)
                                 }
                                 className="text-xs sm:text-sm"
-                              />
-                              <Boton
+                          />
+                          <Boton
                                 label={
                                   imprimiendoPreventa === preventa.id_preventa
                                     ? "Cargando..."
                                     : "Imprimir"
                                 }
-                                tipo="secundario"
+                          tipo="secundario"
                                 onClick={() =>
                                   handleImprimir(preventa.id_preventa)
                                 }
@@ -750,10 +750,10 @@ const HistorialPreventas = () => {
                                       }
                                       className="text-xs sm:text-sm"
                                     />
-                                  </>
-                                )}
-                            </div>
-                          </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                         </div>
 
                         <div
@@ -763,13 +763,13 @@ const HistorialPreventas = () => {
                               : "md:grid-cols-5"
                           } px-4 sm:px-6 py-3 sm:py-4`}
                         >
-                          <div className="text-sm font-medium text-gray-900">
-                            #{preventa.id_preventa}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {formatearFecha(preventa.fecha_creacion)}
-                          </div>
-                          <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          #{preventa.id_preventa}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {formatearFecha(preventa.fecha_creacion)}
+                        </div>
+                        <div>
                             <span
                               className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                     ${
@@ -780,42 +780,42 @@ const HistorialPreventas = () => {
                         : "bg-red-100 text-red-800"
                     }`}
                             >
-                              {preventa.estado}
-                            </span>
-                          </div>
-                          <div className="text-sm text-gray-500">
+                            {preventa.estado}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-500">
                             ${Number(preventa.total).toLocaleString("es-CO")}
+                        </div>
+                        {user.rol === "ADMINISTRADOR" && (
+                          <div className="text-sm text-gray-500">
+                            {preventa.nombre_colaborador}
                           </div>
-                          {user.rol === "ADMINISTRADOR" && (
-                            <div className="text-sm text-gray-500">
-                              {preventa.nombre_colaborador}
-                            </div>
-                          )}
-                          <div className="text-right text-sm font-medium">
+                        )}
+                        <div className="text-right text-sm font-medium">
                             <div className="flex justify-end space-x-2 gap-2">
                               {preventa.estado === "Pendiente" &&
                                 user.rol === "COLABORADOR" && (
-                                  <>
-                                    <button
+                              <>
+                                <button
                                       onClick={() =>
                                         confirmarPreventa(preventa.id_preventa)
                                       }
-                                      className="text-green-600 hover:text-green-900"
-                                    >
-                                      Confirmar
-                                    </button>
-                                    <button
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  Confirmar
+                                </button>
+                                <button
                                       onClick={() =>
                                         handleCancelarPreventa(
                                           preventa.id_preventa
                                         )
                                       }
-                                      className="text-red-600 hover:text-red-900"
-                                    >
-                                      Cancelar
-                                    </button>
-                                  </>
-                                )}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Cancelar
+                                </button>
+                              </>
+                            )}
                               <Boton
                                 label="Ver"
                                 tipo="primario"
@@ -841,21 +841,21 @@ const HistorialPreventas = () => {
                                 }
                               />
                             </div>
-                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-6 sm:py-10 text-gray-500 text-sm sm:text-base">
+            </div>
+          ) : (
+            <div className="text-center py-6 sm:py-10 text-gray-500 text-sm sm:text-base">
                 No se encontraron preventas con los criterios de búsqueda
                 actuales
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
       </Tipografia>
     </div>
   );
