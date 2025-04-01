@@ -191,17 +191,16 @@ const IngresoStock = () => {
         productoId: productoSeleccionado.id_producto,
         cantidad: parseInt(ingreso.cantidad),
         fechaVencimiento: ingreso.fechaVencimiento || null,
-        codigoFactura: ingreso.codigoFactura || null,
+        codigoFactura: ingreso.codigoFactura || "",
         costoTotal: parseFloat(ingreso.costoTotal),
         costoUnitario: parseFloat(ingreso.costoUnitario),
-        porcentajeVenta: parseFloat(ingreso.porcentajeVenta) || 0,
-        precioVenta: parseFloat(ingreso.precioVenta),
-        usuarioId: user.id
+        porcentajeVenta: parseFloat(ingreso.porcentajeVenta) || 0
       };
 
+      console.log('Datos a enviar al servidor:', stockData);
       const response = await stockService.createStockEntry(stockData);
       
-      if (response && response.status === 201) {
+      if (response) {
         setSuccess(true);
         setAlert({
           show: true,
@@ -218,6 +217,7 @@ const IngresoStock = () => {
       let mensajeError = "";
       
       if (error.response) {
+        console.error("Respuesta del servidor:", error.response.data);
         switch (error.response.status) {
           case 401:
             mensajeError = "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
@@ -232,7 +232,7 @@ const IngresoStock = () => {
               "Error de validación en los datos enviados.";
             break;
           case 500:
-            mensajeError = "Error interno del servidor. Por favor, intente más tarde.";
+            mensajeError = error.response.data.message || "Error interno del servidor. Por favor, intente más tarde.";
             break;
           default:
             mensajeError = error.response.data?.message || 

@@ -332,6 +332,15 @@ const App = () => {
 
       {/* Rutas de Inventario */}
       <Route
+        path="/inventario"
+        element={
+          <ProtectedRoute
+            element={<IngresoStock />}
+            allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
         path="/ingreso-stock"
         element={
           <ProtectedRoute

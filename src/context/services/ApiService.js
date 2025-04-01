@@ -392,7 +392,7 @@ export const stockService = {
   getAllStockEntries: async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/entries`, {
+      const response = await axios.get(`${PRODUCTS_DIRECT_URL}/get-hitoricalStock`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -408,40 +408,46 @@ export const stockService = {
     }
   },
   
-  // Obtener usuarios que han registrado ingresos
-  getStockUsers: async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (response.status === 200) {
-        return response.data.users || [];
-      }
-      return [];
-    } catch (error) {
-      console.error("Error al obtener usuarios de stock:", error);
-      throw error;
-    }
-  },
-  
   // Crear un nuevo ingreso de stock
   createStockEntry: async (entryData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/stock/entries`, entryData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const url = `${PRODUCTS_DIRECT_URL}/register-stock/${entryData.productoId}`;
+      console.log('URL de la petición:', url);
+      console.log('Datos a enviar:', {
+        cantidad_ingresada: entryData.cantidad,
+        fecha_vencimiento: entryData.fechaVencimiento,
+        codigo_factura: entryData.codigoFactura,
+        costo_total: entryData.costoTotal,
+        costo_unitario: entryData.costoUnitario,
+        porcentaje_venta: entryData.porcentajeVenta
       });
+
+      const response = await axios.post(
+        url,
+        {
+          cantidad_ingresada: entryData.cantidad,
+          fecha_vencimiento: entryData.fechaVencimiento,
+          codigo_factura: entryData.codigoFactura,
+          costo_total: entryData.costoTotal,
+          costo_unitario: entryData.costoUnitario,
+          porcentaje_venta: entryData.porcentajeVenta
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       
       return response.data;
     } catch (error) {
       console.error("Error al crear ingreso de stock:", error);
+      if (error.response) {
+        console.error("Respuesta del servidor:", error.response.data);
+        console.error("Estado de la respuesta:", error.response.status);
+      }
       throw error;
     }
   },
@@ -450,7 +456,7 @@ export const stockService = {
   getStockEntryDetails: async (entryId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock/entries/${entryId}`, {
+      const response = await axios.get(`${PRODUCTS_DIRECT_URL}/get-detailsStock/${entryId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
