@@ -83,13 +83,8 @@ const VerUsuarioAdm = () => {
             {/* Encabezado con título y botón */}
             <div className="flex flex-col mb-6">
               <h1 className="text-xl font-semibold text-gray-900 mb-4">
-                Ingreso de Stock
+                Perfil del Usuario
               </h1>
-              <Botones
-                label="Volver al Historial"
-                onClick={() => navigate("/historial-stock")}
-                className="w-full sm:w-auto bg-[#F78220] hover:bg-[#F78220]/90 text-white px-4 py-2 rounded-lg"
-              />
             </div>
 
             {error && (

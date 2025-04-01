@@ -335,7 +335,7 @@ const EditarProducto = () => {
   return (
     <div className="min-h-screen flex bg-slate-100">
       <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
-        <Sidebar />
+      <Sidebar />
       </div>
       
       <Tipografia>
