@@ -5,6 +5,9 @@ import Botones from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 import Sidebar from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
+import { productService, stockService } from "../../../context/services/ApiService";
+import { imageService } from "../../../context/services/ImageService";
+import Loading from "../../Loading/Loading";
 
 const IngresoStock = () => {
   const navigate = useNavigate();
@@ -15,14 +18,15 @@ const IngresoStock = () => {
     return JSON.parse(localStorage.getItem("sidebarCollapsed") || "true");
   });
 
-  const [producto] = useState({
-    nombre: "Leche colanta",
-    codigo: "1",
-    precio: 3600,
-    categoria: "Lácteos",
-    stock: 50,
-    imagen: "/path/to/leche-colanta.png",
-  });
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [productImages, setProductImages] = useState({});
+
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showProductList, setShowProductList] = useState(false);
 
   const [ingreso, setIngreso] = useState({
     cantidad: "",
@@ -36,7 +40,7 @@ const IngresoStock = () => {
 
   const [alert, setAlert] = useState({
     show: false,
-    type: "", // "success" o "warning"
+    type: "",
     message: "",
     onConfirm: null,
     onCancel: null,
@@ -46,6 +50,59 @@ const IngresoStock = () => {
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
+
+  // Cargar productos al montar el componente
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await productService.getAllProducts();
+        
+        // Verificar que la respuesta tenga datos válidos
+        if (!response.data || !Array.isArray(response.data)) {
+          throw new Error("Formato de respuesta inválido");
+        }
+
+        // Cargar imágenes para los productos
+        const imagePromises = response.data.map(async (producto) => {
+          if (producto.id_imagen) {
+            try {
+              const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+              if (imageUrl) {
+                return { id: producto.id_producto, url: imageUrl };
+              }
+            } catch (error) {
+              console.error('Error cargando imagen para producto', producto.id_producto, error);
+            }
+          }
+          return { id: producto.id_producto, url: null };
+        });
+        
+        const productImagesResults = await Promise.all(imagePromises);
+        const imagesMap = {};
+        productImagesResults.forEach(({ id, url }) => {
+          imagesMap[id] = url;
+        });
+        
+        setProductImages(imagesMap);
+        setProductos(response.data);
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        setError("Error al cargar los productos. Por favor, intente nuevamente.");
+        setAlert({
+          show: true,
+          type: "warning",
+          message: "Error al cargar los productos. Por favor, intente nuevamente.",
+          onConfirm: () => setAlert({ ...alert, show: false }),
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductos();
+  }, []);
 
   // Calcular costo unitario automáticamente
   useEffect(() => {
@@ -81,6 +138,17 @@ const IngresoStock = () => {
     }));
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setShowProductList(true);
+  };
+
+  const handleProductSelect = (producto) => {
+    setProductoSeleccionado(producto);
+    setSearchTerm(producto.nombre_producto);
+    setShowProductList(false);
+  };
+
   const handleCancelar = () => {
     setAlert({
       show: true,
@@ -93,9 +161,19 @@ const IngresoStock = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!productoSeleccionado) {
+      setAlert({
+        show: true,
+        type: "warning",
+        message: "Debe seleccionar un producto antes de registrar el ingreso.",
+        onConfirm: () => setAlert({ ...alert, show: false }),
+      });
+      return;
+    }
+
     // Validación simple
     if (!ingreso.cantidad || !ingreso.costoTotal) {
       setAlert({
@@ -107,21 +185,75 @@ const IngresoStock = () => {
       return;
     }
 
-    console.log("Datos del ingreso:", {
-      producto,
-      ingreso,
-    });
+    try {
+      setLoading(true);
+      const stockData = {
+        productoId: productoSeleccionado.id_producto,
+        cantidad: parseInt(ingreso.cantidad),
+        fechaVencimiento: ingreso.fechaVencimiento || null,
+        codigoFactura: ingreso.codigoFactura || null,
+        costoTotal: parseFloat(ingreso.costoTotal),
+        costoUnitario: parseFloat(ingreso.costoUnitario),
+        porcentajeVenta: parseFloat(ingreso.porcentajeVenta) || 0,
+        precioVenta: parseFloat(ingreso.precioVenta),
+        usuarioId: user.id
+      };
 
-    // Mostrar mensaje de éxito
-    setAlert({
-      show: true,
-      type: "success",
-      message: "El ingreso se ha registrado correctamente.",
-      onConfirm: () => {
-        setAlert({ ...alert, show: false });
-        navigate("/inventario");
-      },
-    });
+      const response = await stockService.createStockEntry(stockData);
+      
+      if (response && response.status === 201) {
+        setSuccess(true);
+        setAlert({
+          show: true,
+          type: "success",
+          message: "El ingreso se ha registrado correctamente.",
+          onConfirm: () => {
+            setAlert({ ...alert, show: false });
+            navigate("/inventario");
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error al registrar el ingreso:", error);
+      let mensajeError = "";
+      
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            mensajeError = "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
+            break;
+          case 403:
+            mensajeError = "No tiene permisos para realizar esta acción.";
+            break;
+          case 422:
+            const validationError = error.response.data.errors?.[0];
+            mensajeError = validationError ? 
+              `Error de validación: ${validationError.msg}` : 
+              "Error de validación en los datos enviados.";
+            break;
+          case 500:
+            mensajeError = "Error interno del servidor. Por favor, intente más tarde.";
+            break;
+          default:
+            mensajeError = error.response.data?.message || 
+                          "Error al procesar la solicitud. Por favor, intente nuevamente.";
+        }
+      } else if (error.message?.includes('Network Error')) {
+        mensajeError = "Error de conexión con el servidor. Verifique su conexión a internet.";
+      } else {
+        mensajeError = "Error inesperado. Por favor, intente nuevamente más tarde.";
+      }
+      
+      setError(mensajeError);
+      setAlert({
+        show: true,
+        type: "warning",
+        message: mensajeError,
+        onConfirm: () => setAlert({ ...alert, show: false }),
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ===== RENDER FUNCTIONS =====
@@ -172,11 +304,37 @@ const IngresoStock = () => {
     );
   };
 
+  const filteredProductos = productos.filter(producto => {
+    if (!producto || !searchTerm) return false;
+    
+    const nombre = producto.nombre_producto || "";
+    const codigo = producto.codigo || "";
+    
+    return nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           codigo.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  if (loading && !productoSeleccionado) {
+    return <Loading message="Cargando productos..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <Icono name="alert-triangle" size={40} className="text-red-500 mx-auto mb-4" />
+          <Tipografia size="base" className="text-gray-600">
+            {error}
+          </Tipografia>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       
-      <Tipografia>
       <div className="flex-1 transition-all duration-300 pl-2">
         <div className="pl-4 ml-10 md:ml-[8rem] max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mx-1 pt-4">
@@ -196,6 +354,61 @@ const IngresoStock = () => {
               />
             </div>
           </div>
+
+          {/* Filtro de Productos */}
+          <div className="bg-white rounded-lg shadow-md p-5 my-6">
+            <Tipografia variant="h2" size="lg" className="mb-4 text-orange-500 pb-2 border-b border-gray-100">
+              Seleccionar Producto
+            </Tipografia>
+            
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => setShowProductList(true)}
+                placeholder="Buscar producto por nombre o código..."
+                className="w-full pl-3 p-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
+              />
+              
+              {showProductList && searchTerm && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filteredProductos.length > 0 ? (
+                    filteredProductos.map((producto) => (
+                      <div
+                        key={producto.id_producto}
+                        onClick={() => handleProductSelect(producto)}
+                        className="p-3 hover:bg-orange-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Tipografia size="base" className="font-medium">
+                              {producto.nombre_producto}
+                            </Tipografia>
+                            <Tipografia size="sm" className="text-gray-600">
+                              Código: {producto.codigo}
+                            </Tipografia>
+                          </div>
+                          <div className="text-right">
+                            <Tipografia size="base" className="font-medium text-orange-600">
+                              ${producto.precio.toLocaleString()}
+                            </Tipografia>
+                            <Tipografia size="sm" className="text-gray-600">
+                              Stock: {producto.cantidad_ingreso || 0}
+                            </Tipografia>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 text-gray-500 text-center">
+                      No se encontraron productos
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
             {/* Columna de Producto */}
@@ -205,65 +418,82 @@ const IngresoStock = () => {
                   Detalles del Producto
                 </Tipografia>
                 
-                <div className="flex flex-col items-center mb-4">
-                  <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden mb-3">
-                    <img
-                      src={producto.imagen || "https://via.placeholder.com/150"}
-                      alt={producto.nombre}
-                      className="w-full h-full object-contain p-2"
-                    />
-                  </div>
-                  
-                  <Tipografia variant="h3" size="lg" className="font-bold text-center">
-                    {producto.nombre}
-                  </Tipografia>
-                  
-                  <div className="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium mt-2">
-                    {producto.categoria}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5">
-                  <div>
-                    <Tipografia size="xs" className="uppercase text-gray-600 font-medium tracking-wide">
-                      Código:  
-                    </Tipografia>
-                    <Tipografia size="base" className="font-semibold text-orange-600">
-                      {producto.codigo}
-                    </Tipografia>
-                  </div>
-                  
-                  <div>
-                    <Tipografia size="xs" className="uppercase text-gray-600 font-medium tracking-wide">
-                      Precio actual
-                    </Tipografia>
-                    <Tipografia size="base" className="font-semibold text-orange-600">
-                      ${producto.precio.toLocaleString()}
-                    </Tipografia>
-                  </div>
-                </div>
-                
-                <div className="mt-6 p-4 bg-slate-100 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <Tipografia size="sm" className="text-slate-600 font-medium">
-                      Stock Actual
-                    </Tipografia>
-                    <div className="text-2xl font-bold text-slate-700">
-                      {producto.stock}
-                    </div>
-                  </div>
-                  
-                  {ingreso.cantidad && (
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-100">
-                      <Tipografia size="sm" className="text-blue-800 font-medium">
-                        Stock Actualizado
+                {productoSeleccionado ? (
+                  <>
+                    <div className="flex flex-col items-center mb-4">
+                      <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden mb-3">
+                        {productImages[productoSeleccionado.id_producto] ? (
+                          <img
+                            src={productImages[productoSeleccionado.id_producto]}
+                            alt={productoSeleccionado.nombre_producto}
+                            className="w-full h-full object-contain p-2"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-gray-400">
+                            <Icono name="gest-productos" size={48} />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <Tipografia variant="h3" size="lg" className="font-bold text-center">
+                        {productoSeleccionado.nombre_producto}
                       </Tipografia>
-                      <div className="text-2xl font-bold text-green-600">
-                        {producto.stock + parseInt(ingreso.cantidad)}
+                      
+                      <div className="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium mt-2">
+                        {productoSeleccionado.categoria}
                       </div>
                     </div>
-                  )}
-                </div>
+                    
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5">
+                      <div>
+                        <Tipografia size="xs" className="uppercase text-gray-600 font-medium tracking-wide">
+                          Código:  
+                        </Tipografia>
+                        <Tipografia size="base" className="font-semibold text-orange-600">
+                          {productoSeleccionado.codigo}
+                        </Tipografia>
+                      </div>
+                      
+                      <div>
+                        <Tipografia size="xs" className="uppercase text-gray-600 font-medium tracking-wide">
+                          Precio actual
+                        </Tipografia>
+                        <Tipografia size="base" className="font-semibold text-orange-600">
+                          ${productoSeleccionado.precio.toLocaleString()}
+                        </Tipografia>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-slate-100 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <Tipografia size="sm" className="text-slate-600 font-medium">
+                          Stock Actual
+                        </Tipografia>
+                        <div className="text-2xl font-bold text-slate-700">
+                          {productoSeleccionado.cantidad_ingreso || 0}
+                        </div>
+                      </div>
+                      
+                      {ingreso.cantidad && (
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-100">
+                          <Tipografia size="sm" className="text-blue-800 font-medium">
+                            Stock Actualizado
+                          </Tipografia>
+                          <div className="text-2xl font-bold text-green-600">
+                            {(productoSeleccionado.cantidad_ingreso || 0) + parseInt(ingreso.cantidad)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Icono name="search" size={40} className="mx-auto mb-4" />
+                    <Tipografia size="base">
+                      Seleccione un producto para ver sus detalles
+                    </Tipografia>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -289,6 +519,7 @@ const IngresoStock = () => {
                           className="w-full pl-3 p-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                           placeholder="Cantidad"
                           required
+                          disabled={!productoSeleccionado || loading}
                         />
                       </div>
                     </div>
@@ -304,6 +535,7 @@ const IngresoStock = () => {
                           value={ingreso.fechaVencimiento}
                           onChange={handleInputChange}
                           className="w-full pl-3 p-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
+                          disabled={!productoSeleccionado || loading}
                         />
                       </div>
                     </div>
@@ -320,6 +552,7 @@ const IngresoStock = () => {
                           onChange={handleInputChange}
                           className="w-full pl-3 p-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                           placeholder="Código factura"
+                          disabled={!productoSeleccionado || loading}
                         />
                       </div>
                     </div>
@@ -337,6 +570,7 @@ const IngresoStock = () => {
                           className="w-full pl-3 p-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                           placeholder="Costo total"
                           required
+                          disabled={!productoSeleccionado || loading}
                         />
                       </div>
                     </div>
@@ -371,6 +605,7 @@ const IngresoStock = () => {
                             onChange={handleInputChange}
                             className="w-full pl-3 p-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-500"
                             placeholder="% de ganancia"
+                            disabled={!productoSeleccionado || loading}
                           />
                         </div>
                       </div>
@@ -403,12 +638,14 @@ const IngresoStock = () => {
                       tipo="secundario"
                       onClick={handleCancelar}
                       className="w-full sm:w-auto"
+                      disabled={loading}
                     />
                     <Botones
                       label="Registrar Ingreso"
                       tipo="primario"
                       type="submit"
                       className="w-full sm:w-auto"
+                      disabled={!productoSeleccionado || loading}
                     />
                   </div>
                 </form>
@@ -419,7 +656,6 @@ const IngresoStock = () => {
       </div>
 
       {renderAlert()}
-      </Tipografia>
     </div>
   );
 };

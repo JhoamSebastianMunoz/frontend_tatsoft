@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { productService, stockService } from "../src/context/services/ApiService";
+import { imageService } from "../src/context/services/ImageService";
 
 // Páginas de autenticación
 import Login from "./components/pages/loginPage/Login";
@@ -91,6 +93,9 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
 };
 
 const App = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   return (
     <Routes>
       {/* Rutas públicas */}
@@ -326,15 +331,6 @@ const App = () => {
       />
 
       {/* Rutas de Inventario */}
-      <Route
-        path="/inventario"
-        element={
-          <ProtectedRoute
-            element={<HistorialIngresos />}
-            allowedRoles={["ADMINISTRADOR"]}
-          />
-        }
-      />
       <Route
         path="/ingreso-stock"
         element={
