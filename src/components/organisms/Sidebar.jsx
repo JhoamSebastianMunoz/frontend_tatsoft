@@ -212,8 +212,8 @@ const Sidebar = () => {
       label: "Acumulados",
       path: "/acumulados",
       icon: "accumulated",
-      subItems: ["Reporte Acumulado"],
-      subPaths: ["/reporte-acumulado"],
+      subItems: ["Historial de ventas", "Historial de devoluciones"],
+      subPaths: ["/ventas/historial", "/devoluciones/historial"],
     },
 
   ];
