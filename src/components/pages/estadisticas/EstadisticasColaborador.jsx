@@ -8,6 +8,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  AreaChart,
+  Area,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
@@ -20,28 +22,53 @@ import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 
+// Paleta de colores verde-azul
+const CHART_COLORS = {
+  clientes: "#E85D04",
+  productosMasVendidos: {
+    cantidad: "#008B74",
+    monto: "#5390D9",
+  },
+  productosMenosVendidos: {
+    cantidad: "#06D6A0",
+    monto: "#118AB2",
+  },
+};
+
 const EstadisticasColaborador = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topClientes, setTopClientes] = useState([]);
   const [topProductos, setTopProductos] = useState([]);
   const [menosVendidos, setMenosVendidos] = useState([]);
-  
+
   // Estado para el filtro de tiempo
   const [filtroTiempo, setFiltroTiempo] = useState("todo");
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date().getMonth());
-  const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear());
+  const [anioSeleccionado, setAnioSeleccionado] = useState(
+    new Date().getFullYear()
+  );
 
   // Obtener lista de años disponibles
   const [aniosDisponibles, setAniosDisponibles] = useState([]);
-  
+
   // Nombres de los meses para el filtro
   const nombresMeses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
 
   // Datos quemados para demostración
@@ -246,10 +273,10 @@ const EstadisticasColaborador = () => {
 
   // Función para formatear moneda
   const formatearMoneda = (valor) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
     }).format(valor);
   };
 
@@ -262,21 +289,27 @@ const EstadisticasColaborador = () => {
       // Simulación de carga de datos
       setTimeout(() => {
         const clientesFiltrados = aplicarFiltros(datosQuemadosClientes);
-        const productosFiltrados = aplicarFiltros(datosQuemadosProductosMasVendidos);
-        const menosVendidosFiltrados = aplicarFiltros(datosQuemadosProductosMenosVendidos);
-        
+        const productosFiltrados = aplicarFiltros(
+          datosQuemadosProductosMasVendidos
+        );
+        const menosVendidosFiltrados = aplicarFiltros(
+          datosQuemadosProductosMenosVendidos
+        );
+
         setTopClientes(clientesFiltrados);
         setTopProductos(productosFiltrados);
         setMenosVendidos(menosVendidosFiltrados);
-        
+
         // Extraer años de los datos (en un caso real, esto vendría de los datos)
         const años = [2023, 2024, 2025];
         setAniosDisponibles(años);
-        
+
         setLoading(false);
       }, 800);
     } catch (err) {
-      setError("Error al cargar los datos: " + (err.message || "Error desconocido"));
+      setError(
+        "Error al cargar los datos: " + (err.message || "Error desconocido")
+      );
       console.error(err);
       setLoading(false);
     }
@@ -293,7 +326,7 @@ const EstadisticasColaborador = () => {
       // Simular filtro por año
       return datos.slice(0, Math.ceil(datos.length * 0.9));
     }
-    
+
     return datos;
   };
 
@@ -312,8 +345,8 @@ const EstadisticasColaborador = () => {
     return topClientes.map((cliente) => {
       // Obtener solo el primer nombre
       const nombreCompleto = cliente.nombre_cliente;
-      const primerNombre = nombreCompleto.split(' ')[0];
-      
+      const primerNombre = nombreCompleto.split(" ")[0];
+
       return {
         name: primerNombre,
         total: cliente.total_compras,
@@ -329,8 +362,8 @@ const EstadisticasColaborador = () => {
     return productos.map((producto) => {
       // Obtener solo el primer nombre del producto
       const nombreCompleto = producto.nombre_producto;
-      const primerNombre = nombreCompleto.split(' ')[0];
-      
+      const primerNombre = nombreCompleto.split(" ")[0];
+
       return {
         name: primerNombre,
         cantidad: producto.cantidad_vendida,
@@ -346,10 +379,18 @@ const EstadisticasColaborador = () => {
       const data = payload[0].payload;
       return (
         <div className="bg-white p-4 border border-gray-200 shadow-md rounded-lg">
-          <p className="font-semibold text-gray-800">Nombre: {data.tooltipName}</p>
-          <p className="text-sm text-gray-600">Razón Social: {data.razonSocial}</p>
-          <p className="text-sm text-gray-600">Total compras: {formatearMoneda(data.total)}</p>
-          <p className="text-sm text-gray-600">Cantidad de compras: {data.cantidadCompras}</p>
+          <p className="font-semibold text-gray-800">
+            Nombre: {data.tooltipName}
+          </p>
+          <p className="text-sm text-gray-600">
+            Razón Social: {data.razonSocial}
+          </p>
+          <p className="text-sm text-gray-600">
+            Total compras: {formatearMoneda(data.total)}
+          </p>
+          <p className="text-sm text-gray-600">
+            Cantidad de compras: {data.cantidadCompras}
+          </p>
         </div>
       );
     }
@@ -362,9 +403,15 @@ const EstadisticasColaborador = () => {
       const data = payload[0].payload;
       return (
         <div className="bg-white p-4 border border-gray-200 shadow-md rounded-lg">
-          <p className="font-semibold text-gray-800">Producto: {data.tooltipName}</p>
-          <p className="text-sm text-gray-600">Cantidad vendida: {data.cantidad}</p>
-          <p className="text-sm text-gray-600">Monto total: {formatearMoneda(data.monto)}</p>
+          <p className="font-semibold text-gray-800">
+            Producto: {data.tooltipName}
+          </p>
+          <p className="text-sm text-gray-700">
+            Cantidad vendida: {data.cantidad}
+          </p>
+          <p className="text-sm text-gray-700">
+            Monto total: {formatearMoneda(data.monto)}
+          </p>
         </div>
       );
     }
@@ -380,13 +427,16 @@ const EstadisticasColaborador = () => {
       <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar />
       </div>
-      
+
       <Tipografia>
         <main className="w-full md:pl-[100px] pl-20 pr-2 pt-[80px] md:pt-6 md:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-6">
-              <Tipografia variant="h1" className="text-xl md:text-2xl font-semibold text-gray-900">
-                Estadísticas por Colaborador
+              <Tipografia
+                variant="h1"
+                className="text-xl md:text-2xl font-semibold text-gray-900"
+              >
+                Estadísticas
               </Tipografia>
             </div>
 
@@ -398,15 +448,19 @@ const EstadisticasColaborador = () => {
                 </div>
               </div>
             )}
-            
+
             {/* Filtros de tiempo */}
             <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtrar por periodo</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                Filtrar por periodo
+              </h2>
+
               <div className="flex flex-wrap gap-4 mb-4">
                 <button
                   className={`px-4 py-2 rounded-lg transition-colors ${
-                    filtroTiempo === "todo" ? "bg-[#F78220] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    filtroTiempo === "todo"
+                      ? "bg-orange-400 text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                   }`}
                   onClick={() => setFiltroTiempo("todo")}
                 >
@@ -414,7 +468,9 @@ const EstadisticasColaborador = () => {
                 </button>
                 <button
                   className={`px-4 py-2 rounded-lg transition-colors ${
-                    filtroTiempo === "mes" ? "bg-[#F78220] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    filtroTiempo === "mes"
+                      ? "bg-orange-400 text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                   }`}
                   onClick={() => setFiltroTiempo("mes")}
                 >
@@ -422,61 +478,75 @@ const EstadisticasColaborador = () => {
                 </button>
                 <button
                   className={`px-4 py-2 rounded-lg transition-colors ${
-                    filtroTiempo === "anio" ? "bg-[#F78220] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    filtroTiempo === "anio"
+                      ? "bg-orange-400 text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                   }`}
                   onClick={() => setFiltroTiempo("anio")}
                 >
                   Por año
                 </button>
               </div>
-              
+
               {filtroTiempo !== "todo" && (
                 <div className="flex flex-wrap gap-4 mb-2">
-                  {/* Selector de año */}
                   <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-600 mb-1">Año</label>
+                    <label className="text-sm font-medium text-gray-600 mb-1">
+                      Año
+                    </label>
                     <select
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F78220] focus:border-transparent"
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#98DDCA] focus:border-transparent"
                       value={anioSeleccionado}
-                      onChange={(e) => setAnioSeleccionado(parseInt(e.target.value, 10))}
+                      onChange={(e) =>
+                        setAnioSeleccionado(parseInt(e.target.value, 10))
+                      }
                     >
-                      {aniosDisponibles.map(anio => (
-                        <option key={anio} value={anio}>{anio}</option>
+                      {aniosDisponibles.map((anio) => (
+                        <option key={anio} value={anio}>
+                          {anio}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   {/* Selector de mes (solo visible cuando el filtro es por mes) */}
                   {filtroTiempo === "mes" && (
                     <div className="flex flex-col">
-                      <label className="text-sm font-medium text-gray-600 mb-1">Mes</label>
+                      <label className="text-sm font-medium text-gray-600 mb-1">
+                        Mes
+                      </label>
                       <select
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F78220] focus:border-transparent"
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#98DDCA] focus:border-transparent"
                         value={mesSeleccionado}
-                        onChange={(e) => setMesSeleccionado(parseInt(e.target.value, 10))}
+                        onChange={(e) =>
+                          setMesSeleccionado(parseInt(e.target.value, 10))
+                        }
                       >
                         {nombresMeses.map((nombre, index) => (
-                          <option key={index} value={index}>{nombre}</option>
+                          <option key={index} value={index}>
+                            {nombre}
+                          </option>
                         ))}
                       </select>
                     </div>
                   )}
                 </div>
               )}
-              
+
               <div className="text-sm text-gray-500 mt-2">
-                {topClientes.length} datos de clientes encontrados en el periodo seleccionado
+                {topClientes.length} datos de clientes encontrados en el periodo
+                seleccionado
               </div>
             </div>
 
-            {/* Top 10 Clientes */}
             <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              <h2 className="text-lg font-semibold text-black mb-4">
                 Top 10 Clientes que Más Compran
-                {filtroTiempo === "mes" && ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
+                {filtroTiempo === "mes" &&
+                  ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
                 {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
               </h2>
-              
+
               <div className="h-[450px]">
                 {topClientes.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -487,137 +557,256 @@ const EstadisticasColaborador = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="name"
-                        angle={-75}
+                        angle={-45}
                         textAnchor="end"
-                        height={110}
+                        height={100}
                         interval={0}
                         tick={{ fontSize: 13 }}
                       />
-                      <YAxis 
-                        tickFormatter={(value) => formatearMoneda(value).replace('$', '')}
+                      <YAxis
+                        tickFormatter={(value) =>
+                          formatearMoneda(value).replace("$", "")
+                        }
                       />
                       <Tooltip content={<CustomTooltipClientes />} />
                       <Legend />
                       <Bar
                         dataKey="total"
                         name="Total de Compras"
-                        fill="#F78220"
+                        fill={CHART_COLORS.clientes}
+                        radius={[8, 8, 0, 0]}
+                        stroke="#FFFFFF"
+                        strokeWidth={1}
+                        animationDuration={1500}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
-                    No hay suficientes datos para mostrar el gráfico en el periodo seleccionado
+                    No hay suficientes datos para mostrar el gráfico en el
+                    periodo seleccionado
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Top 10 Productos Más Vendidos */}
+            {/* Top 10 Productos Más Vendidos - ESTILO GRADIENTE */}
             <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">
                 Top 10 Productos Más Vendidos
-                {filtroTiempo === "mes" && ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
+                {filtroTiempo === "mes" &&
+                  ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
                 {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
               </h2>
-              
+
               <div className="h-96">
                 {topProductos.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
+                    <AreaChart
                       data={formatProductosData(topProductos)}
                       margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
+                      <defs>
+                        <linearGradient
+                          id="colorCantidad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#98DDCA"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#98DDCA"
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="colorMonto"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor={CHART_COLORS.productosMasVendidos.monto}
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor={CHART_COLORS.productosMasVendidos.monto}
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="name"
-                        angle={-75}
+                        angle={-45}
                         textAnchor="end"
-                        height={110}
+                        height={100}
                         interval={0}
                         tick={{ fontSize: 13 }}
                       />
-                      <YAxis yAxisId="left" orientation="left" stroke="#F78220" />
-                      <YAxis 
-                        yAxisId="right" 
-                        orientation="right" 
-                        stroke="#3B82F6" 
-                        tickFormatter={(value) => formatearMoneda(value).replace('$', '')}
+                      <YAxis
+                        yAxisId="left"
+                        orientation="left"
+                        stroke="#98DDCA"
+                      />
+                      <YAxis
+                        yAxisId="right"
+                        orientation="right"
+                        stroke={CHART_COLORS.productosMasVendidos.monto}
+                        tickFormatter={(value) =>
+                          formatearMoneda(value).replace("$", "")
+                        }
                       />
                       <Tooltip content={<CustomTooltipProductos />} />
                       <Legend />
-                      <Bar
+                      <Area
                         yAxisId="left"
+                        type="monotone"
                         dataKey="cantidad"
                         name="Cantidad Vendida"
-                        fill="#F78220"
+                        stroke="#98DDCA"
+                        fillOpacity={1}
+                        fill="url(#colorCantidad)"
                       />
-                      <Bar
+                      <Area
                         yAxisId="right"
+                        type="monotone"
                         dataKey="monto"
                         name="Monto Total"
-                        fill="#3B82F6"
+                        stroke={CHART_COLORS.productosMasVendidos.monto}
+                        fillOpacity={1}
+                        fill="url(#colorMonto)"
                       />
-                    </BarChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
-                    No hay suficientes datos para mostrar el gráfico en el periodo seleccionado
+                    No hay suficientes datos para mostrar el gráfico en el
+                    periodo seleccionado
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Top 10 Productos Menos Vendidos */}
+            {/* Top 10 Productos Menos Vendidos - ESTILO GRADIENTE */}
             <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">
                 Top 10 Productos Menos Vendidos
-                {filtroTiempo === "mes" && ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
+                {filtroTiempo === "mes" &&
+                  ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
                 {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
               </h2>
-              
+
               <div className="h-96">
                 {menosVendidos.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
+                    <AreaChart
                       data={formatProductosData(menosVendidos)}
                       margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
+                      <defs>
+                        <linearGradient
+                          id="colorMenosCantidad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor={
+                              CHART_COLORS.productosMenosVendidos.cantidad
+                            }
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor={
+                              CHART_COLORS.productosMenosVendidos.cantidad
+                            }
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="colorMenosMonto"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor={
+                              CHART_COLORS.productosMenosVendidos.monto
+                            }
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor={
+                              CHART_COLORS.productosMenosVendidos.monto
+                            }
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="name"
-                        angle={-75}
+                        angle={-45}
                         textAnchor="end"
-                        height={110}
+                        height={100}
                         interval={0}
                         tick={{ fontSize: 13 }}
                       />
-                      <YAxis yAxisId="left" orientation="left" stroke="#10B981" />
-                      <YAxis 
-                        yAxisId="right" 
-                        orientation="right" 
-                        stroke="#8B5CF6"
-                        tickFormatter={(value) => formatearMoneda(value).replace('$', '')}
+                      <YAxis
+                        yAxisId="left"
+                        orientation="left"
+                        stroke={CHART_COLORS.productosMenosVendidos.cantidad}
+                      />
+                      <YAxis
+                        yAxisId="right"
+                        orientation="right"
+                        stroke={CHART_COLORS.productosMenosVendidos.monto}
+                        tickFormatter={(value) =>
+                          formatearMoneda(value).replace("$", "")
+                        }
                       />
                       <Tooltip content={<CustomTooltipProductos />} />
                       <Legend />
-                      <Bar
+                      <Area
                         yAxisId="left"
+                        type="monotone"
                         dataKey="cantidad"
                         name="Cantidad Vendida"
-                        fill="#10B981"
+                        stroke={CHART_COLORS.productosMenosVendidos.cantidad}
+                        fillOpacity={1}
+                        fill="url(#colorMenosCantidad)"
                       />
-                      <Bar
+                      <Area
                         yAxisId="right"
+                        type="monotone"
                         dataKey="monto"
                         name="Monto Total"
-                        fill="#8B5CF6"
+                        stroke={CHART_COLORS.productosMenosVendidos.monto}
+                        fillOpacity={1}
+                        fill="url(#colorMenosMonto)"
                       />
-                    </BarChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
-                    No hay suficientes datos para mostrar el gráfico en el periodo seleccionado
+                    No hay suficientes datos para mostrar el gráfico en el
+                    periodo seleccionado
                   </div>
                 )}
               </div>
@@ -627,12 +816,12 @@ const EstadisticasColaborador = () => {
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 mb-8">
               <Boton
                 label="Ver Historial de Ventas"
-                onClick={() => navigate('/ventas/historial')}
+                onClick={() => navigate("/ventas/historial")}
                 className="w-full sm:w-auto"
               />
               <Boton
                 label="Volver a Estadísticas de Ventas"
-                onClick={() => navigate('/ventas/estadisticas')}
+                onClick={() => navigate("/ventas/estadisticas")}
                 variant="secondary"
                 className="w-full sm:w-auto"
               />
