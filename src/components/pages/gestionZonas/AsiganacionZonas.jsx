@@ -2,42 +2,42 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { userService, areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
+import Sidebar from "../../organisms/Sidebar";
+import Loading from "../../Loading/Loading";
+import Botones from "../../atoms/Botones";
 
 const AsignacionZonas = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // ID de la zona
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedColaboradores, setSelectedColaboradores] = useState([]);
-  const [colaboradoresList, setColaboradoresList] = useState([]);
-  const [zonaNombre, setZonaNombre] = useState("Zona");
+  const { id } = useParams(); // ID del colaborador
+  const [selectedZonas, setSelectedZonas] = useState([]);
+  const [zonasList, setZonasList] = useState([]);
+  const [nombreColaborador, setNombreColaborador] = useState("Colaborador");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Cargar datos de la zona y colaboradores disponibles
+  // Cargar datos del colaborador y zonas disponibles
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Obtener detalles de la zona
+        // Obtener detalles del colaborador
         if (id) {
-          const zonaResponse = await areaService.getAreaById(id);
-          setZonaNombre(zonaResponse.data.nombre_zona_trabajo || "Zona");
+          const colaboradorResponse = await userService.getUserById(id);
+          setNombreColaborador(colaboradorResponse.data.nombreCompleto || "Colaborador");
         }
         
-        // Obtener todos los colaboradores
-        const colaboradoresResponse = await userService.getAllUsers();
-        const colaboradores = colaboradoresResponse.data
-          .filter(user => user.rol === "COLABORADOR") // Solo mostrar colaboradores
-          .map(user => ({
-            id: user.id_usuario,
-            nombre: user.nombreCompleto,
-            cel: user.celular,
-            rol: user.rol,
-            selected: false
-          }));
+        // Obtener todas las zonas
+        const zonasResponse = await areaService.getAllAreas();
+        const zonas = zonasResponse.data.map(zona => ({
+          id: zona.id_zona_trabajo,
+          nombre: zona.nombre_zona_trabajo,
+          ciudad: zona.ciudad,
+          descripcion: zona.descripcion,
+          selected: false
+        }));
         
-        setColaboradoresList(colaboradores);
+        setZonasList(zonas);
       } catch (err) {
         console.error("Error al cargar datos:", err);
         setError("Error al cargar datos. Por favor, intenta de nuevo más tarde.");
@@ -49,38 +49,17 @@ const AsignacionZonas = () => {
     fetchData();
   }, [id]);
 
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-   
-    if (value.trim() === "") {
-      // Restaurar la lista completa sin filtrar
-      setColaboradoresList(prev => 
-        prev.map(col => ({...col, selected: selectedColaboradores.includes(col.id)}))
-      );
-    } else {
-      // Filtrar colaboradores por nombre, manteniendo el estado de selección
-      const filteredColaboradores = colaboradoresList
-        .map(col => ({...col}))
-        .filter(colaborador =>
-          colaborador.nombre.toLowerCase().includes(value.toLowerCase())
-        );
-      
-      setColaboradoresList(filteredColaboradores);
-    }
-  };
-
-  const handleSelectColaborador = (id) => {
-    setColaboradoresList(prev => prev.map(colaborador => {
-      if (colaborador.id === id) {
-        return { ...colaborador, selected: !colaborador.selected };
+  const handleSelectZona = (id) => {
+    setZonasList(prev => prev.map(zona => {
+      if (zona.id === id) {
+        return { ...zona, selected: !zona.selected };
       }
-      return colaborador;
+      return zona;
     }));
    
-    setSelectedColaboradores(prev => {
+    setSelectedZonas(prev => {
       if (prev.includes(id)) {
-        return prev.filter(colId => colId !== id);
+        return prev.filter(zonaId => zonaId !== id);
       } else {
         return [...prev, id];
       }
@@ -88,144 +67,137 @@ const AsignacionZonas = () => {
   };
 
   const handleAsignar = async () => {
-    if (selectedColaboradores.length === 0) {
-      alert("Por favor seleccione al menos un colaborador");
+    if (selectedZonas.length === 0) {
+      alert("Por favor seleccione al menos una zona");
       return;
     }
 
     try {
       setLoading(true);
-      
-      // Llamada a la API para asignar zonas a los colaboradores seleccionados
-      // La API espera un arreglo de IDs de zona, pero como estamos asignando colaboradores a una zona,
-      // enviamos el array de IDs de colaboradores al ID de zona específico
-      await userService.assignZonasToUser(id, selectedColaboradores);
-      
-      alert(`Colaboradores asignados con éxito a ${zonaNombre}`);
-      navigate(`/gestion-zonas/colaboradores/${id}`);
+      await userService.assignZonasToUser(id, selectedZonas);
+      alert(`Zonas asignadas con éxito a ${nombreColaborador}`);
+      navigate("/gestion/usuarios");
     } catch (err) {
-      console.error("Error al asignar colaboradores:", err);
-      setError("Error al asignar colaboradores. Por favor, intenta de nuevo más tarde.");
+      console.error("Error al asignar zonas:", err);
+      setError("Error al asignar zonas. Por favor, intenta de nuevo más tarde.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para agrupar colaboradores en filas de 3
-  const chunkedColaboradores = () => {
-    const result = [];
-    for (let i = 0; i < colaboradoresList.length; i += 3) {
-      result.push(colaboradoresList.slice(i, i + 3));
-    }
-    return result;
-  };
-
   if (loading) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center bg-white">
-        <Tipografia>Cargando colaboradores...</Tipografia>
-      </div>
-    );
+    return <Loading message="Cargando zonas..." />;
   }
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-white">
-      {/* Header */}
-      <div className="bg-purple-600 text-white p-4 flex items-center justify-between">
-        <button
-          onClick={() => navigate(`/gestion-zonas/colaboradores/${id}`)}
-          className="text-white flex items-center justify-center rounded-full bg-white bg-opacity-30 h-10 w-10"
-        >
-          <span className="text-2xl">&#8592;</span>
-        </button>
-        <span className="text-xl font-medium">{zonaNombre}</span>
-        <div className="w-10"></div> {/* Espacio para equilibrar el header */}
-      </div>
-     
-      {error && (
-        <div className="px-6 py-2">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        </div>
-      )}
-
-      {/* Search bar */}
-      <div className="px-6 pt-4 pb-2">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Buscar colaborador"
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full p-2 pl-4 pr-10 border rounded-full text-sm"
-          />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
+    <div className="min-h-screen flex bg-slate-100">
+      <div className="fixed top-0 left-0 h-full w-14 sm:w-16 md:w-20 lg:w-20 z-10">
+        <Sidebar />
       </div>
       
-      {/* Asignar button */}
-      <div className="px-6 py-2">
-        <button
-          onClick={handleAsignar}
-          className="bg-purple-500 text-white py-1.5 px-6 rounded-full text-sm"
-          disabled={selectedColaboradores.length === 0}
-        >
-          Asignar
-        </button>
-      </div>
-     
-      {/* Colaboradores list */}
-      <div className="p-4 flex-grow overflow-auto">
-        {colaboradoresList.length > 0 ? (
-          chunkedColaboradores().map((row, rowIndex) => (
-            <div key={rowIndex} className="flex flex-row gap-4 mb-4">
-              {row.map((colaborador) => (
-                <div
-                  key={colaborador.id}
-                  className="flex-1 border rounded-lg p-4 flex flex-row items-start"
+      <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="w-full">
+            {/* Header */}
+            <div className="mt-2 mb-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                  Asignación de Zonas
+                </h1>
+                <Botones
+                  label="Volver"
+                  variant="outlined"
+                  onClick={() => navigate("/gestion/usuarios")}
+                  icon="back"
+                  size="small"
+                />
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+                <Tipografia 
+                  variant="h5" 
+                  className="text-gray-700 font-medium"
                 >
-                  <div className="mr-2 mt-1">
-                    <input
-                      type="checkbox"
-                      checked={colaborador.selected}
-                      onChange={() => handleSelectColaborador(colaborador.id)}
-                      className="w-4 h-4 rounded-sm border-purple-500 text-purple-600 focus:ring-purple-500"
+                  Colaborador:
+                </Tipografia>
+                <Tipografia 
+                  variant="h4" 
+                  className="text-orange-600 font-semibold mt-1"
+                >
+                  {nombreColaborador}
+                </Tipografia>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md">
+                <Tipografia className="text-red-700 text-sm">{error}</Tipografia>
+              </div>
+            )}
+
+            <div className="flex flex-col space-y-3 w-full">
+              <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
+                <div className="flex flex-col space-y-4">
+                  {/* Botón de asignar */}
+                  <div className="flex justify-end">
+                    <Botones
+                      label="Asignar Zonas"
+                      variant="contained"
+                      onClick={handleAsignar}
+                      disabled={selectedZonas.length === 0}
                     />
                   </div>
-                  <div className="flex-1">
-                    <div className="mb-1">
-                      <span className="font-medium text-sm">Nombre:</span> {colaborador.nombre}
-                    </div>
-                    <div className="mb-1">
-                      <span className="font-medium text-sm">Cel:</span> {colaborador.cel}
-                    </div>
-                    <div>
-                      <span className="font-medium text-sm">Rol:</span> {colaborador.rol}
-                    </div>
-                  </div>
-                  <div className="h-full flex items-center">
-                    <div className="w-6 h-6 bg-purple-800 rounded-md"></div>
+
+                  {/* Lista de zonas */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {zonasList.length > 0 ? (
+                      zonasList.map((zona) => (
+                        <div
+                          key={zona.id}
+                          onClick={() => handleSelectZona(zona.id)}
+                          className={`bg-white border rounded-lg p-4 flex items-start space-x-4 hover:shadow-md transition-all cursor-pointer
+                            ${zona.selected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}`}
+                        >
+                          <div className="flex-shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={zona.selected}
+                              onChange={() => handleSelectZona(zona.id)}
+                              className="w-5 h-5 rounded border-orange-500 text-orange-600 focus:ring-orange-500"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <Tipografia 
+                              variant="h6" 
+                              className={`font-medium truncate ${zona.selected ? 'text-orange-700' : 'text-gray-900'}`}
+                            >
+                              {zona.nombre}
+                            </Tipografia>
+                            <div className="mt-1 space-y-1">
+                              <Tipografia variant="body2" className="text-gray-600">
+                                Ciudad: {zona.ciudad}
+                              </Tipografia>
+                              <Tipografia variant="body2" className="text-gray-600">
+                                {zona.descripcion}
+                              </Tipografia>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center py-8">
+                        <Tipografia variant="body1" className="text-gray-500">
+                          No se encontraron zonas disponibles.
+                        </Tipografia>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
-              {/* Añadir divs vacíos para mantener la alineación en filas incompletas */}
-              {row.length < 3 && Array(3 - row.length).fill().map((_, i) => (
-                <div key={`empty-${i}`} className="flex-1"></div>
-              ))}
+              </div>
             </div>
-          ))
-        ) : (
-          <div className="text-center py-8">
-            <Tipografia className="text-gray-500">
-              No se encontraron colaboradores disponibles.
-            </Tipografia>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
