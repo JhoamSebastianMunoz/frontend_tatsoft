@@ -102,7 +102,7 @@ const RegistrarProducto = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
-    }
+    } 
   };
 
   const handleSubmit = async (e) => {
