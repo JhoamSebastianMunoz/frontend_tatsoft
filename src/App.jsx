@@ -217,7 +217,7 @@ const App = () => {
 
       {/* Rutas de gestión de zonas */}
       <Route
-        path="/zonas"
+        path="/zonas/:idZona?"
         element={
           <ProtectedRoute
             element={<Zonas />}

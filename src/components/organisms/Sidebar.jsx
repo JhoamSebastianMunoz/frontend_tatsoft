@@ -148,16 +148,16 @@ const Sidebar = () => {
       label: "Gestión de Inventario",
       path: "/inventario",
       icon: "inventory",
-      subItems: ["Ingreso de Stock"],
-      subPaths: ["/ingreso-stock"],
+      subItems: ["Historial de Ingresos","Ingreso de Stock"],
+      subPaths: ["/historial-ingresos","/ingreso-stock"],
     },
     {
       name: "gest-zonas",
       label: "Gestión de Zonas",
       path: "/gestion-zonas",
       icon: "zones",
-      subItems: [ "Registrar Zona"],
-      subPaths: [ "/registrar-zona"],
+      subItems: [ "Lista de Zonas", "Registrar Zona"],
+      subPaths: [ "/gestion-zonas", "/registrar-zona"],
     },
     {
       name: "gest-acumulados",
@@ -215,7 +215,6 @@ const Sidebar = () => {
       subItems: ["Historial de ventas", "Historial de devoluciones"],
       subPaths: ["/ventas/historial", "/devoluciones/historial"],
     },
-
   ];
 
   const renderIcon = (iconName, className = "") => {

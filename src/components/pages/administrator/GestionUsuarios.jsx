@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { userService } from "../../../context/services/ApiService";
 import Boton from "../../../components/atoms/Botones";
 import Buscador from "../../../components/molecules/Buscador";
@@ -19,17 +19,30 @@ const scrollStyle = `
 
 const GestionUsuarios = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [usuarios, setUsuarios] = useState([]);
   const [filteredUsuarios, setFilteredUsuarios] = useState([]);
   const [filtro, setFiltro] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [asignarZona, setAsignarZona] = useState(false);
+  const [zonaId, setZonaId] = useState(null);
+  const [zonaNombre, setZonaNombre] = useState("");
   const [menuAbierto, setMenuAbierto] = useState(null);
   
   // Agregar estado para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(9); 
+
+  useEffect(() => {
+    if (location.state?.asignarZona) {
+      setAsignarZona(true);
+      setZonaId(location.state.zonaId);
+      setZonaNombre(location.state.zonaNombre);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchUsuarios = async () => {
@@ -101,6 +114,28 @@ const GestionUsuarios = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
   };
 
+  const handleUserSelect = (userId) => {
+    setSelectedUsers(prev => {
+      if (prev.includes(userId)) {
+        return prev.filter(id => id !== userId);
+      } else {
+        return [...prev, userId];
+      }
+    });
+  };
+
+  const handleAsignarZona = async () => {
+    try {
+      // Aquí iría la lógica para asignar la zona a los usuarios seleccionados
+      console.log("Asignando zona", zonaId, "a usuarios:", selectedUsers);
+      // Después de asignar, volver a la vista de zonas
+      navigate("/zonas");
+    } catch (error) {
+      console.error("Error al asignar zona:", error);
+      setError("Error al asignar la zona a los usuarios");
+    }
+  };
+
   if (loading) {
     return <Loading message="Cargando usuarios..." />;
   }
@@ -117,7 +152,9 @@ const GestionUsuarios = () => {
       <Tipografia>
             <div className="w-full">
               <div className="mt-2 mb-4">
-                <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Gestión de usuarios</h1>
+                <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                  {asignarZona ? `Asignar Zona: ${zonaNombre}` : "Gestión de usuarios"}
+                </h1>
           </div>
 
           {error && (
@@ -220,14 +257,25 @@ const GestionUsuarios = () => {
                           <div key={usuario.id_usuario} className="bg-white rounded-lg shadow-sm overflow-hidden">
                             <div className="h-1 w-full bg-gray-200"></div>
                             <div className="p-4 relative">
-                              <button 
-                                className="absolute top-0 right-0 p-1 text-gray-400 hover:text-gray-600"
-                                onClick={() => toggleMenu(usuario.id_usuario)}
-                              >
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                              {asignarZona ? (
+                                <div className="absolute top-0 right-0 p-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedUsers.includes(usuario.id_usuario)}
+                                    onChange={() => handleUserSelect(usuario.id_usuario)}
+                                    className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                                  />
+                                </div>
+                              ) : (
+                                <button 
+                                  className="absolute top-0 right-0 p-1 text-gray-400 hover:text-gray-600"
+                                  onClick={() => toggleMenu(usuario.id_usuario)}
+                                >
+                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                                   </svg>
-                              </button>
+                                </button>
+                              )}
                               {menuAbierto === usuario.id_usuario && (
                                 <div className="absolute top-6 right-0 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-10">
                                 <button
@@ -392,6 +440,22 @@ const GestionUsuarios = () => {
       </Tipografia>
         </div>
       </div>
+      
+      {asignarZona && selectedUsers.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+          <div className="max-w-[1600px] mx-auto flex justify-between items-center">
+            <span className="text-sm text-gray-700">
+              {selectedUsers.length} {selectedUsers.length === 1 ? "usuario seleccionado" : "usuarios seleccionados"}
+            </span>
+            <Boton
+              label="Asignar Zona"
+              tipo="primario"
+              onClick={handleAsignarZona}
+              size="small"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

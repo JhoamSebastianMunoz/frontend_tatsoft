@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { areaService, clientService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
@@ -18,6 +18,7 @@ const scrollStyle = `
 
 const Zonas = () => {
   const navigate = useNavigate();
+  const { idZona } = useParams();
   const [zonas, setZonas] = useState([]);
   const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
   const [clientes, setClientes] = useState([]);
@@ -33,8 +34,14 @@ const Zonas = () => {
         const zonasData = response.data;
         setZonas(zonasData);
         
-        // Seleccionar la primera zona por defecto si hay zonas
-        if (zonasData.length > 0) {
+        // Si hay un ID de zona en la URL, seleccionar esa zona
+        if (idZona) {
+          const zonaEncontrada = zonasData.find(zona => zona.id_zona_de_trabajo === parseInt(idZona));
+          if (zonaEncontrada) {
+            setZonaSeleccionada(zonaEncontrada);
+          }
+        } else if (zonasData.length > 0) {
+          // Si no hay ID en la URL, seleccionar la primera zona
           setZonaSeleccionada(zonasData[0]);
         }
       } catch (error) {
@@ -46,7 +53,7 @@ const Zonas = () => {
     };
 
     fetchZonas();
-  }, []);
+  }, [idZona]);
 
   // Cargar clientes cuando cambia la zona seleccionada
   useEffect(() => {
@@ -75,11 +82,30 @@ const Zonas = () => {
   };
 
   const handleNuevoCliente = () => {
-    navigate("/registrar-cliente");
+    if (zonaSeleccionada) {
+      sessionStorage.setItem("returnPath", "/zonas");
+      navigate("/registro/cliente", { 
+        state: { 
+          zonaId: zonaSeleccionada.id_zona_de_trabajo 
+        }
+      });
+    } else {
+      navigate("/registro/cliente");
+    }
   };
 
   const handleAsignarZona = () => {
-    navigate("/asignar-zona");
+    if (zonaSeleccionada) {
+      navigate("/gestion/usuarios", { 
+        state: { 
+          asignarZona: true,
+          zonaId: zonaSeleccionada.id_zona_de_trabajo,
+          zonaNombre: zonaSeleccionada.nombre_zona_trabajo
+        }
+      });
+    } else {
+      navigate("/gestion/usuarios");
+    }
   };
 
   const handleEliminarZona = (zonaId) => {
@@ -112,14 +138,14 @@ const Zonas = () => {
                     <Boton
                       label="Nuevo cliente"
                       tipo="primario"
-                      onClick={handleAsignarZona}
+                      onClick={handleNuevoCliente}
                       size="small"
                       className="w-full sm:w-auto"
                     />
                     <Boton
                       label="Asignar Zonas"
                       tipo="primario"
-                      onClick={handleNuevoCliente}
+                      onClick={handleAsignarZona}
                       size="small"
                       className="w-full sm:w-auto"
                     />

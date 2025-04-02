@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Boton from "../../atoms/Botones";
 import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
 import Sidebar from "../../organisms/Sidebar";
+import { areaService } from "../../../context/services/ApiService";
 
 const RegistroCliente = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [returnPath, setReturnPath] = useState("/gestion/clientes");
+  const zonaId = location.state?.zonaId || "";
 
   const [formData, setFormData] = useState({
     razonSocial: "",
@@ -17,6 +20,7 @@ const RegistroCliente = () => {
     numeroCelular: "",
     direccion: "",
     correoElectronico: "",
+    id_zona: zonaId,
   });
 
   const [errores, setErrores] = useState({
@@ -61,12 +65,11 @@ const RegistroCliente = () => {
   useEffect(() => {
     const fetchZonas = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/zonas");
-        if (!response.ok) {
+        const response = await areaService.getAllAreas();
+        if (!response.data) {
           throw new Error("Error al cargar las zonas");
         }
-        const data = await response.json();
-        setZonas(data);
+        setZonas(response.data);
       } catch (err) {
         console.error("Error al cargar las zonas:", err);
         setError("Error al cargar la lista de zonas");
@@ -393,13 +396,6 @@ const RegistroCliente = () => {
                         required
                       >
                         <option value="">Seleccione una zona</option>
-                        <option value="1">Zona Norte - Centro Comercial</option>
-                        <option value="2">Zona Sur - Parque Industrial</option>
-                        <option value="3">Zona Este - Área Residencial</option>
-                        <option value="4">
-                          Zona Oeste - Distrito Comercial
-                        </option>
-                        <option value="5">Zona Centro - Plaza Principal</option>
                         {zonas.map((zona) => (
                           <option
                             key={zona.id_zona_de_trabajo}

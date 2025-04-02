@@ -191,7 +191,7 @@ const HistorialIngresos = () => {
       <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Historial Ingresos</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Historial de Ingresos</h1>
           </div>
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { userService, areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
@@ -29,6 +29,13 @@ const AsignacionZonas = () => {
         
         // Obtener todas las zonas
         const zonasResponse = await areaService.getAllAreas();
+        
+        // Verificar que los datos sean correctos
+        if (!Array.isArray(zonasResponse.data)) {
+          throw new Error("Los datos de zonas no son válidos");
+        }
+        
+        // Transformar los datos y asegurar que los IDs sean únicos
         const zonas = zonasResponse.data.map(zona => ({
           id: zona.id_zona_trabajo,
           nombre: zona.nombre_zona_trabajo,
@@ -36,6 +43,14 @@ const AsignacionZonas = () => {
           descripcion: zona.descripcion,
           selected: false
         }));
+        
+        // Verificar IDs únicos
+        const ids = zonas.map(zona => zona.id);
+        const uniqueIds = [...new Set(ids)];
+        
+        if (ids.length !== uniqueIds.length) {
+          console.error("Advertencia: Hay IDs duplicados en las zonas", ids);
+        }
         
         setZonasList(zonas);
       } catch (err) {
@@ -49,22 +64,27 @@ const AsignacionZonas = () => {
     fetchData();
   }, [id]);
 
-  const handleSelectZona = (id) => {
-    setZonasList(prev => prev.map(zona => {
-      if (zona.id === id) {
-        return { ...zona, selected: !zona.selected };
-      }
-      return zona;
-    }));
-   
-    setSelectedZonas(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(zonaId => zonaId !== id);
+  // Función para manejar la selección de zona usando useCallback
+  const handleSelectZona = useCallback((zonaId) => {
+    // Usando una función para actualizar el estado que recibe el estado anterior
+    setZonasList(prevZonas => {
+      return prevZonas.map(zona => 
+        zona.id === zonaId
+          ? { ...zona, selected: !zona.selected }
+          : zona
+      );
+    });
+    
+    // Actualizar la lista de IDs seleccionados
+    setSelectedZonas(prevSelectedIds => {
+      const isSelected = prevSelectedIds.includes(zonaId);
+      if (isSelected) {
+        return prevSelectedIds.filter(id => id !== zonaId);
       } else {
-        return [...prev, id];
+        return [...prevSelectedIds, zonaId];
       }
     });
-  };
+  }, []);
 
   const handleAsignar = async () => {
     if (selectedZonas.length === 0) {
@@ -95,6 +115,7 @@ const AsignacionZonas = () => {
         <Sidebar />
       </div>
       
+      <Tipografia>
       <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
         <div className="max-w-[1600px] mx-auto">
           <div className="w-full">
@@ -148,13 +169,12 @@ const AsignacionZonas = () => {
                     />
                   </div>
 
-                  {/* Lista de zonas */}
+                  {/* Lista de zonas - COMPLETAMENTE REDISEÑADA */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {zonasList.length > 0 ? (
                       zonasList.map((zona) => (
-                        <div
+                        <label 
                           key={zona.id}
-                          onClick={() => handleSelectZona(zona.id)}
                           className={`bg-white border rounded-lg p-4 flex items-start space-x-4 hover:shadow-md transition-all cursor-pointer
                             ${zona.selected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}`}
                         >
@@ -164,7 +184,6 @@ const AsignacionZonas = () => {
                               checked={zona.selected}
                               onChange={() => handleSelectZona(zona.id)}
                               className="w-5 h-5 rounded border-orange-500 text-orange-600 focus:ring-orange-500"
-                              onClick={(e) => e.stopPropagation()}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -183,7 +202,7 @@ const AsignacionZonas = () => {
                               </Tipografia>
                             </div>
                           </div>
-                        </div>
+                        </label>
                       ))
                     ) : (
                       <div className="col-span-full text-center py-8">
@@ -199,6 +218,7 @@ const AsignacionZonas = () => {
           </div>
         </div>
       </div>
+      </Tipografia>
     </div>
   );
 };
