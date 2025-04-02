@@ -1,189 +1,276 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { areaService, userService } from "../../../context/services/ApiService";
-import Tipografia from '../../../components/atoms/Tipografia';
+import { useNavigate } from "react-router-dom";
+import { areaService, clientService } from "../../../context/services/ApiService";
+import Tipografia from "../../../components/atoms/Tipografia";
+import Boton from "../../../components/atoms/Botones";
+import Sidebar from "../../organisms/Sidebar"
 
+
+const scrollStyle = `
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
 
 const ColaboradoresZona = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // ID de la zona
-  const [zonaData, setZonaData] = useState({
-    nombre_zona_trabajo: "",
-    latitud: 0,
-    longitud: 0,
-    descripcion: ""
-  });
-  const [colaboradores, setColaboradores] = useState([]);
+  const [zonas, setZonas] = useState([]);
+  const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
+  const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Cargar datos de la zona y los usuarios asignados a ella
+  
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchZonas = async () => {
       try {
         setLoading(true);
+        const response = await areaService.getAllAreas();
+        const zonasData = response.data;
+        setZonas(zonasData);
         
-        // Obtener detalles de la zona
-        if (id) {
-          const zonaResponse = await areaService.getAreaById(id);
-          setZonaData(zonaResponse.data);
-          
-          // Para obtener los colaboradores asignados a esta zona, necesitaríamos
-          // una API específica que devuelva los usuarios de una zona
-          // Como alternativa, podemos obtener todos los usuarios y filtrar
-          // los que tienen esta zona asignada
-          const usersResponse = await userService.getAllUsers();
-          
-          // Ahora para cada usuario, revisamos si tiene asignada esta zona
-          const colaboradoresAsignados = [];
-          
-          for (const user of usersResponse.data) {
-            if (user.rol === "COLABORADOR") {
-              try {
-                // Obtener las zonas asignadas a este usuario
-                const zonasResponse = await userService.getUserZonas(user.id_usuario);
-                
-                // Verificar si esta zona está entre las asignadas al usuario
-                const zonaAsignada = zonasResponse.data.zonas.some(
-                  zona => zona.id_zona_de_trabajo === parseInt(id)
-                );
-                
-                if (zonaAsignada) {
-                  colaboradoresAsignados.push({
-                    id: user.id_usuario,
-                    nombre: user.nombreCompleto,
-                    cel: user.celular,
-                    rol: user.rol
-                  });
-                }
-              } catch (error) {
-                console.log(`Error al obtener zonas para usuario ${user.id_usuario}:`, error);
-              }
-            }
-          }
-          
-          setColaboradores(colaboradoresAsignados);
+        // Seleccionar la primera zona por defecto si hay zonas
+        if (zonasData.length > 0) {
+          setZonaSeleccionada(zonasData[0]);
         }
-      } catch (err) {
-        console.error("Error al cargar datos:", err);
-        setError("Error al cargar datos. Por favor, intenta de nuevo más tarde.");
+      } catch (error) {
+        console.error("Error al cargar zonas:", error);
+        setError("Error al cargar las zonas. Por favor, intenta de nuevo más tarde.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [id]);
+    fetchZonas();
+  }, []);
 
-  const handleEditarClick = () => {
-    navigate(`/editar-zona/${id}`);
-  };
-  
-  const handleEditarColaboradores = () => {
-    navigate(`/gestion-zonas/editar-colaboradores/${id}`);
+  // Cargar clientes cuando cambia la zona seleccionada
+  useEffect(() => {
+    const fetchClientes = async () => {
+      if (!zonaSeleccionada) return;
+      
+      try {
+        setLoading(true);
+        const response = await areaService.getClientsInArea(zonaSeleccionada.id_zona_de_trabajo);
+        setClientes(response.data);
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        setError("Error al cargar los clientes. Por favor, intenta de nuevo más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (zonaSeleccionada) {
+      fetchClientes();
+    }
+  }, [zonaSeleccionada]);
+
+  const handleZonaChange = (index) => {
+    setZonaSeleccionada(zonas[index]);
   };
 
-  if (loading) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center bg-white">
-        <Tipografia>Cargando información de la zona...</Tipografia>
-      </div>
-    );
-  }
+  const handleNuevoCliente = () => {
+    navigate("/registrar-cliente");
+  };
+
+  const handleAsignarZona = () => {
+    navigate("/asignar-zona");
+  };
+
+  const handleEliminarZona = (zonaId) => {
+    // Implementar la lógica para eliminar la zona
+    console.log(`Eliminar zona con ID: ${zonaId}`);
+  };
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-white">
-      {/* Header */}
-      <div className="bg-purple-600 text-white p-4 flex items-center justify-between">
-        <button
-          onClick={() => navigate("/gestion-zonas")}
-          className="text-white flex items-center justify-center rounded-full bg-white bg-opacity-30 h-10 w-10"
-        >
-          <span className="text-2xl">&#8592;</span>
-        </button>
-        <Tipografia variant="h1" size="xl" className="text-white font-medium">
-          {zonaData.nombre_zona_trabajo}
-        </Tipografia>
-        <div className="w-10"></div> {/* Espacio para equilibrar el header */}
+    <div className="min-h-screen flex bg-slate-100">
+      <style>{scrollStyle}</style>
+      <div className="w-20 flex-shrink-0">
+        <Sidebar />
       </div>
-     
-      {error && (
-        <div className="px-6 py-2">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        </div>
-      )}
 
-      {/* Información de la zona */}
-      <div className="px-6 py-4">
-        <div className="border rounded-lg p-4 mb-4">
-          <Tipografia>
-            <div className="mb-3">
-              <span className="font-medium">Ubicación:</span> Coordenadas: {zonaData.latitud || 0}, {zonaData.longitud || 0}
+      <div className="flex-1 overflow-auto">
+        <div className="flex flex-col px-4 pt-5 pb-6 w-full">
+          {error && (
+            <div className="mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md">
+              <Tipografia className="text-red-700">{error}</Tipografia>
             </div>
-            <div>
-              <span className="font-medium">Descripción:</span> {zonaData.descripcion}
+          )}
+          <div className="flex flex-col space-y-4 w-full">
+            <div className="bg-white rounded-lg shadow-md p-4 w-full">
+              <div className="flex flex-col space-y-1">
+                <div className="flex flex-col sm:flex-row justify-between items-center">
+                  <Tipografia variant="subtitle" className="text-black font-bold mb-3 sm:mb-0">
+                    Selección de Zona
+                  </Tipografia>
+                  <div className="flex flex-wrap justify-center gap-2 mb-7 w-full sm:w-auto">
+                    {/* <Boton
+                      label="Nuevo cliente"
+                      tipo="primario"
+                      onClick={handleAsignarZona}
+                      size="small"
+                      className="w-full sm:w-auto"
+                    /> */}
+                    <Boton
+                      label="Asignar nueva zona"
+                      tipo="primario"
+                      onClick={handleNuevoCliente}
+                      size="small"
+                      className="w-full sm:w-auto"
+                    />
+                    <Boton
+                      label="Eliminar Zona"
+                      tipo="cancelar"
+                      onClick={() => zonaSeleccionada && handleEliminarZona(zonaSeleccionada.id_zona_de_trabajo)}
+                      size="small"
+                      className="w-full sm:w-auto"
+                    />
+                  </div>
+                </div>
+                <div className="rounded-lg">
+                  {loading && !zonas.length ? (
+                    <div className="flex justify-center">
+                      <div className="animate-pulse flex space-x-4">
+                        <div className="rounded-full bg-orange-200 h-8 w-8"></div>
+                        <div className="flex-1 space-y-2 py-1">
+                          <div className="h-4 bg-orange-200 rounded w-3/4"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : zonas.length > 0 ? (
+                    <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 md:flex-wrap md:justify-start">
+                      {zonas.map((zona, index) => (
+                        <button
+                          key={zona.id_zona_de_trabajo || index}
+                          onClick={() => handleZonaChange(index)}
+                          className={`flex-shrink-0 px-4 py-2 rounded-full transition-all duration-200 ${
+                            zonaSeleccionada && zona.id_zona_de_trabajo === zonaSeleccionada.id_zona_de_trabajo
+                              ? 'bg-gradient-to-r from-orange-600 to-orange-400 text-white shadow-md'
+                              : 'bg-white border border-orange-200 hover:border-orange-400 text-black hover:shadow-sm'
+                          }`}
+                        >
+                          <Tipografia className={`${
+                            zonaSeleccionada && zona.id_zona_de_trabajo === zonaSeleccionada.id_zona_de_trabajo
+                              ? 'text-white'
+                              : 'text-orange-700'
+                          }`}>
+                            {zona.nombre_zona_trabajo}
+                          </Tipografia>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <Tipografia className="text-center">No hay zonas disponibles.</Tipografia>
+                  )}
+                </div>
+              </div>
             </div>
-          </Tipografia>
-          <div className="flex justify-end mt-2">
-            <button
-              onClick={handleEditarClick}
-              className="bg-purple-500 text-white py-1 px-6 rounded-md text-sm"
-            >
-              Editar
-            </button>
+            <div className="bg-white rounded-lg shadow-md p-4">
+              <div className="flex justify-between items-center">
+                <Tipografia variant="subtitle" className="text-black font-medium">
+                  {zonaSeleccionada ? 
+                    zonaSeleccionada.nombre_colaborador || "Colaborador no asignado" : 
+                    "Selecciona una zona"}
+                </Tipografia>
+                {clientes.length > 0 && (
+                  <div className="px-2 py-1 bg-orange-200 rounded-full text-center min-w-[60px] flex items-center justify-center">
+                    <Tipografia className="text-xs text-orange-800 whitespace-nowrap">
+                      {clientes.length} {clientes.length === 1 ? "cliente" : "clientes"}
+                    </Tipografia>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-4 flex-1 w-full ">
+              <Tipografia variant="subtitle" className="text-black font-bold mb-4 ">
+                Clientes
+              </Tipografia>
+              <div className="w-full">
+                {loading && zonaSeleccionada ? (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700 mb-4"></div>
+                    <Tipografia>Cargando clientes</Tipografia>
+                  </div>
+                ) : clientes.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {clientes.map((cliente) => (
+                      <div key={cliente.id_cliente} className="rounded-lg m-1.5 overflow-hidden border border-orange-100">
+                        <div className="bg-gray-100 px-4 py-3">
+                          <Tipografia className="text-black font-medium">
+                            {cliente.nombre_completo_cliente}
+                          </Tipografia>
+                        </div>
+                        <div className="p-4">
+                          <div className="bg-white rounded-lg p-3 mb-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center">
+                                <Tipografia className="w-28 font-medium text-black">CC:</Tipografia>
+                                <Tipografia>{cliente.cedula}</Tipografia>
+                              </div>
+                              <div className="flex items-center">
+                                <Tipografia className="w-28 font-medium text-black">Nit:</Tipografia>
+                                <Tipografia>{cliente.rut_nit || "No disponible"}</Tipografia>
+                              </div>
+                              <div className="flex items-center">
+                                <Tipografia className="w-28 font-medium text-black">Razón Social:</Tipografia>
+                                <Tipografia>{cliente.razon_social || "No disponible"}</Tipografia>
+                              </div>
+                              <div className="flex items-center">
+                                <Tipografia className="w-28 font-medium text-black">Teléfono:</Tipografia>
+                                <Tipografia>{cliente.telefono || "No disponible"}</Tipografia>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : zonaSeleccionada ? (
+                  <div className="flex flex-col items-center justify-center text-center py-10">
+                    <div className="bg-orange-50 p-6 rounded-full mb-4">
+                      <svg className="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <Tipografia className="text-black mb-2">
+                      No hay clientes registrados en esta zona.
+                    </Tipografia>
+                    <Tipografia className="text-gray-500 mb-4">
+                      Puedes agregar un nuevo cliente para comenzar a trabajar en esta zona.
+                    </Tipografia>
+                    <Boton
+                      label="Agregar cliente"
+                      tipo="primario"
+                      onClick={handleNuevoCliente}
+                      size="medium"
+                      iconName="user-plus"
+                      className="mt-2"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-center py-10">
+                    <div className="bg-orange-50 p-6 rounded-full mb-4">
+                      <svg className="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                    </div>
+                    <Tipografia className="text-black mb-2">
+                      Por favor selecciona una zona
+                    </Tipografia>
+                    <Tipografia className="text-gray-500">
+                      Selecciona una zona de trabajo para ver sus clientes asociados.
+                    </Tipografia>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-     
-      {/* Título y botón de editar colaboradores */}
-      <div className="px-6 py-2 flex justify-between items-center">
-        <Tipografia variant="h2" size="lg" className="text-gray-700">
-          Colaboradores Asignados
-        </Tipografia>
-        <button
-          onClick={handleEditarColaboradores}
-          className="bg-purple-500 text-white py-1 px-6 rounded-md text-sm"
-        >
-          Editar Colaboradores
-        </button>
-      </div>
-     
-      {/* Lista de colaboradores */}
-      <div className="px-6 flex-grow overflow-auto">
-        {colaboradores.length > 0 ? (
-          colaboradores.map((colaborador) => (
-            <div
-              key={colaborador.id}
-              className="border rounded-lg p-4 mb-4"
-            >
-              <Tipografia>
-                <div className="mb-1">
-                  <span className="font-medium">Nombre:</span> {colaborador.nombre}
-                </div>
-                <div className="mb-1">
-                  <span className="font-medium">Cel:</span> {colaborador.cel}
-                </div>
-                <div>
-                  <span className="font-medium">Rol:</span> {colaborador.rol}
-                </div>
-              </Tipografia>
-            </div>
-          ))
-        ) : (
-          <div className="text-center py-8">
-            <Tipografia className="text-gray-500">
-              No hay colaboradores asignados a esta zona.
-            </Tipografia>
-            <button
-              onClick={() => navigate(`/gestion-zonas/asignar/${id}`)}
-              className="mt-4 bg-purple-500 text-white py-2 px-6 rounded-md"
-            >
-              Asignar Colaboradores
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

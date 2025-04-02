@@ -133,7 +133,7 @@ const CodigoVerificacion = () => {
         </div>
 
         <footer className="absolute bottom-6 text-gray-500 text-sm">
-          © TatSoft 2024 | Desarrollado por TatSoft
+          © TatSoft 2025 
         </footer>
       </div>
     </Tipografia>

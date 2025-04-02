@@ -405,10 +405,12 @@ const NuevaPreventa = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 ml-10 pl-6">
-      <div className="w-full bg-white shadow-sm mb-4">
+    <div className="min-h-screen bg-slate-50 ml-10 pl-6">
+      <div className="w-full bg-white mb-4">
         <div className="px-2 sm:px-4 lg:px-8 py-2">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nueva Preventa</h1>
+          <Tipografia>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nueva Preventa</h1>
+          </Tipografia>
         </div>
       </div>
 
@@ -419,7 +421,9 @@ const NuevaPreventa = () => {
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
             <div className="flex items-center">
               <Icono name="eliminarAlert" size={20} />
-              <span className="ml-2">{error}</span>
+              <Tipografia>
+                <span className="ml-2">{error}</span>
+              </Tipografia>
             </div>
           </div>
         )}
@@ -428,7 +432,9 @@ const NuevaPreventa = () => {
           <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
             <div className="flex items-center">
               <Icono name="confirmar" size={20} />
-              <span className="ml-2">Preventa registrada con éxito. Redirigiendo...</span>
+              <Tipografia>
+                <span className="ml-2">Preventa registrada con éxito. Redirigiendo...</span>
+              </Tipografia>
             </div>
           </div>
         )}
@@ -441,7 +447,9 @@ const NuevaPreventa = () => {
                 Zonas Asignadas
               </Tipografia>
               <div className="text-sm text-gray-600">
-                {zonasAsignadas.length} zonas disponibles
+                <Tipografia>
+                  {zonasAsignadas.length} zonas disponibles
+                </Tipografia>
               </div>
             </div>
 
@@ -472,7 +480,9 @@ const NuevaPreventa = () => {
                         {zona.ciudad && (
                           <div className="flex items-center text-sm text-gray-600">
                             <Icono name="ubicacion" size={16} className="mr-1" />
-                            <span>{zona.ciudad}</span>
+                            <Tipografia>
+                              <span>{zona.ciudad}</span>
+                            </Tipografia>
                           </div>
                         )}
                       </div>
@@ -523,9 +533,11 @@ const NuevaPreventa = () => {
                       {(zona.latitud || zona.longitud) && (
                         <div className="text-xs text-gray-500 flex items-center mt-2">
                           <Icono name="ubicacion" size={14} className="mr-1" />
-                          <span>
-                            Lat: {zona.latitud}, Long: {zona.longitud}
-                          </span>
+                          <Tipografia>
+                            <span>
+                              Lat: {zona.latitud}, Long: {zona.longitud}
+                            </span>
+                          </Tipografia>
                         </div>
                       )}
 
@@ -537,13 +549,17 @@ const NuevaPreventa = () => {
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-100 text-gray-800'
                           }`}>
-                            {zona.estado}
+                            <Tipografia>
+                              {zona.estado}
+                            </Tipografia>
                           </div>
                         )}
                         
                         {zona.cantidad_clientes !== undefined && (
                           <div className="text-xs text-gray-600">
-                            {zona.cantidad_clientes} clientes
+                            <Tipografia>
+                              {zona.cantidad_clientes} clientes
+                            </Tipografia>
                           </div>
                         )}
                       </div>
@@ -625,11 +641,13 @@ const NuevaPreventa = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-4 text-gray-500">
-                      {!zonaSeleccionada && user.rol === "COLABORADOR" 
-                        ? "Seleccione una zona para ver sus clientes"
-                        : "No se encontraron clientes en esta zona"}
-                    </div>
+                    <Tipografia>
+                      <div className="col-span-full text-center py-1 text-gray-500">
+                        {!zonaSeleccionada && user.rol === "COLABORADOR" 
+                          ? "Seleccione una zona para ver sus clientes"
+                          : "No se encontraron clientes en esta zona"}
+                      </div>
+                    </Tipografia>
                   )}
                 </div>
               ) : (
@@ -686,14 +704,14 @@ const NuevaPreventa = () => {
                       
                       <div className="space-y-2">
                         <Tipografia className="font-medium break-words line-clamp-2">
-                        {producto.nombre_producto}
-                      </Tipografia>
+                          {producto.nombre_producto}
+                        </Tipografia>
                         <Tipografia className="text-purple-600 font-bold">
-                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                      </Tipografia>
+                          ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                        </Tipografia>
                         <Tipografia className="text-sm text-gray-500">
-                        Stock: {producto.cantidad_ingreso || 0}
-                      </Tipografia>
+                          Stock: {producto.cantidad_ingreso || 0}
+                        </Tipografia>
                       </div>
                     </div>
                     <Boton
@@ -714,7 +732,9 @@ const NuevaPreventa = () => {
               ))
             ) : (
               <div className="col-span-full text-center py-4 text-gray-500">
-                No se encontraron productos con ese criterio de búsqueda
+                <Tipografia>
+                  No se encontraron productos con ese criterio de búsqueda
+                </Tipografia>
               </div>
             )}
           </div>
@@ -747,9 +767,9 @@ const NuevaPreventa = () => {
                     
                     <div className="flex-grow min-w-0">
                       <Tipografia className="font-medium break-words">{producto.nombre_producto}</Tipografia>
-                    <Tipografia className="text-purple-600">
-                      ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                    </Tipografia>
+                      <Tipografia className="text-purple-600">
+                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                      </Tipografia>
                     </div>
                   </div>
                   
@@ -758,14 +778,14 @@ const NuevaPreventa = () => {
                       className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
                       onClick={() => handleUpdateCantidad(producto.id_producto, "disminuir")}
                     >
-                      -
+                      <Tipografia>-</Tipografia>
                     </button>
-                    <span className="font-medium">{producto.cantidad}</span>
+                    <Tipografia className="font-medium">{producto.cantidad}</Tipografia>
                     <button
                       className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
                       onClick={() => handleUpdateCantidad(producto.id_producto, "aumentar")}
                     >
-                      +
+                      <Tipografia>+</Tipografia>
                     </button>
                   </div>
                   

@@ -230,21 +230,28 @@ const GestionUsuarios = () => {
                               </button>
                               {menuAbierto === usuario.id_usuario && (
                                 <div className="absolute top-6 right-0 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-10">
-                                  <button
-                                    onClick={() => navigate(`/ver/usuario/${usuario.id_usuario}`)}
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                  >
-                                    Ver usuario
-                                  </button>
-                                  {usuario.rol !== "ADMINISTRADOR" && (
+                                <button
+                                  onClick={() => navigate(`/ver/usuario/${usuario.id_usuario}`)}
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                  Ver usuario
+                                </button>
+                                {usuario.rol !== "ADMINISTRADOR" && (
+                                  <>
                                     <button
                                       onClick={() => navigate(`/gestion-zonas/asignar/${usuario.id_usuario}`)}
                                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                     >
                                       Asignar zona
                                     </button>
-                                  )}
-                                </div>
+                                    <button
+                                      onClick={() => navigate(`/gestion-zonas/colaboradores/${usuario.id_usuario}`)}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                      Ver Zonas                                    </button>
+                                  </>
+                                )}
+                              </div>
                               )}
                               
                               <div className="space-y-3">

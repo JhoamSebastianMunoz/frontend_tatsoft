@@ -103,7 +103,7 @@ const OlvidarPassword = () => {
         </div>
 
         <footer className="absolute bottom-4 text-gray-500 text-xs sm:text-sm">
-          © TatSoft 2024 | Desarrollado por TatSoft
+          © TatSoft 2025 
         </footer>
       </div>
     </Tipografia>

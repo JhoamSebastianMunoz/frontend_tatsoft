@@ -22,9 +22,9 @@ import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 
-// Paleta de colores verde-azul
+
 const CHART_COLORS = {
-  clientes: "#E85D04",
+  clientes: "#5E60CE",
   productosMasVendidos: {
     cantidad: "#008B74",
     monto: "#5390D9",
