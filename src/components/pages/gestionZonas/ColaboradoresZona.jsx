@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { areaService, clientService } from "../../../context/services/ApiService";
+import { useNavigate, useParams } from "react-router-dom";
+import { userService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
-import Sidebar from "../../organisms/Sidebar"
-
+import Sidebar from "../../organisms/Sidebar";
 
 const scrollStyle = `
   .no-scrollbar::-webkit-scrollbar {
@@ -18,19 +17,22 @@ const scrollStyle = `
 
 const ColaboradoresZona = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [zonas, setZonas] = useState([]);
   const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [usuarioInfo, setUsuarioInfo] = useState(null);
 
-  
   useEffect(() => {
     const fetchZonas = async () => {
       try {
         setLoading(true);
-        const response = await areaService.getAllAreas();
-        const zonasData = response.data;
+        console.log("Obteniendo zonas para usuario:", id);
+        const response = await userService.getUserZonas(id);
+        console.log("Respuesta de zonas:", response);
+        const zonasData = response.data.zonas;
         setZonas(zonasData);
         
         // Seleccionar la primera zona por defecto si hay zonas
@@ -45,8 +47,10 @@ const ColaboradoresZona = () => {
       }
     };
 
-    fetchZonas();
-  }, []);
+    if (id) {
+      fetchZonas();
+    }
+  }, [id]);
 
   // Cargar clientes cuando cambia la zona seleccionada
   useEffect(() => {
@@ -55,8 +59,8 @@ const ColaboradoresZona = () => {
       
       try {
         setLoading(true);
-        const response = await areaService.getClientsInArea(zonaSeleccionada.id_zona_de_trabajo);
-        setClientes(response.data);
+        const response = await userService.getClientesZona(zonaSeleccionada.id_zona_de_trabajo);
+        setClientes(response.data.clientes);
       } catch (error) {
         console.error("Error al cargar clientes:", error);
         setError("Error al cargar los clientes. Por favor, intenta de nuevo más tarde.");
@@ -106,16 +110,9 @@ const ColaboradoresZona = () => {
               <div className="flex flex-col space-y-1">
                 <div className="flex flex-col sm:flex-row justify-between items-center">
                   <Tipografia variant="subtitle" className="text-black font-bold mb-3 sm:mb-0">
-                    Selección de Zona
+                    Zonas Asignadas
                   </Tipografia>
                   <div className="flex flex-wrap justify-center gap-2 mb-7 w-full sm:w-auto">
-                    {/* <Boton
-                      label="Nuevo cliente"
-                      tipo="primario"
-                      onClick={handleAsignarZona}
-                      size="small"
-                      className="w-full sm:w-auto"
-                    /> */}
                     <Boton
                       label="Asignar nueva zona"
                       tipo="primario"
@@ -146,7 +143,7 @@ const ColaboradoresZona = () => {
                     <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 md:flex-wrap md:justify-start">
                       {zonas.map((zona, index) => (
                         <button
-                          key={zona.id_zona_de_trabajo || index}
+                          key={zona.id_zona_de_trabajo}
                           onClick={() => handleZonaChange(index)}
                           className={`flex-shrink-0 px-4 py-2 rounded-full transition-all duration-200 ${
                             zonaSeleccionada && zona.id_zona_de_trabajo === zonaSeleccionada.id_zona_de_trabajo
@@ -165,30 +162,33 @@ const ColaboradoresZona = () => {
                       ))}
                     </div>
                   ) : (
-                    <Tipografia className="text-center">No hay zonas disponibles.</Tipografia>
+                    <Tipografia className="text-center">No hay zonas asignadas.</Tipografia>
                   )}
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <div className="flex justify-between items-center">
-                <Tipografia variant="subtitle" className="text-black font-medium">
-                  {zonaSeleccionada ? 
-                    zonaSeleccionada.nombre_colaborador || "Colaborador no asignado" : 
-                    "Selecciona una zona"}
-                </Tipografia>
-                {clientes.length > 0 && (
+
+            {zonaSeleccionada && (
+              <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex justify-between items-center">
+                  <Tipografia variant="subtitle" className="text-black font-medium">
+                    Zona {zonaSeleccionada.nombre_zona_trabajo}
+                  </Tipografia>
                   <div className="px-2 py-1 bg-orange-200 rounded-full text-center min-w-[60px] flex items-center justify-center">
                     <Tipografia className="text-xs text-orange-800 whitespace-nowrap">
                       {clientes.length} {clientes.length === 1 ? "cliente" : "clientes"}
                     </Tipografia>
                   </div>
-                )}
+                </div>
+                <Tipografia className="text-sm text-gray-600 mt-2">
+                  {zonaSeleccionada.descripcion}
+                </Tipografia>
               </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-4 flex-1 w-full ">
-              <Tipografia variant="subtitle" className="text-black font-bold mb-4 ">
-                Clientes
+            )}
+
+            <div className="bg-white rounded-lg shadow-md p-4 flex-1 w-full">
+              <Tipografia variant="subtitle" className="text-black font-bold mb-4">
+                Clientes de la Zona
               </Tipografia>
               <div className="w-full">
                 {loading && zonaSeleccionada ? (
@@ -224,6 +224,10 @@ const ColaboradoresZona = () => {
                                 <Tipografia className="w-28 font-medium text-black">Teléfono:</Tipografia>
                                 <Tipografia>{cliente.telefono || "No disponible"}</Tipografia>
                               </div>
+                              <div className="flex items-center">
+                                <Tipografia className="w-28 font-medium text-black">Dirección:</Tipografia>
+                                <Tipografia>{cliente.direccion || "No disponible"}</Tipografia>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -240,17 +244,6 @@ const ColaboradoresZona = () => {
                     <Tipografia className="text-black mb-2">
                       No hay clientes registrados en esta zona.
                     </Tipografia>
-                    <Tipografia className="text-gray-500 mb-4">
-                      Puedes agregar un nuevo cliente para comenzar a trabajar en esta zona.
-                    </Tipografia>
-                    <Boton
-                      label="Agregar cliente"
-                      tipo="primario"
-                      onClick={handleNuevoCliente}
-                      size="medium"
-                      iconName="user-plus"
-                      className="mt-2"
-                    />
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center py-10">

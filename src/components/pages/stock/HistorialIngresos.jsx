@@ -26,6 +26,7 @@ const HistorialIngresos = () => {
 
   // Estado para el detalle expandido
   const [expandedRow, setExpandedRow] = useState(null);
+  const [detalleIngreso, setDetalleIngreso] = useState(null);
   
   // Estados para datos de la API
   const [historialIngresos, setHistorialIngresos] = useState([]);
@@ -45,36 +46,42 @@ const HistorialIngresos = () => {
       try {
         setLoading(true);
         const response = await productService.getHistoricalStock();
-        
-        // Obtener los datos del response (puede ser response.data o directamente response dependiendo de cómo esté implementado el servicio)
-        const datos = response.data || response;
+        console.log("Respuesta del historial:", response.data);
         
         // Transformar datos de la API al formato que espera el componente
-        const historialFormateado = datos.map(item => ({
-          id: item.id_registro,
-          fecha: formatearFecha(item.fecha_ingreso),
-          producto: item.nombre_producto,
-          cantidad: item.cantidad_ingresada,
-          usuarioResponsable: item.nombre_usuario,
-          codigoIngreso: item.id_registro,
-          stock: item.cantidad_ingresada, // Asumiendo que esta es la cantidad en stock
-          porcentajeVenta: `${item.porcentaje_venta}%`,
-          codigoFacturaProveedor: item.codigo_factura,
-          costoTotal: formatearPrecio(item.costo_total),
-          costoUnitario: formatearPrecio(item.costo_unitario),
-          fechaVencimiento: formatearFecha(item.fecha_vencimiento)
-        }));
+        const historialFormateado = response.data.map(item => {
+          console.log("Item original:", item);
+          return {
+            id: item.id_producto,
+            id_registro: item.id_registro || item.id_producto, // Usar id_producto como fallback
+            fecha: formatearFecha(item.fecha_ingreso),
+            producto: item.nombre_producto,
+            cantidad: item.cantidad_ingresada,
+            usuarioResponsable: item.nombre_completo,
+            codigoIngreso: item.id_producto,
+            stock: item.cantidad_ingresada
+          };
+        });
+        
+        console.log("Historial formateado:", historialFormateado);
         
         setHistorialIngresos(historialFormateado);
         setHistorialFiltrado(historialFormateado);
         
         // Extraer usuarios únicos para el filtro
-        const usuariosUnicos = [...new Set(datos.map(item => item.nombre_usuario))];
+        const usuariosUnicos = [...new Set(response.data.map(item => item.nombre_completo))];
+        console.log("Usuarios únicos:", usuariosUnicos);
         setUsuarios(usuariosUnicos);
         
         setLoading(false);
       } catch (err) {
         console.error("Error al obtener historial:", err);
+        console.error("Detalles del error:", {
+          mensaje: err.message,
+          respuesta: err.response?.data,
+          estado: err.response?.status
+        });
+        setError("Error al cargar el historial de ingresos. Por favor, intenta de nuevo más tarde.");
         setLoading(false);
       }
     };
@@ -89,7 +96,9 @@ const HistorialIngresos = () => {
     return date.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -144,11 +153,50 @@ const HistorialIngresos = () => {
     return `${partes[2]}-${partes[1]}-${partes[0]}`;
   };
 
-  const toggleDetalles = (id) => {
+  const toggleDetalles = async (id, id_registro) => {
+    console.log("Toggle detalles llamado con:", { id, id_registro });
+    
     if (expandedRow === id) {
+      console.log("Cerrando detalles");
       setExpandedRow(null);
+      setDetalleIngreso(null);
     } else {
-      setExpandedRow(id);
+      try {
+        console.log("Intentando obtener detalles para id_registro:", id_registro);
+        setLoading(true);
+        setError(null); // Limpiar error anterior
+        
+        const response = await productService.getStockDetails(id_registro);
+        console.log("Respuesta de detalles completa:", response);
+        
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          console.log("Detalles obtenidos:", response.data[0]);
+          setDetalleIngreso(response.data[0]);
+          setExpandedRow(id);
+        } else {
+          console.log("No se encontraron detalles en la respuesta:", response.data);
+          setError("No se encontraron detalles para este ingreso.");
+        }
+      } catch (err) {
+        console.error("Error al obtener detalles del ingreso:", err);
+        console.error("Detalles del error:", {
+          mensaje: err.message,
+          respuesta: err.response?.data,
+          estado: err.response?.status,
+          url: err.config?.url
+        });
+        
+        let mensajeError = "Error al cargar los detalles del ingreso.";
+        if (err.response?.status === 404) {
+          mensajeError = "No se encontraron los detalles del ingreso.";
+        } else if (err.response?.data?.message) {
+          mensajeError = err.response.data.message;
+        }
+        
+        setError(mensajeError);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -345,7 +393,13 @@ const HistorialIngresos = () => {
                                 </td>
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                   <button
-                                    onClick={() => toggleDetalles(ingreso.id)}
+                                    onClick={() => {
+                                      if (!ingreso.id_registro) {
+                                        setError("No se puede obtener el detalle de este ingreso.");
+                                        return;
+                                      }
+                                      toggleDetalles(ingreso.id, ingreso.id_registro);
+                                    }}
                                     className="bg-orange-500 hover:bg-orange-600 text-white rounded px-3 py-1 text-xs inline-flex items-center justify-center"
                                   >
                                     <Icono
@@ -361,37 +415,53 @@ const HistorialIngresos = () => {
                               {expandedRow === ingreso.id && (
                                 <tr className="bg-orange-50">
                                   <td colSpan="5" className="px-3 sm:px-6 py-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                      <div className="bg-white p-3 rounded shadow-sm">
-                                        <div className="font-bold text-orange-600 mb-2">Datos de ingreso</div>
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                          <div className="text-gray-600">Código:</div>
-                                          <div className="font-medium">{ingreso.codigoIngreso}</div>
-                                          <div className="text-gray-600">Factura:</div>
-                                          <div className="font-medium">{ingreso.codigoFacturaProveedor}</div>
-                                          <div className="text-gray-600">Vencimiento:</div>
-                                          <div className="font-medium">{ingreso.fechaVencimiento}</div>
+                                    {loading ? (
+                                      <div className="flex justify-center items-center py-4">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                      </div>
+                                    ) : detalleIngreso ? (
+                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div className="bg-white p-3 rounded shadow-sm">
+                                          <div className="font-bold text-orange-600 mb-2">Datos de ingreso</div>
+                                          <div className="grid grid-cols-2 gap-2 text-sm">
+                                            <div className="text-gray-600">Código:</div>
+                                            <div className="font-medium">{detalleIngreso.id_registro}</div>
+                                            <div className="text-gray-600">Usuario:</div>
+                                            <div className="font-medium">{detalleIngreso.nombre_usuario}</div>
+                                            <div className="text-gray-600">Fecha:</div>
+                                            <div className="font-medium">{formatearFecha(detalleIngreso.fecha_ingreso)}</div>
+                                          </div>
+                                        </div>
+                                        <div className="bg-white p-3 rounded shadow-sm">
+                                          <div className="font-bold text-orange-600 mb-2">Datos del producto</div>
+                                          <div className="grid grid-cols-2 gap-2 text-sm">
+                                            <div className="text-gray-600">Producto:</div>
+                                            <div className="font-medium">{detalleIngreso.nombre_producto}</div>
+                                            <div className="text-gray-600">Cantidad:</div>
+                                            <div className="font-medium">{detalleIngreso.cantidad_ingresada}</div>
+                                            <div className="text-gray-600">Vencimiento:</div>
+                                            <div className="font-medium">{formatearFecha(detalleIngreso.fecha_vencimiento)}</div>
+                                          </div>
+                                        </div>
+                                        <div className="bg-white p-3 rounded shadow-sm">
+                                          <div className="font-bold text-orange-600 mb-2">Información de costos</div>
+                                          <div className="grid grid-cols-2 gap-2 text-sm">
+                                            <div className="text-gray-600">Factura:</div>
+                                            <div className="font-medium">{detalleIngreso.codigo_factura}</div>
+                                            <div className="text-gray-600">Costo Total:</div>
+                                            <div className="font-medium">{formatearPrecio(detalleIngreso.costo_total)}</div>
+                                            <div className="text-gray-600">Costo Unitario:</div>
+                                            <div className="font-medium">{formatearPrecio(detalleIngreso.costo_unitario)}</div>
+                                            <div className="text-gray-600">% Venta:</div>
+                                            <div className="font-medium">{detalleIngreso.porcentaje_venta}%</div>
+                                          </div>
                                         </div>
                                       </div>
-                                      <div className="bg-white p-3 rounded shadow-sm">
-                                        <div className="font-bold text-orange-600 mb-2">Datos de costo</div>
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                          <div className="text-gray-600">Stock:</div>
-                                          <div className="font-medium">{ingreso.stock}</div>
-                                          <div className="text-gray-600">Total:</div>
-                                          <div className="font-medium">{ingreso.costoTotal}</div>
-                                          <div className="text-gray-600">Unitario:</div>
-                                          <div className="font-medium">{ingreso.costoUnitario}</div>
-                                        </div>
+                                    ) : (
+                                      <div className="text-center text-gray-500 py-4">
+                                        No se encontraron detalles del ingreso
                                       </div>
-                                      <div className="bg-white p-3 rounded shadow-sm">
-                                        <div className="font-bold text-orange-600 mb-2">Datos de venta</div>
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                          <div className="text-gray-600">% Venta:</div>
-                                          <div className="font-medium">{ingreso.porcentajeVenta}</div>
-                                        </div>
-                                      </div>
-                                    </div>
+                                    )}
                                   </td>
                                 </tr>
                               )}
@@ -446,7 +516,7 @@ const HistorialIngresos = () => {
         </Tipografia>
       </div>
       
-      <style jsx>{`
+      <style global="true">{`
         .no-scrollbar {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
