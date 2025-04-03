@@ -277,11 +277,11 @@ const GestionProductos = () => {
           onClick={() => handleVerProducto(producto.id_producto)}
         >
           {producto.id_imagen && productImages[producto.id_producto] ? (
-            <div className="h-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <div className="h-full bg-white-200 flex items-center justify-center overflow-hidden">
               <img
                 src={productImages[producto.id_producto]}
                 alt={producto.nombre_producto}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-container px-3 "
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = "ruta-a-imagen-placeholder";
@@ -514,7 +514,7 @@ const GestionProductos = () => {
                 {currentItems.map(producto => renderProductoItem(producto))}
               </div>
             ) : (
-              // Vista de tabla
+           
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <div className="inline-block min-w-full align-middle px-4 sm:px-0">
                   <table className="min-w-full divide-y divide-gray-200">
