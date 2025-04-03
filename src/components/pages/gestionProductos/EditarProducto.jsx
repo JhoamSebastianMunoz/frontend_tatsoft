@@ -101,13 +101,13 @@ const EditarProducto = () => {
           // Cargar la imagen actual si existe
           if (producto.id_imagen) {
             try {
-            const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+              const imageUrl = await imageService.getImageUrl(producto.id_imagen);
               console.log('URL de imagen cargada:', imageUrl);
-            setCurrentImageUrl(imageUrl);
+              setCurrentImageUrl(imageUrl);
             } catch (imageError) {
               console.error('Error cargando imagen:', imageError);
               setError("No se pudo cargar la imagen del producto, pero puede continuar editando.");
-          }
+            }
           }
         } else {
           setError("No se encontraron datos del producto.");
@@ -124,7 +124,7 @@ const EditarProducto = () => {
     };
 
     if (id) {
-    fetchProductAndCategories();
+      fetchProductAndCategories();
     }
   }, [id]);
 
@@ -205,17 +205,43 @@ const EditarProducto = () => {
         try {
           // Si hay una imagen anterior, intentar eliminarla
           if (formData.id_imagen) {
-            await imageService.deleteImage(formData.id_imagen);
+            try {
+              await imageService.deleteImage(formData.id_imagen);
+              console.log("Imagen anterior eliminada con éxito");
+            } catch (deleteErr) {
+              console.error("Error al eliminar imagen anterior:", deleteErr);
+              // Continuar incluso si falla la eliminación
+            }
           }
          
+          // Preparar correctamente el FormData para la nueva imagen
+          const imageFormData = new FormData();
+          imageFormData.append('image', imageFile);
+          
+          console.log("Subiendo nueva imagen:", imageFile.name, imageFile.type, imageFile.size);
+          
+          // Verificar que el FormData se creó correctamente (solo para debugging)
+          for (let [key, value] of imageFormData.entries()) {
+            console.log(`${key}: ${value instanceof File ? value.name : value}`);
+          }
+          
           // Subir la nueva imagen
-          const uploadResponse = await imageService.uploadImage(imageFile);
-          if (uploadResponse && uploadResponse.url) {
-            imageId = uploadResponse.fileName || uploadResponse.url.split('/').pop();
+          const uploadResponse = await imageService.uploadImage(imageFormData);
+          console.log("Respuesta de subida de imagen:", uploadResponse);
+          
+          if (uploadResponse && uploadResponse.data) {
+            // Intentar extraer el ID de la imagen de varias posibles ubicaciones en la respuesta
+            imageId = uploadResponse.data.id || 
+                     uploadResponse.data.fileName || 
+                     (uploadResponse.data.url ? uploadResponse.data.url.split('/').pop() : null);
+            
+            console.log("Nuevo ID de imagen asignado:", imageId);
+          } else {
+            console.warn("No se pudo obtener ID de imagen de la respuesta:", uploadResponse);
           }
         } catch (imageError) {
           console.error("Error procesando imagen:", imageError);
-          setError("Hubo un problema con la imagen. El producto se actualizará sin cambiar la imagen.");
+          // No establecer error, permitir continuar con la actualización sin cambiar la imagen
         } finally {
           setIsUploading(false);
         }
@@ -227,9 +253,14 @@ const EditarProducto = () => {
         nombre_producto: formData.nombre_producto.trim(),
         precio: precioNumerico,
         descripcion: formData.descripcion.trim(),
-        id_imagen: imageId,
-        id_categoria: parseInt(formData.id_categoria)
+        id_categoria: parseInt(formData.id_categoria),
+        estado: "Activo"  // Asegurar que se mantiene activo
       };
+      
+      // Solo incluir id_imagen si tenemos uno
+      if (imageId) {
+        productData.id_imagen = imageId;
+      }
 
       console.log("Datos a enviar al servidor:", productData);
 
@@ -371,40 +402,30 @@ const EditarProducto = () => {
                
                 <div>
                   <Tipografia size="sm" className="block text-gray-700 mb-1">Categoría*</Tipografia>
-                  <div className="relative">
-                    <div
-                      className="w-full p-2 border rounded flex justify-between items-center cursor-pointer"
-                      onClick={() => setShowCategorias(!showCategorias)}
-                    >
-                      <Tipografia size="base" className="text-gray-700">
-                        {formData.categoria || "Seleccione una categoría"}
-                      </Tipografia>
-                      <Icono name="despliegue" size={16} />
-                    </div>
-                   
-                    {showCategorias && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                        {categorias.map((categoria) => (
-                          <div
-                            key={categoria.id_categoria}
-                            className="p-2 hover:bg-orange-100 cursor-pointer"
-                            onClick={() => handleCategoriaChange(categoria)}
-                          >
-                            <Tipografia size="base">{categoria.nombre_categoria}</Tipografia>
-                          </div>
-                        ))}
-                        <div
-                          className="p-2 bg-orange-200 text-center hover:bg-orange-300 cursor-pointer"
-                          onClick={() => {
-                            setShowNuevaCategoriaModal(true);
-                            setShowCategorias(false);
-                          }}
-                        >
-                          <Tipografia size="base">+ Agregar otra categoría</Tipografia>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <select
+                    name="id_categoria"
+                    value={formData.id_categoria}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                  >
+                    <option value="">Seleccione una categoría</option>
+                    {categorias.map((categoria) => (
+                      <option 
+                        key={categoria.id_categoria} 
+                        value={categoria.id_categoria}
+                      >
+                        {categoria.nombre_categoria}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowNuevaCategoriaModal(true)}
+                    className="mt-1 text-sm text-orange-600 hover:text-orange-800"
+                  >
+                    + Agregar otra categoría
+                  </button>
                 </div>
                
                 <div>

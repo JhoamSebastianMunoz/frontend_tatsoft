@@ -24,14 +24,14 @@ const scrollStyle = `
 const GestionProductos = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-
+  
   // Estados para datos
   const [productos, setProductos] = useState([]);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
   const [productImages, setProductImages] = useState({});
-
+  
   // Estados para UI
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ const GestionProductos = () => {
   
   // Ref para cerrar el menú al hacer clic fuera
   const menuRef = useRef(null);
-
+  
   // Cerrar el menú cuando se hace clic fuera
   useEffect(() => {
     function handleClickOutside(event) {
@@ -61,19 +61,19 @@ const GestionProductos = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  
   // Cargar productos y categorías al montar el componente
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-       
+        
         // Cargar categorías
         const categoriasResponse = await productService.getAllCategories();
         if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
           setCategorias(categoriasResponse.data);
         }
-       
+        
         // Cargar productos
         const productosResponse = await productService.getAllProducts();
         if (productosResponse.data && Array.isArray(productosResponse.data)) {
@@ -82,9 +82,10 @@ const GestionProductos = () => {
             ...producto,
             colorPrecio: 'text-orange-500'
           }));
+          
           setProductos(productosConColorPrecio);
           setProductosFiltrados(productosConColorPrecio);
-
+          
           // Cargar imágenes para los productos
           const imagePromises = productosResponse.data.map(async (producto) => {
             if (producto.id_imagen) {
@@ -115,32 +116,32 @@ const GestionProductos = () => {
         setLoading(false);
       }
     };
-   
+    
     fetchData();
   }, []);
-
+  
   // Filtrar productos según búsqueda y categoría
   useEffect(() => {
     let resultado = [...productos];
-   
+    
     // Filtrar por término de búsqueda
     if (searchTerm.trim() !== "") {
       resultado = resultado.filter(producto =>
         producto.nombre_producto.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-   
+    
     // Filtrar por categoría seleccionada
     if (categoriaSeleccionada !== 'Todas') {
       resultado = resultado.filter(producto =>
         producto.id_categoria === parseInt(categoriaSeleccionada)
       );
     }
-   
+    
     setProductosFiltrados(resultado);
     setCurrentPage(1); // Resetear a primera página cuando cambian los filtros
   }, [searchTerm, categoriaSeleccionada, productos]);
-
+  
   // Cálculos para paginación
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -174,7 +175,13 @@ const GestionProductos = () => {
     setShowDeleteModal(true);
     setOpenMenuId(null);
   };
-  
+
+  // Añadimos la función que faltaba para manejar el clic en "Editar"
+  const handleEditarProducto = (id) => {
+    navigate(`/editar-producto/${id}`);
+    setOpenMenuId(null);
+  };
+
   const toggleMenu = (id, e) => {
     e.stopPropagation(); // Evitar que el evento se propague
     setOpenMenuId(openMenuId === id ? null : id);
@@ -182,17 +189,17 @@ const GestionProductos = () => {
 
   const confirmarEliminacion = async () => {
     if (!productoAEliminar) return;
-   
+    
     try {
       setLoading(true);
-     
+      
       // Primero, obtenemos el producto para saber si tiene imagen
       const productoResponse = await productService.getProductById(productoAEliminar);
       const imageId = productoResponse.data?.id_imagen;
-     
+      
       // Eliminar el producto
       await productService.deleteProduct(productoAEliminar);
-     
+      
       // Después de eliminar el producto, eliminar su imagen si existe
       if (imageId) {
         try {
@@ -202,12 +209,12 @@ const GestionProductos = () => {
           // No interrumpimos el flujo si falla la eliminación de la imagen
         }
       }
-     
+      
       // Actualizar la lista de productos
       setProductos(productos.filter(p => p.id_producto !== productoAEliminar));
       setShowDeleteModal(false);
       setProductoAEliminar(null);
-     
+      
     } catch (error) {
       console.error("Error eliminando producto:", error);
       setError("Ocurrió un error al eliminar el producto.");
@@ -240,7 +247,7 @@ const GestionProductos = () => {
       <div key={producto.id_producto} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative">
         <div></div>
         <div className="absolute top-3 right-3 z-10">
-          <button 
+          <button
             onClick={(e) => toggleMenu(producto.id_producto, e)}
             className="text-gray-700 hover:text-gray-700 focus:outline-none"
           >
@@ -250,7 +257,7 @@ const GestionProductos = () => {
               </svg>
             </div>
           </button>
-          
+         
           {openMenuId === producto.id_producto && (
             <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
               <ul className="py-1 text-sm text-gray-600">
@@ -270,18 +277,18 @@ const GestionProductos = () => {
             </div>
           )}
         </div>
-        
-        {/* Imagen del producto */}
-        <div 
-          className="cursor-pointer h-48" 
+       
+        {/* Imagen del producto - Ajustada para mejor visualización */}
+        <div
+          className="cursor-pointer h-48"
           onClick={() => handleVerProducto(producto.id_producto)}
         >
           {producto.id_imagen && productImages[producto.id_producto] ? (
-            <div className="h-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <div className="h-full bg-white-200 flex items-center justify-center overflow-hidden">
               <img
                 src={productImages[producto.id_producto]}
                 alt={producto.nombre_producto}
-                className="w-full h-full object-cover"
+                className="w-auto h-full max-h-full object-contain px-3"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = "ruta-a-imagen-placeholder";
@@ -294,46 +301,47 @@ const GestionProductos = () => {
             </div>
           )}
         </div>
-        
+       
         {/* Información del producto */}
-        <div 
-          className="p-4 flex-grow cursor-pointer" 
+        <div
+          className="p-4 flex-grow cursor-pointer"
           onClick={() => handleVerProducto(producto.id_producto)}
         >
           <h3 className="font-medium text-lg text-gray-900 break-words mb-2 truncate">
             {producto.nombre_producto}
           </h3>
-          
+         
           <p className="text-gray-600 break-words text-sm mb-2">
             <strong>Precio:</strong> <span className="text-orange-600 font-medium">${parseFloat(producto.precio).toFixed(2)}</span>
           </p>
-          
+         
           <p className="text-gray-600 break-words text-sm mb-2">
             <strong>Categoría:</strong> {categorias.find(c => c.id_categoria === producto.id_categoria)?.nombre_categoria || "Sin categoría"}
           </p>
-          
+         
           <p className="text-gray-600 text-sm mb-2 line-clamp-2">
             {producto.descripcion || "Sin descripción"}
           </p>
-          
+         
           <p className="mt-2">
             <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800`}>
               {producto.estado || "Activo"}
             </span>
           </p>
         </div>
-        
+       
+        {/* Botón de editar - Reducido a la mitad del tamaño */}
         <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 mt-auto">
-          <div className="flex justify-between items-center">
-            <button 
+          <div className="flex justify-center items-center">
+            <button
               onClick={() => handleEditarProducto(producto.id_producto)}
-              className="w-full"
+              className="w-1/2" // Reducido a la mitad
             >
-              <Boton 
-                tipo="primario" 
-                label="Editar" 
-                size="small" 
-                className="w-full" 
+              <Boton
+                tipo="primario"
+                label="Editar"
+                size="small"
+                className="w-full py-1 text-xs h-8" // Tamaño reducido
               />
             </button>
           </div>
@@ -353,13 +361,13 @@ const GestionProductos = () => {
           <Sidebar />
         </div>
       </div>
-      
+     
       <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de productos</h1>
           </div>
-          
+         
           <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
@@ -372,7 +380,7 @@ const GestionProductos = () => {
                   </span>
                 </div>
               </div>
-              
+             
               <div className="mt-4 sm:mt-0 flex w-full sm:w-auto justify-center sm:justify-end">
                 {user && user.rol === "ADMINISTRADOR" && (
                   <Boton
@@ -407,14 +415,14 @@ const GestionProductos = () => {
               </div>
             </div>
           </div>
-          
+         
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded">
               <p className="font-medium">Error</p>
               <p>{error}</p>
             </div>
           )}
-          
+         
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
@@ -427,7 +435,7 @@ const GestionProductos = () => {
                   value={searchTerm}
                 />
               </div>
-              
+             
               <div className="flex flex-col justify-end">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Categoría
@@ -448,7 +456,7 @@ const GestionProductos = () => {
                   ))}
                 </select>
               </div>
-              
+             
               {(searchTerm || categoriaSeleccionada !== 'Todas') && (
                 <div className="mt-1 flex justify-end md:col-span-3">
                   <button
@@ -476,7 +484,7 @@ const GestionProductos = () => {
               )}
             </div>
           </div>
-          
+         
           {/* Lista de productos */}
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -487,7 +495,7 @@ const GestionProductos = () => {
                 </span>
               </h3>
             </div>
-            
+           
             {/* Mensaje de no resultados */}
             {productosFiltrados.length === 0 ? (
               <div className="col-span-full py-8 flex flex-col items-center justify-center text-center">
@@ -514,7 +522,7 @@ const GestionProductos = () => {
                 {currentItems.map(producto => renderProductoItem(producto))}
               </div>
             ) : (
-              // Vista de tabla
+           
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <div className="inline-block min-w-full align-middle px-4 sm:px-0">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -543,10 +551,10 @@ const GestionProductos = () => {
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                             <div className="font-medium text-gray-900 truncate max-w-[120px] sm:max-w-xs flex items-center">
                               {producto.id_imagen && productImages[producto.id_producto] ? (
-                                <img 
-                                  src={productImages[producto.id_producto]} 
+                                <img
+                                  src={productImages[producto.id_producto]}
                                   alt={producto.nombre_producto}
-                                  className="w-10 h-10 object-cover rounded-md mr-2" 
+                                  className="w-10 h-10 object-cover rounded-md mr-2"
                                 />
                               ) : (
                                 <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center mr-2">
@@ -572,10 +580,10 @@ const GestionProductos = () => {
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
                             <div className="flex justify-end gap-2">
                               <button onClick={() => handleEditarProducto(producto.id_producto)}>
-                                <Boton tipo="primario" label="Editar" size="small" />
+                                <Boton tipo="primario" label="Editar" size="small" className="py-1 text-xs h-8 w-16" />
                               </button>
                               <button onClick={() => handleEliminarProducto(producto.id_producto)}>
-                                <Boton tipo="cancelar" label="Eliminar" size="small" />
+                                <Boton tipo="cancelar" label="Eliminar" size="small" className="py-1 text-xs h-8 w-16" />
                               </button>
                             </div>
                           </td>
@@ -586,7 +594,6 @@ const GestionProductos = () => {
                 </div>
               </div>
             )}
-
             {productosFiltrados.length > 0 && (
               <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
                 <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
@@ -607,18 +614,18 @@ const GestionProductos = () => {
                     className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                     aria-label="Pagination"
                   >
-                    <button 
+                    <button
                       onClick={handlePrevPage}
                       disabled={currentPage === 1}
                       className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                        currentPage === 1 
-                          ? "text-gray-500 cursor-not-allowed" 
+                        currentPage === 1
+                          ? "text-gray-500 cursor-not-allowed"
                           : "text-gray-500 hover:bg-gray-100"
                       }`}
                     >
                       Anterior
                     </button>
-                  
+                 
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
                       if (totalPages <= 5) {
@@ -630,7 +637,7 @@ const GestionProductos = () => {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                      
+                     
                       return (
                         <button
                           key={pageNum}
@@ -645,13 +652,13 @@ const GestionProductos = () => {
                         </button>
                       );
                     })}
-                    
-                    <button 
+                   
+                    <button
                       onClick={handleNextPage}
                       disabled={currentPage === totalPages}
                       className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                        currentPage === totalPages 
-                          ? "text-gray-300 cursor-not-allowed" 
+                        currentPage === totalPages
+                          ? "text-gray-300 cursor-not-allowed"
                           : "text-gray-500 hover:bg-gray-100"
                       }`}
                     >
@@ -664,7 +671,7 @@ const GestionProductos = () => {
           </div>
         </Tipografia>
       </div>
-      
+     
       {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
