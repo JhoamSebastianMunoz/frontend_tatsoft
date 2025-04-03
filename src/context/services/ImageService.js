@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { productService } from './ApiService';
 
 // URLs base según el entorno
 const PRODUCTS_API_URL = '/products-api';
@@ -37,38 +36,47 @@ const imageApiClient = createApiClient();
 // Servicio para manejar las imágenes de productos
 export const imageService = {
   // Subir una imagen al servidor
-  uploadImage: async (imageFile) => {
+  uploadImage: async (imageFormData) => {
     try {
-      const formData = new FormData();
-      formData.append('image', imageFile);
+      // Verificación para depuración
+      console.log("FormData a enviar:");
+      for (let [key, value] of imageFormData.entries()) {
+        console.log(`${key}: ${value instanceof File ? `File(${value.name}, ${value.type}, ${value.size})` : value}`);
+      }
       
-      // Usar el cliente de axios configurado para productos
-      const response = await imageApiClient.post('/upload-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      // IMPORTANTE: No establecer manualmente Content-Type, deja que el navegador lo configure con el boundary
+      const response = await imageApiClient.post('/upload-image', imageFormData);
       
-      return response.data;
+      console.log('Respuesta del servidor al subir imagen:', response);
+      return response;
     } catch (error) {
       console.error('Error subiendo la imagen:', error);
       throw error;
     }
   },
-  
+
   // Obtener URL de una imagen por su nombre de archivo
   getImageUrl: async (fileName) => {
     if (!fileName) return null;
     
     try {
+      console.log('Obteniendo URL para imagen:', fileName);
       const response = await imageApiClient.get(`/get-image/${fileName}`);
-      return response.data.url;
+      
+      if (response.data && response.data.url) {
+        console.log('URL de imagen obtenida:', response.data.url);
+        return response.data.url;
+      } else {
+        console.warn('Respuesta sin URL válida:', response.data);
+        // Intentar recuperar la URL de otra forma si la respuesta tiene un formato diferente
+        return response.data.message || response.data || null;
+      }
     } catch (error) {
       console.error('Error obteniendo URL de imagen:', error);
       return null;
     }
   },
-  
+
   // Eliminar una imagen por su nombre de archivo
   deleteImage: async (fileName) => {
     if (!fileName) return false;
@@ -83,7 +91,7 @@ export const imageService = {
       return false;
     }
   },
-  
+
   // Obtener imagen para un producto específico
   getProductImage: async (productId) => {
     try {
