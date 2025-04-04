@@ -144,10 +144,10 @@ const VerCliente = () => {
   };
 
   const handleEditarCliente = () => {
-    // Navegar a la página de edición con el ID del cliente
-    navigate(`/editar/cliente/${id}`, { 
-      state: { origen: 'ver' } 
-    });
+    // Guardar la ruta de origen en localStorage (como en GestionClientes.jsx)
+    localStorage.setItem("rutaOrigenEdicion", `/ver/cliente/${id}`);
+    // Navegar a la página de edición con el ID del cliente (usando la misma ruta que GestionClientes)
+    navigate(`/editar-cliente/${id}`);
   };
 
   const handleVolver = () => {
