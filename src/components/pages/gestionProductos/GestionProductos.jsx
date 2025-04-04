@@ -251,7 +251,7 @@ const GestionProductos = () => {
             onClick={(e) => toggleMenu(producto.id_producto, e)}
             className="text-gray-700 hover:text-gray-700 focus:outline-none"
           >
-            <div className="bg-white bg-opacity-50 rounded-full p-1 hover:shadow-lg hover:bg-opacity-80 transition-all duration-200">
+            <div className="bg-white bg-opacity-50 rounded-full p-1 hover:shadow-lg hover:bg-opacity-80 transition-all duration-200 mr-2">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
               </svg>
@@ -673,7 +673,7 @@ const GestionProductos = () => {
       </div>
      
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 ">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">
             <div className="flex justify-center mb-4">
               <Icono name="eliminarAlert" size={65} />
