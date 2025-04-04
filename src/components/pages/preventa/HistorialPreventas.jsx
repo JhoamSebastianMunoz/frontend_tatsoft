@@ -589,22 +589,6 @@ const HistorialPreventas = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <Tipografia className="whitespace-nowrap text-sm sm:text-base">
-                    Estado:
-                  </Tipografia>
-                  <select
-                    className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto text-sm sm:text-base"
-                    value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value)}
-                  >
-                    <option value="Todos">Todos</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Confirmada">Confirmada</option>
-                    <option value="Cancelada">Cancelada</option>
-                  </select>
-                </div>
-
                 {user.rol === "COLABORADOR" && (
                   <Boton
                     tipo="primario"
@@ -730,25 +714,27 @@ const HistorialPreventas = () => {
                               />
 
                               {preventa.estado === "Pendiente" &&
-                                user.rol === "COLABORADOR" && (
+                                user.rol === "ADMINISTRADOR" && (
                                   <>
                                     <Boton
                                       label="Confirmar"
                                       tipo="success"
+                                      size="small"
                                       onClick={() =>
                                         confirmarPreventa(preventa.id_preventa)
                                       }
-                                      className="text-xs sm:text-sm"
+                                      className="text-xs py-1 px-2 text-green-600"
                                     />
                                     <Boton
                                       label="Cancelar"
                                       tipo="danger"
+                                      size="small"
                                       onClick={() =>
                                         handleCancelarPreventa(
                                           preventa.id_preventa
                                         )
                                       }
-                                      className="text-xs sm:text-sm"
+                                      className="text-xs py-1 px-2 text-red-600"
                                     />
                                   </>
                                 )}
@@ -791,55 +777,60 @@ const HistorialPreventas = () => {
                               {preventa.nombre_colaborador}
                             </div>
                           )}
-                          <div className="text-right text-sm font-medium">
-                            <div className="flex justify-end space-x-2 gap-2">
+                          <div className="text-sm font-medium">
+                            <div className="flex flex-col gap-1">
                               {preventa.estado === "Pendiente" &&
-                                user.rol === "COLABORADOR" && (
-                                  <>
-                                    <button
+                                user.rol === "ADMINISTRADOR" && (
+                                  <div className="flex gap-1 mb-1">
+                                    <Boton
+                                      label="Confirmar"
+                                      tipo="success"
+                                      size="small"
                                       onClick={() =>
                                         confirmarPreventa(preventa.id_preventa)
                                       }
-                                      className="text-green-600 hover:text-green-900"
-                                    >
-                                      Confirmar
-                                    </button>
-                                    <button
+                                      className="text-xs py-1 px-2 text-green-600"
+                                    />
+                                    <Boton
+                                      label="Cancelar"
+                                      tipo="danger"
+                                      size="small"
                                       onClick={() =>
                                         handleCancelarPreventa(
                                           preventa.id_preventa
                                         )
                                       }
-                                      className="text-red-600 hover:text-red-900"
-                                    >
-                                      Cancelar
-                                    </button>
-                                  </>
+                                      className="text-xs py-1 px-2 text-red-600"
+                                    />
+                                  </div>
                                 )}
-                              <Boton
-                                label="Ver"
-                                tipo="primario"
-                                size="medium"
-                                onClick={() =>
-                                verDetallesPreventa(preventa.id_preventa)
-                                }
-                                className="text-gray-600 hover:text-white"
-                              />
-                              <Boton
-                                label={
-                                  imprimiendoPreventa === preventa.id_preventa
-                                    ? "Cargando..."
-                                    : "Imprimir"
-                                }
-                                tipo="secundario"
-                                size="small"
-                                onClick={() =>
-                                  handleImprimir(preventa.id_preventa)
-                                }
-                                disabled={
-                                  imprimiendoPreventa === preventa.id_preventa
-                                }
-                              />
+                              <div className="flex gap-1">
+                                <Boton
+                                  label="Ver"
+                                  tipo="primario"
+                                  size="small"
+                                  onClick={() =>
+                                  verDetallesPreventa(preventa.id_preventa)
+                                  }
+                                  className="text-xs py-1 px-2"
+                                />
+                                <Boton
+                                  label={
+                                    imprimiendoPreventa === preventa.id_preventa
+                                      ? "..."
+                                      : "Imprimir"
+                                  }
+                                  tipo="secundario"
+                                  size="small"
+                                  onClick={() =>
+                                    handleImprimir(preventa.id_preventa)
+                                  }
+                                  disabled={
+                                    imprimiendoPreventa === preventa.id_preventa
+                                  }
+                                  className="text-xs py-1 px-2"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
