@@ -4,51 +4,83 @@ import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
 import Sidebar from "../../organisms/Sidebar";
 import AlertaInhabilitar from "../../pages/administrator/AlertaInhabilitar";
+import { clientService } from "../../../context/services/ApiService";
 
 const VerCliente = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [clienteStatus, setClienteStatus] = useState("activo");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [clienteData, setClienteData] = useState({
+    razonSocial: "",
+    nombre: "",
+    apellido: "",
+    celular: "",
+    nit: "",
+    direccion: "",
+    estado: "activo",
+    email: "",
+    fechaCreacion: ""
+  });
   const navigate = useNavigate();
   const { id } = useParams();
 
-
-  const clienteData = {
-    razonSocial: "Tienda el galán",
-    nombre: "Carlos Alberto",
-    apellido: "Muñoz",
-    celular: "3097735678",
-    nit: "12345678",
-    direccion: "B/El galan calle 30 #20",
-    estado: clienteStatus,
-    email: "carlosalberto@gmail.com",
-    fechaCreacion: "15/02/2023"
-  };
-
   useEffect(() => {
-    // Aquí iría la llamada a la API para obtener los datos del cliente
-    setLoading(true);
-    
-    // Simulación de llamada a API
+    // Obtener datos del cliente desde la API
     const fetchCliente = async () => {
       try {
-        // Aquí iría una llamada real a la API
-        // const response = await clienteService.getClienteById(id);
-        // setClienteData(response.data);
-        // setClienteStatus(response.data.estado);
+        setLoading(true);
+        const response = await clientService.getClientById(id);
+        console.log("Datos del cliente recibidos:", response.data);
         
-        // Simulamos un tiempo de carga
-        setTimeout(() => {
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Error al cargar datos del cliente:", error);
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          const cliente = response.data[0];
+          console.log("Cliente extraído:", cliente);
+          
+          // Extraer nombre y apellido del nombre completo
+          const nombreCompleto = cliente.nombre_completo_cliente ? cliente.nombre_completo_cliente.split(' ') : ['', ''];
+          
+          // Mapear los datos del cliente al formato esperado por el componente
+          const formattedData = {
+            razonSocial: cliente.razon_social || '',
+            nombre: nombreCompleto[0] || '',
+            apellido: nombreCompleto.slice(1).join(' ') || '',
+            celular: cliente.telefono || '',
+            nit: cliente.rut_nit || '',
+            direccion: cliente.direccion || '',
+            estado: cliente.estado?.toLowerCase() || 'activo',
+            fechaCreacion: formatearFecha(cliente.created_at) || ''
+          };
+          
+          console.log("Datos mapeados:", formattedData);
+          setClienteData(formattedData);
+          setClienteStatus(formattedData.estado);
+        } else {
+          console.error("No se encontraron datos de cliente válidos");
+          setError("No se pudieron encontrar los datos del cliente");
+        }
+      } catch (err) {
+        console.error("Error al cargar datos del cliente:", err);
+        setError("Error al cargar los datos del cliente: " + (err.message || "Error desconocido"));
+      } finally {
         setLoading(false);
       }
     };
 
     fetchCliente();
   }, [id]);
+
+  // Función para formatear la fecha en formato DD/MM/YYYY
+  const formatearFecha = (fechaStr) => {
+    if (!fechaStr) return "";
+    try {
+      const fecha = new Date(fechaStr);
+      return `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+    } catch (error) {
+      console.error("Error al formatear fecha:", error);
+      return fechaStr;
+    }
+  };
 
   const handleShowAlert = () => {
     setShowAlert(true);
@@ -58,10 +90,57 @@ const VerCliente = () => {
     setShowAlert(false);
   };
 
-  const handleConfirmStatusChange = () => {
-    // Aquí iría la llamada a la API para cambiar el estado del cliente
-    setClienteStatus(clienteStatus === "activo" ? "inactivo" : "activo");
-    setShowAlert(false);
+  const handleConfirmStatusChange = async () => {
+    try {
+      setLoading(true);
+      // Nuevo estado: si está activo, pasa a inactivo y viceversa
+      const nuevoEstado = clienteStatus === "activo" ? "inactivo" : "activo";
+      
+      // Obtener el ID real del cliente desde la API
+      const responseGet = await clientService.getClientById(id);
+      if (!responseGet.data || !responseGet.data[0] || !responseGet.data[0].id_cliente) {
+        throw new Error("No se pudo obtener el ID real del cliente");
+      }
+      
+      const clienteIdReal = responseGet.data[0].id_cliente;
+      
+      // Preparar los datos para actualizar
+      const clienteToUpdate = {
+        estado: nuevoEstado === "activo" ? "Activo" : "Inactivo"
+      };
+      
+      // Llamar a la API para actualizar el estado
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const response = await fetch(`https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/update-client/${clienteIdReal}`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(clienteToUpdate)
+      });
+      
+      if (response.ok) {
+        console.log(`Cliente ${nuevoEstado === "activo" ? "habilitado" : "inhabilitado"} correctamente`);
+        // Actualizar el estado local
+        setClienteStatus(nuevoEstado);
+        setClienteData(prev => ({
+          ...prev,
+          estado: nuevoEstado
+        }));
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Error al cambiar estado: ${errorText}`);
+      }
+    } catch (err) {
+      console.error("Error al cambiar estado del cliente:", err);
+      setError("Error al cambiar el estado del cliente: " + (err.message || "Error desconocido"));
+    } finally {
+      setLoading(false);
+      setShowAlert(false);
+    }
   };
 
   const handleEditarCliente = () => {
@@ -86,6 +165,23 @@ const VerCliente = () => {
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
           <Tipografia className="mt-4 text-gray-600">Cargando información del cliente...</Tipografia>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-100 ml-16 md:ml-64 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-md">
+          <div className="text-red-500 text-5xl mb-4">⚠️</div>
+          <Tipografia variant="h2" className="text-red-600 font-semibold mb-4">Error</Tipografia>
+          <Tipografia className="text-gray-600 mb-6">{error}</Tipografia>
+          <Botones
+            tipo="primario"
+            label="Volver a clientes"
+            onClick={handleVolver}
+          />
         </div>
       </div>
     );
@@ -177,13 +273,7 @@ const VerCliente = () => {
                   <Tipografia className="font-medium">{clienteData.fechaCreacion}</Tipografia>
                 </div>
               </div>
-              
-              <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
-                <Tipografia variant="label" className="text-gray-500 text-xs uppercase font-semibold block mb-1">
-                  Email
-                </Tipografia>
-                <Tipografia className="font-medium truncate">{clienteData.email}</Tipografia>
-              </div>
+
             </div>
           </div>
 
@@ -251,18 +341,7 @@ const VerCliente = () => {
                   </Tipografia>
                 </div>
               </div>
-
-              <div>
-                <Tipografia variant="label" className="text-gray-600 text-xs uppercase font-semibold block mb-1">
-                  Email
-                </Tipografia>
-                <div className="border border-orange-200 rounded-lg p-3  shadow-sm">
-                  <Tipografia className="font-medium">
-                    {clienteData.email}
-                  </Tipografia>
-                </div>
-              </div>
-
+              
               <div className="md:col-span-2">
                 <Tipografia variant="label" className="text-gray-600 text-xs uppercase font-semibold block mb-1">
                   Dirección
