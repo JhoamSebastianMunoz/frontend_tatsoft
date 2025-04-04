@@ -291,15 +291,6 @@ const GestionClientes = () => {
                                 setMenuAbierto(null);
                               }}
                             >
-                              Editar
-                            </li>
-                            <li
-                              className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
-                              onClick={() => {
-                                handleEliminarClick(cliente);
-                                setMenuAbierto(null);
-                              }}
-                            >
                               Eliminar
                             </li>
                           </ul>

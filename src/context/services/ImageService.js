@@ -37,53 +37,77 @@ const imageApiClient = createApiClient();
 // Servicio para manejar las imágenes de productos
 export const imageService = {
   // Subir una imagen al servidor
-  uploadImage: async (imageFile) => {
+  uploadImage: async (formData) => {
     try {
-      const formData = new FormData();
-      formData.append('image', imageFile);
+      console.log("FormData a enviar:");
       
-      // Usar el cliente de axios configurado para productos
-      const response = await imageApiClient.post('/upload-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      // Verificar que formData sea una instancia de FormData
+      if (!(formData instanceof FormData)) {
+        console.error("Error: El parámetro no es una instancia de FormData");
+        
+        // Si recibimos un File directamente, creamos un nuevo FormData
+        if (formData instanceof File) {
+          console.log("Recibido un objeto File directamente, creando FormData");
+          const newFormData = new FormData();
+          newFormData.append('image', formData);
+          formData = newFormData;
+        } else {
+          throw new Error("El parámetro debe ser una instancia de FormData o File");
         }
-      });
+      }
       
-      return response.data;
+      // IMPORTANTE: NO establecer Content-Type en las solicitudes multipart/form-data
+      // Axios lo configurará automáticamente con el boundary correcto
+      const response = await imageApiClient.post('/upload-image', formData);
+      
+      console.log('Respuesta del servidor al subir imagen:', response);
+      return response;
     } catch (error) {
       console.error('Error subiendo la imagen:', error);
       throw error;
     }
   },
-  
+
   // Obtener URL de una imagen por su nombre de archivo
   getImageUrl: async (fileName) => {
     if (!fileName) return null;
     
     try {
+      console.log('Obteniendo URL para imagen:', fileName);
       const response = await imageApiClient.get(`/get-image/${fileName}`);
-      return response.data.url;
+      
+      if (response.data && response.data.url) {
+        console.log('URL de imagen obtenida:', response.data.url);
+        return response.data.url;
+      } else {
+        console.warn('Respuesta sin URL válida:', response.data);
+        // Si hay una propiedad message, podría contener la URL o información útil
+        return response.data.message || null;
+      }
     } catch (error) {
       console.error('Error obteniendo URL de imagen:', error);
       return null;
     }
   },
-  
+
   // Eliminar una imagen por su nombre de archivo
   deleteImage: async (fileName) => {
     if (!fileName) return false;
     
     try {
-      await imageApiClient.delete('/delete-image', {
+      console.log('Eliminando imagen:', fileName);
+      const response = await imageApiClient.delete('/delete-image', {
         data: { fileName }
       });
+      
+      console.log('Respuesta eliminación de imagen:', response);
       return true;
     } catch (error) {
       console.error('Error eliminando imagen:', error);
       return false;
     }
   },
-  
+
   // Obtener imagen para un producto específico
   getProductImage: async (productId) => {
     try {
