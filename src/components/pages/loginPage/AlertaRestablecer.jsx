@@ -21,7 +21,7 @@ const AlertaRestablecer = ({ onClose }) => {
         <Tipografia>
           <Icono name="confirmar" size={55} />
           <p className="mt-4">Contraseña modificada correctamente</p>
-          <div className="mt-4">
+          <div className="mt-4  justify-center ">
             <Boton label="Aceptar" onClick={handleAceptar} />
           </div>
         </Tipografia>

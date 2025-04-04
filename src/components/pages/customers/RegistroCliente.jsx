@@ -146,9 +146,10 @@ const RegistroCliente = () => {
   const validarFormularioPaso2 = () => {
     let erroresTemp = {};
     let esValido = true;
-
-    if (!formData.numeroCelular.trim()) {
-      erroresTemp.numeroCelular = "El número de celular es obligatorio";
+    // Para números colombianos (10 dígitos, puede empezar con 3)
+    if (!/^3\d{9}$/.test(formData.numeroCelular)) {
+      erroresTemp.numeroCelular =
+        "Ingrese un número celular colombiano válido (10 dígitos empezando con 3)";
       esValido = false;
     } else if (!/^\d{10}$/.test(formData.numeroCelular)) {
       erroresTemp.numeroCelular = "Ingrese un número de 10 dígitos";
