@@ -30,64 +30,99 @@ const AsignacionZonas = () => {
         if (id) {
           const colaboradorResponse = await userService.getUserById(id);
           setNombreColaborador(colaboradorResponse.data.nombreCompleto || "Colaborador");
+          console.log("Respuesta del perfil de usuario:", colaboradorResponse);
+          console.log("ID del colaborador:", id);
+        }
+        
+        // Primero obtener zonas ya asignadas al usuario
+        let zonasAsignadasIds = [];
+        try {
+          const zonasUsuarioResponse = await userService.getUserZonas(id);
+          console.log("Respuesta de zonas del usuario:", zonasUsuarioResponse);
+          
+          if (zonasUsuarioResponse.data && Array.isArray(zonasUsuarioResponse.data.zonas)) {
+            const zonasAsignadas = zonasUsuarioResponse.data.zonas;
+            console.log("Zonas asignadas:", zonasAsignadas);
+            
+            // Extraer los IDs
+            zonasAsignadasIds = zonasAsignadas.map(zona => {
+              // Puede venir en diferentes formatos según la API
+              return zona.id_zona_de_trabajo || zona.id_zona_trabajo || zona.id || zona.zona_id;
+            }).filter(id => id !== undefined);
+            
+            console.log("IDs de zonas asignadas:", zonasAsignadasIds);
+            setZonasYaAsignadas(zonasAsignadasIds);
+          }
+        } catch (err) {
+          console.error("Error al cargar zonas asignadas:", err);
         }
         
         // Obtener todas las zonas
         const zonasResponse = await areaService.getAllAreas();
+        console.log("Todas las zonas disponibles:", zonasResponse);
         
         // Verificar que los datos sean correctos
         if (!Array.isArray(zonasResponse.data)) {
           throw new Error("Los datos de zonas no son válidos");
         }
         
-        // Transformar los datos y asegurar que los IDs sean únicos
-        const zonas = zonasResponse.data.map(zona => ({
-          id: zona.id_zona_trabajo,
-          nombre: zona.nombre_zona_trabajo,
-          ciudad: zona.ciudad,
-          descripcion: zona.descripcion,
-          selected: false,
-          disabled: false
-        }));
+        // Crear un mapa para zonasAsignadasIds para búsqueda más eficiente
+        const zonasAsignadasMap = new Map();
+        zonasAsignadasIds.forEach(id => {
+          console.log(`Agregando ID asignada al mapa: ${id} (tipo: ${typeof id})`);
+          zonasAsignadasMap.set(String(id), true);
+        });
         
-        // Verificar IDs únicos
-        const ids = zonas.map(zona => zona.id);
-        const uniqueIds = [...new Set(ids)];
+        console.log("Mapa de zonas asignadas:", [...zonasAsignadasMap.keys()]);
+        console.log("Cantidad de zonas totales antes de filtrado:", zonasResponse.data.length);
         
-        if (ids.length !== uniqueIds.length) {
-          console.error("Advertencia: Hay IDs duplicados en las zonas", ids);
-        }
+        // Filtrar las zonas que ya están asignadas
+        const zonasDisponibles = zonasResponse.data.filter(zona => {
+          // Obtener el ID de la zona - CORREGIDO con el nombre exacto de la propiedad
+          const zonaId = zona.id_zona_de_trabajo || zona.id_zona_trabajo || zona.id;
+          const zonaIdStr = String(zonaId);
+          
+          // Verificar si esta zona ya está asignada al usuario
+          const estaAsignada = zonasAsignadasMap.has(zonaIdStr);
+          
+          console.log(`Zona ID: ${zonaIdStr}, Nombre: ${zona.nombre_zona_trabajo || 'Sin nombre'}, ¿Ya asignada?: ${estaAsignada}`);
+          
+          return !estaAsignada;
+        });
+
+        // Transformar los datos filtrados
+        const zonas = zonasDisponibles.map((zona, index) => {
+          // Corregido para usar la propiedad correcta
+          const zonaId = zona.id_zona_de_trabajo || zona.id_zona_trabajo || zona.id || `fallback_${index}`;
+          console.log(`Transformando zona: ID=${zonaId}, Nombre=${zona.nombre_zona_trabajo || 'Sin nombre'}`);
+          
+          return {
+            id: zonaId,
+            nombre: zona.nombre_zona_trabajo || `Zona ${zonaId}`,
+            ciudad: zona.ciudad,
+            descripcion: zona.descripcion,
+            selected: false // Inicialmente no seleccionada
+          };
+        });
         
-        // Verificar zonas ya asignadas al usuario
-        try {
-          const zonasUsuarioResponse = await userService.getUserZonas(id);
-          if (zonasUsuarioResponse.data && Array.isArray(zonasUsuarioResponse.data.zonas)) {
-            const zonasAsignadas = zonasUsuarioResponse.data.zonas;
-            const zonasAsignadasIds = zonasAsignadas.map(zona => zona.id_zona_de_trabajo);
-
-            // Guardar las zonas ya asignadas
-            setZonasYaAsignadas(zonasAsignadasIds);
-
-            // Marcar zonas como seleccionadas y deshabilitadas
-            const zonasConSeleccion = zonas.map(zona => {
-              const yaAsignada = zonasAsignadasIds.includes(zona.id);
-              return {
-                ...zona,
-                selected: yaAsignada,
-                disabled: yaAsignada,
-              };
-            });
-
-            // Establecer el estado completo una sola vez
-            setSelectedZonas(zonasAsignadasIds);
-            setZonasList(zonasConSeleccion);
+        // Verificar IDs únicos y corregir si hay duplicados
+        const idsMap = new Map();
+        const zonasConIdsUnicos = zonas.map((zona, index) => {
+          const idStr = String(zona.id);
+          if (idsMap.has(idStr)) {
+            // Si hay un ID duplicado, crear un ID único
+            const nuevoId = `${zona.id}_${index}`;
+            console.log(`ID duplicado encontrado: ${zona.id}, asignando nuevo ID: ${nuevoId}`);
+            return { ...zona, id: nuevoId };
           } else {
-            setZonasList(zonas);
+            idsMap.set(idStr, true);
+            return zona;
           }
-        } catch (err) {
-          console.error("Error al cargar zonas asignadas:", err);
-          setZonasList(zonas);
-        }
+        });
+        
+        setSelectedZonas([]);
+        setZonasList(zonasConIdsUnicos);
+        
       } catch (err) {
         console.error("Error al cargar datos:", err);
         setError("Error al cargar datos. Por favor, intenta de nuevo más tarde.");
@@ -99,22 +134,23 @@ const AsignacionZonas = () => {
     fetchData();
   }, [id]);
 
-  // Función para manejar la selección de zona usando useCallback
+  // Función para manejar la selección de zona
   const handleSelectZona = useCallback((zonaId) => {
-    setZonasList(prevZonas =>
-      prevZonas.map(zona => {
-        if (zona.id === zonaId) {
-          if (zona.disabled) return zona; // no cambiar zonas deshabilitadas
-          return { ...zona, selected: !zona.selected };
-        }
-        return zona;
-      })
+    // Actualizar el estado de la lista de zonas
+    setZonasList(prevZonas => 
+      prevZonas.map(zona => 
+        zona.id === zonaId ? { ...zona, selected: !zona.selected } : zona
+      )
     );
-
+    
+    // Actualizar el array de zonas seleccionadas
     setSelectedZonas(prevSelected => {
-      return prevSelected.includes(zonaId)
-        ? prevSelected.filter(id => id !== zonaId)
-        : [...prevSelected, zonaId];
+      const isCurrentlySelected = prevSelected.includes(zonaId);
+      if (isCurrentlySelected) {
+        return prevSelected.filter(id => id !== zonaId);
+      } else {
+        return [...prevSelected, zonaId];
+      }
     });
   }, []);
 
@@ -126,15 +162,17 @@ const AsignacionZonas = () => {
 
     try {
       setAsignando(true);
-      // Usar la API correcta para asignar zonas al usuario
-      await userService.assignZonasToUser(id, { zonas: selectedZonas });
+      console.log("Enviando al servidor los siguientes IDs de zonas:", selectedZonas);
+      console.log("ID del usuario:", id);
+      
+      await userService.assignZonasToUser(id, selectedZonas);
       
       // Mostrar mensaje de éxito
       setSuccessMessage(`Zonas asignadas con éxito a ${nombreColaborador}`);
       setShowSuccessAlert(true);
     } catch (err) {
       console.error("Error al asignar zonas:", err);
-      setError("Error al asignar zonas. Por favor, intenta de nuevo más tarde.");
+      setError(`Error al asignar zonas: ${err.message}. Por favor, intenta de nuevo más tarde.`);
     } finally {
       setAsignando(false);
     }
@@ -160,6 +198,7 @@ const AsignacionZonas = () => {
         <Sidebar />
       </div>
       
+      <Tipografia>
       <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
         <div className="max-w-[1600px] mx-auto">
           <div className="w-full">
@@ -172,7 +211,7 @@ const AsignacionZonas = () => {
                 <Botones
                   label="Volver"
                   tipo="secundario"
-                  onClick={() => navigate(`/zonas-asignadas/${id}`)}
+                  onClick={() => navigate(`/gestion-zonas/colaboradores/${id}`)}
                   size="small"
                 />
               </div>
@@ -193,12 +232,12 @@ const AsignacionZonas = () => {
               </div>
 
               {zonasYaAsignadas.length > 0 && (
-                <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                <div className="flex flex-col bg-orange-50 rounded-lg p-4 border border-orange-200">
                   <Tipografia className="text-orange-800 font-medium">
                     Este colaborador ya tiene {zonasYaAsignadas.length} zona{zonasYaAsignadas.length !== 1 ? 's' : ''} asignada{zonasYaAsignadas.length !== 1 ? 's' : ''}
                   </Tipografia>
                   <Tipografia className="text-orange-700 text-sm mt-1">
-                    Las zonas ya asignadas aparecerán marcadas y no se pueden deseleccionar.
+                    Solo se muestran las zonas que aún no han sido asignadas a este colaborador.
                   </Tipografia>
                 </div>
               )}
@@ -231,19 +270,21 @@ const AsignacionZonas = () => {
                   {/* Lista de zonas */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {zonasList.length > 0 ? (
-                      zonasList.map((zona) => (
-                        <label 
-                          key={zona.id}
+                      zonasList.map((zona, index) => (
+                        <div 
+                          key={`zona-${zona.id}-${index}`}
                           className={`bg-white border rounded-lg p-4 flex items-start space-x-4 hover:shadow-md transition-all cursor-pointer
-                            ${zona.selected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}
-                            ${zona.disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            ${zona.selected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}`}
+                          onClick={() => handleSelectZona(zona.id)}
                         >
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               checked={zona.selected}
-                              disabled={zona.disabled}
-                              onChange={() => handleSelectZona(zona.id)}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleSelectZona(zona.id);
+                              }}
                               className="w-5 h-5 rounded border-orange-500 text-orange-600 focus:ring-orange-500"
                             />
                           </div>
@@ -265,19 +306,14 @@ const AsignacionZonas = () => {
                                   {zona.descripcion}
                                 </Tipografia>
                               )}
-                              {zona.disabled && (
-                                <Tipografia variant="body2" className="text-orange-600 font-medium">
-                                  Ya asignada
-                                </Tipografia>
-                              )}
                             </div>
                           </div>
-                        </label>
+                        </div>
                       ))
                     ) : (
                       <div className="col-span-full text-center py-8">
                         <Tipografia variant="body1" className="text-gray-500">
-                          No se encontraron zonas disponibles.
+                          No se encontraron zonas disponibles para asignar.
                         </Tipografia>
                       </div>
                     )}
@@ -301,18 +337,13 @@ const AsignacionZonas = () => {
               <Tipografia className="text-gray-600 mb-4">
                 {successMessage}
               </Tipografia>
-              <Botones
-                tipo="primario"
-                label="Aceptar"
-                size="large"
-                onClick={closeSuccessAlert}
-              />
             </div>
           </div>
         </div>
       )}
+      </Tipografia>
     </div>
   );
 };
 
-export default AsignacionZonas; 
+export default AsignacionZonas;

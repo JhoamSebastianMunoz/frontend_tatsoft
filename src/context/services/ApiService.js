@@ -90,8 +90,8 @@ export const userService = {
   getUserProfile: () => usersApi.get('/api/usuarios/perfil'),
   
   // Endpoints de asignación de zonas
-  assignZonasToUser: (idZona, colaboradoresIds) =>
-    usersApi.post(`/api/usuarios/asignar-zonas/${idZona}`, { zonas: colaboradoresIds }),
+  assignZonasToUser: (idUsuario, zonasIds) =>
+    usersApi.post(`/api/usuarios/asignar-zonas/${idUsuario}`, { zonas: zonasIds }),
   
   getUserZonas: (idUsuario) =>
     usersApi.get(`/api/usuarios/zonas/${idUsuario}`),
