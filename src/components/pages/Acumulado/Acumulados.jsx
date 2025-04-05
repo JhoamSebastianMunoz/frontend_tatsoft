@@ -546,7 +546,18 @@ verDetalles = (item) => {
               </table>
               
               <div class="total">
-                TOTAL: <span>$${formatearMoneda(detalle.total)}</span>
+                TOTAL: <span>$${(() => {
+                  // Calculate total as sum of all subtotals
+                  if (detalle.productos && detalle.productos.length > 0) {
+                    const totalCalculado = detalle.productos.reduce((sum, producto) => {
+                      const subtotal = producto.subtotal || (producto.precio * producto.cantidad);
+                      return sum + parseFloat(subtotal);
+                    }, 0);
+                    return formatearMoneda(totalCalculado);
+                  }
+                  // Fallback to provided total if products not available
+                  return formatearMoneda(detalle.total || detalle.total_vendido || 0);
+                })()}</span>
               </div>
             </div>
             
