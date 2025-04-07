@@ -267,7 +267,7 @@ const ColaboradoresZona = () => {
       
       <div className="flex-1 overflow-auto">
         <div className="mt-4 ml-4">
-            <Tipografia className="text-xl sm:text-2xl font-semibold text-gray-800">Gestión de clientes</Tipografia>
+            <Tipografia className="text-xl sm:text-2xl font-semibold text-gray-800">Zonas</Tipografia>
         </div>
         <div className="flex flex-col px-4 pt-5 pb-6 w-full">
           {error && (

@@ -1,13 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Sidebar from "../../organisms/Sidebar";
+// Importamos la biblioteca de Leaflet para el mapa
+import L from 'leaflet';
+import { MapContainer, TileLayer, FeatureGroup } from "react-leaflet";
+import { EditControl } from "react-leaflet-draw";
+import "leaflet/dist/leaflet.css";
+import "leaflet-draw/dist/leaflet.draw.css";
+
+// Arreglo para los iconos de Leaflet
+// Esto es necesario porque Leaflet espera que las imágenes estén en la ruta del servidor
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 const RegistrarZona = () => {
   const navigate = useNavigate();
+  const mapRef = useRef(null);
   const [zona, setZona] = useState({
     nombre_zona_trabajo: "",
     descripcion: "",
@@ -15,7 +31,15 @@ const RegistrarZona = () => {
   });
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [error, setError] = useState("");
+  const [areaSeleccionada, setAreaSeleccionada] = useState(false);
+  const [mapaListo, setMapaListo] = useState(false);
+  
+  // Aseguramos que el mapa se cargue solo después del renderizado completo
+  useEffect(() => {
+    setMapaListo(true);
+  }, []);
 
+  // Función para manejar los cambios en los inputs de texto
   const handleChange = (e) => {
     const { name, value } = e.target;
     setZona(prev => ({
@@ -24,11 +48,79 @@ const RegistrarZona = () => {
     }));
   };
 
+  // Función para manejar cuando se dibuja un área en el mapa
+  const handleAreaCreated = (e) => {
+    const { layerType, layer } = e;
+    
+    if (layerType === 'polygon' || layerType === 'rectangle') {
+      // Obtener las coordenadas del polígono dibujado
+      const coordenadas = layer.getLatLngs()[0].map(latlng => ({
+        lat: latlng.lat,
+        lng: latlng.lng
+      }));
+      
+      setZona(prev => ({
+        ...prev,
+        coordenadas: coordenadas
+      }));
+      
+      setAreaSeleccionada(true);
+      
+      // Actualizar la descripción para incluir información sobre el área seleccionada
+      const areaInfo = `Área seleccionada: ${coordenadas.length} puntos de coordenadas definidos.`;
+      if (!zona.descripcion.includes("Área seleccionada")) {
+        setZona(prev => ({
+          ...prev,
+          descripcion: prev.descripcion 
+            ? `${prev.descripcion}\n\n${areaInfo}`
+            : areaInfo
+        }));
+      }
+    }
+  };
+
+  // Función para manejar la edición de un área
+  const handleAreaEdited = (e) => {
+    const layers = e.layers;
+    layers.eachLayer((layer) => {
+      const coordenadas = layer.getLatLngs()[0].map(latlng => ({
+        lat: latlng.lat,
+        lng: latlng.lng
+      }));
+      
+      setZona(prev => ({
+        ...prev,
+        coordenadas: coordenadas
+      }));
+    });
+  };
+
+  // Función para manejar la eliminación de un área
+  const handleAreaDeleted = () => {
+    setZona(prev => ({
+      ...prev,
+      coordenadas: []
+    }));
+    setAreaSeleccionada(false);
+    
+    // Eliminar la información del área de la descripción
+    const descripcionLimpia = zona.descripcion.replace(/Área seleccionada:.*$/g, '').trim();
+    setZona(prev => ({
+      ...prev,
+      descripcion: descripcionLimpia
+    }));
+  };
+
   const handleGuardarClick = (e) => {
     e.preventDefault();
     
     if (!zona.nombre_zona_trabajo || !zona.descripcion) {
       setError("Por favor completa todos los campos requeridos");
+      return;
+    }
+    
+    if (zona.coordenadas.length === 0) {
+      setError("Por favor selecciona un área en el mapa");
       return;
     }
     
@@ -117,18 +209,46 @@ const RegistrarZona = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                                          <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700 block">
                         Ubicación
                       </label>
-                      <div className="border border-gray-300 rounded-lg overflow-hidden h-[300px] sm:h-[400px] flex items-center justify-center bg-gray-100">
-                        <div className="text-center">
-                          <Icono name="ubicacion" size="50" />
-                          <p className="mt-2 text-gray-600">Haz clic para simular selección de ubicación</p>
-                        </div>
+                      <div className="border border-gray-300 rounded-lg overflow-hidden h-[300px] sm:h-[400px]" id="map-container">
+                        {/* Implementación del mapa con Leaflet usando efecto de renderizado condicional */}
+                        {mapaListo && (
+                          <MapContainer 
+                            center={[4.6097, -74.0817]} // Centrado en Bogotá, Colombia (ajusta según tu ubicación)
+                            zoom={13} 
+                            style={{ width: '100%', height: '100%' }}
+                            ref={mapRef}
+                          >
+                            <TileLayer
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            />
+                            <FeatureGroup>
+                              <EditControl
+                                position="topright"
+                                onCreated={handleAreaCreated}
+                                onEdited={handleAreaEdited}
+                                onDeleted={handleAreaDeleted}
+                                draw={{
+                                  rectangle: true,
+                                  polygon: true,
+                                  circle: false,
+                                  circlemarker: false,
+                                  marker: false,
+                                  polyline: false
+                                }}
+                              />
+                            </FeatureGroup>
+                          </MapContainer>
+                        )}
                       </div>
                       <p className="text-sm text-gray-500">
-                        Selecciona la ubicación de la zona en el mapa
+                        {areaSeleccionada 
+                          ? "Área seleccionada. Puedes editar o eliminar el área dibujada."
+                          : "Dibuja un polígono o rectángulo para seleccionar el área de la zona."}
                       </p>
                     </div>
                   </div>
@@ -166,7 +286,7 @@ const RegistrarZona = () => {
                     ¿Desea guardar la zona?
                   </h3>
                   <p className="text-sm text-black mb-4">
-                    Esta acción registrará una nueva zona. ¿Estás seguro de continuar?
+                    Esta acción registrará una nueva zona con el área seleccionada. ¿Estás seguro de continuar?
                   </p>
                 </Tipografia>
               </div>
@@ -192,4 +312,4 @@ const RegistrarZona = () => {
   );
 };
 
-export default RegistrarZona; 
+export default RegistrarZona;

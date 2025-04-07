@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { areaService } from "../../../context/services/ApiService";
+import { areaService, userService } from "../../../context/services/ApiService";
 import Icono from "../../../components/atoms/Iconos";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Loading from "../../../components/Loading/Loading";
 import Sidebar from "../../organisms/Sidebar";
 import Boton from "../../atoms/Botones";
-import Buscador from "../../molecules/Buscador";
+import CampoTexto from "../../atoms/CamposTexto";
 import { useAuth } from "../../../context/AuthContext";
 
 const scrollStyle = `
@@ -34,6 +34,76 @@ const GestionZonas = () => {
   const [filtro, setFiltro] = useState("Todos");
   const [zonasFiltradas, setZonasFiltradas] = useState([]);
   const [menuAbierto, setMenuAbierto] = useState(null);
+  const [usuariosConZonas, setUsuariosConZonas] = useState([]);
+  const [todosUsuarios, setTodosUsuarios] = useState([]);
+
+  // Función para verificar si una zona está asignada a algún usuario
+  const verificarZonaAsignada = (idZona) => {
+    // Verificamos si la zona está en nuestro mapa de zonas asignadas
+    return usuariosConZonas.has(idZona);
+  };
+
+  // Obtener todos los usuarios y sus zonas asignadas
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Obtener todos los usuarios
+        const responseUsuarios = await userService.getAllUsers();
+        if (responseUsuarios && responseUsuarios.data) {
+          setTodosUsuarios(responseUsuarios.data);
+        } else {
+          console.error("No se pudieron obtener los usuarios");
+        }
+
+        // Obtener las zonas asignadas a usuarios
+        // Vamos a crear un mapa para registrar qué zonas están asignadas
+        const zonasAsignadas = new Map();
+
+        // Recorremos todos los usuarios conocidos
+        for (const usuario of responseUsuarios.data) {
+          try {
+            // Obtener zonas asignadas a este usuario
+            const responseZonas = await userService.getUserZonas(usuario.id_usuario);
+            
+            if (responseZonas && responseZonas.data) {
+              // Si la respuesta es un array, procesamos cada zona
+              if (Array.isArray(responseZonas.data)) {
+                responseZonas.data.forEach(zona => {
+                  if (zona.id_zona_de_trabajo) {
+                    zonasAsignadas.set(zona.id_zona_de_trabajo, true);
+                  }
+                });
+              } 
+              // A veces la API puede devolver un objeto con una propiedad que contiene el array
+              else if (responseZonas.data.zonas && Array.isArray(responseZonas.data.zonas)) {
+                responseZonas.data.zonas.forEach(zona => {
+                  if (zona.id_zona_de_trabajo) {
+                    zonasAsignadas.set(zona.id_zona_de_trabajo, true);
+                  }
+                });
+              }
+              // Si es un objeto simple con id_zona_de_trabajo
+              else if (responseZonas.data.id_zona_de_trabajo) {
+                zonasAsignadas.set(responseZonas.data.id_zona_de_trabajo, true);
+              }
+            }
+          } catch (error) {
+            console.error(`Error al obtener zonas para usuario ${usuario.id_usuario}:`, error);
+            // Continuamos con el siguiente usuario
+          }
+        }
+
+        // Guardamos el mapa de zonas asignadas para usarlo después
+        setUsuariosConZonas(zonasAsignadas);
+      } catch (error) {
+        console.error("Error al obtener usuarios y zonas:", error);
+      }
+    };
+
+    if (user && user.id_usuario) {
+      fetchData();
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchZonas = async () => {
@@ -43,17 +113,30 @@ const GestionZonas = () => {
         let response;
         
         if (isColaborador) {
-          console.log("Solicitando zonas para colaborador con ID:", user?.id_usuario);
           response = await areaService.getAreasByColaborador(user?.id_usuario);
         } else {
           response = await areaService.getAllAreas();
         }
         
-        console.log("Zonas obtenidas:", response?.data);
-        
         if (response && response.data) {
-        setZonas(response.data);
-        setZonasFiltradas(response.data);
+          // Si ya tenemos el mapa de zonas asignadas, añadimos el estado de asignación real a cada zona
+          let zonasConEstado;
+          
+          if (usuariosConZonas.size > 0) {
+            zonasConEstado = response.data.map(zona => ({
+              ...zona,
+              asignado: verificarZonaAsignada(zona.id_zona_de_trabajo)
+            }));
+          } else {
+            // Si no tenemos el mapa de zonas asignadas, marcamos todas como no asignadas
+            zonasConEstado = response.data.map(zona => ({
+              ...zona,
+              asignado: false
+            }));
+          }
+          
+          setZonas(zonasConEstado);
+          setZonasFiltradas(zonasConEstado);
         } else {
           console.error("Respuesta inválida:", response);
           setError("Error en el formato de datos recibidos");
@@ -73,33 +156,47 @@ const GestionZonas = () => {
     };
 
     if (user && user.id_usuario) {
-    fetchZonas();
+      fetchZonas();
     } else {
       console.log("No hay usuario autenticado o falta id_usuario");
       setLoading(false);
       setError("No se pudo autenticar el usuario");
     }
-  }, [user, isColaborador]);
+  }, [user, isColaborador, usuariosConZonas]);
 
   useEffect(() => {
-    let resultados = zonas;
-    
-    if (!isColaborador) {
-    if (filtro === "Asignados") {
-      resultados = resultados.filter(zona => zona.asignado === true);
-    } else if (filtro === "Por asignar") {
-      resultados = resultados.filter(zona => !zona.asignado);
+    // Aplicar filtros
+    const aplicarFiltros = () => {
+      let resultados = zonas;
+      
+      // Filtro por estado de asignación
+      if (!isColaborador) {
+        if (filtro === "Asignados") {
+          resultados = resultados.filter(zona => zona.asignado === true);
+        } else if (filtro === "Por asignar") {
+          resultados = resultados.filter(zona => !zona.asignado);
+        }
       }
-    }
+      
+      // Filtro por término de búsqueda
+      if (searchTerm) {
+        const terminoBusqueda = searchTerm.toLowerCase();
+        
+        resultados = resultados.filter((zona) => {
+          const nombreString = String(zona.nombre_zona_trabajo || "").toLowerCase();
+          const descripcionString = String(zona.descripcion || "").toLowerCase();
+          
+          return nombreString.includes(terminoBusqueda) || 
+                 descripcionString.includes(terminoBusqueda);
+        });
+        
+        console.log(`Resultados después de búsqueda: ${resultados.length} zonas`);
+      }
+      
+      setZonasFiltradas(resultados);
+    };
     
-    if (searchTerm) {
-      const termino = searchTerm.toLowerCase();
-      resultados = resultados.filter(zona => 
-        zona.nombre_zona_trabajo.toLowerCase().includes(termino)
-      );
-    }
-    
-    setZonasFiltradas(resultados);
+    aplicarFiltros();
   }, [zonas, filtro, searchTerm, isColaborador]);
 
   const handleEliminarClick = (zona) => {
@@ -130,8 +227,33 @@ const GestionZonas = () => {
     }
   };
 
-  const handleFiltroChange = (opcion) => {
-    setFiltro(opcion);
+  const limpiarFiltros = () => {
+    setSearchTerm("");
+    setFiltro("Todos");
+  };
+
+  // Función para mostrar las coordenadas en formato adecuado
+  const formatCoordenadas = (zona) => {
+    // Verificar si hay coordenadas en el formato esperado
+    if (zona.coordenadas && Array.isArray(zona.coordenadas) && zona.coordenadas.length > 0) {
+      // Si hay coordenadas en el array, usar la primera (como un punto central)
+      return `${zona.coordenadas[0].lat?.toFixed(4) || 'N/A'}, ${zona.coordenadas[0].lng?.toFixed(4) || 'N/A'}`;
+    }
+    // Si hay latitud/longitud en el objeto de la zona
+    else if (zona.latitud && zona.longitud) {
+      return `${zona.latitud.toFixed(4)}, ${zona.longitud.toFixed(4)}`;
+    }
+    // Si hay coordenadas pero como string
+    else if (typeof zona.coordenadas === 'string' && zona.coordenadas !== '23.6345, -102.5528') {
+      return zona.coordenadas;
+    }
+    // Si no hay coordenadas definidas
+    return 'Coordenadas no disponibles';
+  };
+
+  const handleVerZona = (id) => {
+    navigate(`/ver-zona/${id}`);
+    setMenuAbierto(null);
   };
 
   if (loading) {
@@ -194,7 +316,7 @@ const GestionZonas = () => {
                   {["Todos", "Asignados", "Por asignar"].map((opcion) => (
                     <button
                       key={opcion}
-                      onClick={() => handleFiltroChange(opcion)}
+                      onClick={() => setFiltro(opcion)}
                       className={`flex-shrink-0 px-4 py-2 rounded-full transition-all duration-200 ${
                         filtro === opcion
                           ? 'bg-gradient-to-r from-orange-600 to-orange-400 text-white shadow-md'
@@ -215,20 +337,19 @@ const GestionZonas = () => {
               )}
               
               <div className={`w-full ${!isColaborador ? 'md:w-1/2 pl-0 md:pl-4' : ''}`}>
-                <div className="flex flex-col items-center md:items-start">
-                  <div className="w-[200px] md:w-full">
-                    <Buscador
+                  <div className="flex flex-col md:pl 20 pl-0">
+                    <CampoTexto
                       placeholder="Buscar zona"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full"
+                      className="md:w-[100%] w-[100%]"
                     />
                   </div>
                   
                   {searchTerm && (
                     <div className="mt-1 flex justify-end w-[200px] md:w-full">
                       <button
-                        onClick={() => setSearchTerm("")}
+                        onClick={limpiarFiltros}
                         className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
                       >
                         <svg
@@ -243,11 +364,10 @@ const GestionZonas = () => {
                             clipRule="evenodd"
                           />
                         </svg>
-                        Limpiar filtro
+                        Limpiar filtros
                       </button>
                     </div>
                   )}
-                </div>
               </div>
             </div>
           </div>
@@ -279,11 +399,7 @@ const GestionZonas = () => {
                     className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative flex flex-col h-full"
                   >
                     <div
-                      className={`h-2 ${
-                        zona.asignado
-                          ? "bg-green-500"
-                          : "bg-gray-100"
-                      }`}
+                      className={`h-2 bg-gray-100`}
                     ></div>
                     
                     {!isColaborador && (
@@ -314,6 +430,15 @@ const GestionZonas = () => {
                               Ver Clientes
                             </li>
                             <li
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => {
+                                navigate(`/editar-zona/${zona.id_zona_de_trabajo}`);
+                                setMenuAbierto(null);
+                              }}
+                            >
+                              Ver Zona
+                            </li>
+                            <li
                               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                               onClick={() => {
                                 handleEliminarClick(zona);
@@ -333,7 +458,7 @@ const GestionZonas = () => {
                         {zona.nombre_zona_trabajo}
                       </h3>
                       <p className="text-gray-600 break-words text-sm mb-2">
-                        <strong>Ubicación:</strong> Coordenadas: {zona.latitud || "23.6345"}, {zona.longitud || "-102.5528"}
+                        <strong>Ubicación:</strong> {formatCoordenadas(zona)}
                       </p>
                       <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                         {zona.descripcion}
@@ -342,7 +467,7 @@ const GestionZonas = () => {
                         <span
                           className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                             zona.asignado
-                              ? "bg-slate-100 text-slate-800"
+                              ? "bg-green-100 text-green-800"
                               : "bg-orange-200 text-orange-800"
                           }`}
                         >
@@ -407,6 +532,7 @@ const GestionZonas = () => {
             <Tipografia size="lg" className="font-bold mb-1 md:mb-2 text-base md:text-lg">
               ¿Desea eliminar la zona?
             </Tipografia>
+            <br />
             <Tipografia className="mb-3 md:mb-6 text-gray-600 text-sm md:text-base">
               Esta acción no se puede deshacer.
             </Tipografia>
