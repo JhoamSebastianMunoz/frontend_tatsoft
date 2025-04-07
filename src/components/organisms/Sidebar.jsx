@@ -192,6 +192,12 @@ const Sidebar = () => {
       subPaths: ["/perfil"],
     },
     {
+      name: "mis-zonas",
+      label: "Mis Zonas",
+      path: "/mis-zonas",
+      icon: "zones",
+    },
+    {
       name: "preventa",
       label: "Gestión de Preventa",
       path: "/preventa/historial",

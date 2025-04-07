@@ -16,7 +16,7 @@ const scrollStyle = `
   }
 `;
 
-const Zonas = () => {
+const MisZonas = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { idZona } = useParams();
@@ -31,8 +31,11 @@ const Zonas = () => {
     const fetchZonas = async () => {
       try {
         setLoading(true);
-        const response = await areaService.getAllAreas();
-        const zonasData = response.data;
+        // Importante: aquí faltaba ejecutar la función con ()
+        const response = await userService.getUserOwnZonas();
+        
+        // La estructura de la respuesta es diferente, hay que acceder a response.data.zonas
+        const zonasData = response.data.zonas || [];
         setZonas(zonasData);
 
         // Si hay un ID de zona en la URL, seleccionar esa zona
@@ -92,7 +95,7 @@ const Zonas = () => {
 
   const handleNuevoCliente = () => {
     if (zonaSeleccionada) {
-      sessionStorage.setItem("returnPath", "/zonas");
+      sessionStorage.setItem("returnPath", "/mis-zonas");
       navigate("/registro/cliente", {
         state: {
           zonaId: zonaSeleccionada.id_zona_de_trabajo,
@@ -101,25 +104,6 @@ const Zonas = () => {
     } else {
       navigate("/registro/cliente");
     }
-  };
-
-  const handleAsignarZona = () => {
-    if (zonaSeleccionada) {
-      navigate("/gestion/usuarios", {
-        state: {
-          asignarZona: true,
-          zonaId: zonaSeleccionada.id_zona_de_trabajo,
-          zonaNombre: zonaSeleccionada.nombre_zona_trabajo,
-        },
-      });
-    } else {
-      navigate("/gestion/usuarios");
-    }
-  };
-
-  const handleEliminarZona = (zonaId) => {
-    // Implementar la lógica para eliminar la zona
-    console.log(`Eliminar zona con ID: ${zonaId}`);
   };
 
   return (
@@ -144,39 +128,18 @@ const Zonas = () => {
                     variant="subtitle"
                     className="text-black font-bold mb-3 sm:mb-0"
                   >
-                    Selección de Zona
+                    Mis Zonas Asignadas
                   </Tipografia>
 
-                  {user && user.rol !== "COLABORADOR" && (
-                    <div className="flex flex-wrap justify-center gap-2 mb-7 w-full sm:w-auto">
-                      <Boton
-                        label="Nuevo cliente"
-                        tipo="primario"
-                        onClick={handleNuevoCliente}
-                        size="small"
-                        className="w-full sm:w-auto"
-                      />
-                      <Boton
-                        label="Asignar Zonas"
-                        tipo="primario"
-                        onClick={handleAsignarZona}
-                        size="small"
-                        className="w-full sm:w-auto"
-                      />
-                      <Boton
-                        label="Eliminar Zona"
-                        tipo="cancelar"
-                        onClick={() =>
-                          zonaSeleccionada &&
-                          handleEliminarZona(
-                            zonaSeleccionada.id_zona_de_trabajo
-                          )
-                        }
-                        size="small"
-                        className="w-full sm:w-auto"
-                      />
-                    </div>
-                  )}
+                  <div className="flex flex-wrap justify-center gap-2 mb-7 w-full sm:w-auto">
+                    <Boton
+                      label="Nuevo cliente"
+                      tipo="primario"
+                      onClick={handleNuevoCliente}
+                      size="small"
+                      className="w-full sm:w-auto"
+                    />
+                  </div>
                 </div>
                 <div className="rounded-lg">
                   {loading && !zonas.length ? (
@@ -218,33 +181,37 @@ const Zonas = () => {
                     </div>
                   ) : (
                     <Tipografia className="text-center">
-                      No hay zonas disponibles.
+                      No hay zonas asignadas a tu usuario.
                     </Tipografia>
                   )}
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <div className="flex justify-between items-center">
-                <Tipografia
-                  variant="subtitle"
-                  className="text-black font-medium"
-                >
-                  {zonaSeleccionada
-                    ? zonaSeleccionada.nombre_colaborador ||
-                      "Colaborador no asignado"
-                    : "Selecciona una zona"}
-                </Tipografia>
-                {clientes.length > 0 && (
-                  <div className="px-2 py-1 bg-orange-200 rounded-full text-center min-w-[60px] flex items-center justify-center">
-                    <Tipografia className="text-xs text-orange-800 whitespace-nowrap">
-                      {clientes.length}{" "}
-                      {clientes.length === 1 ? "cliente" : "clientes"}
-                    </Tipografia>
-                  </div>
+            {zonaSeleccionada && (
+              <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex justify-between items-center">
+                  <Tipografia
+                    variant="subtitle"
+                    className="text-black font-medium"
+                  >
+                    Zona: {zonaSeleccionada.nombre_zona_trabajo}
+                  </Tipografia>
+                  {clientes.length > 0 && (
+                    <div className="px-2 py-1 bg-orange-200 rounded-full text-center min-w-[60px] flex items-center justify-center">
+                      <Tipografia className="text-xs text-orange-800 whitespace-nowrap">
+                        {clientes.length}{" "}
+                        {clientes.length === 1 ? "cliente" : "clientes"}
+                      </Tipografia>
+                    </div>
+                  )}
+                </div>
+                {zonaSeleccionada.descripcion && (
+                  <Tipografia className="text-gray-600 mt-2">
+                    {zonaSeleccionada.descripcion}
+                  </Tipografia>
                 )}
               </div>
-            </div>
+            )}
             <div className="bg-white rounded-lg shadow-md p-4 flex-1 w-full ">
               <Tipografia
                 variant="subtitle"
@@ -377,4 +344,4 @@ const Zonas = () => {
   );
 };
 
-export default Zonas;
+export default MisZonas;

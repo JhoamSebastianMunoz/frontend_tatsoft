@@ -105,7 +105,13 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleZonasClick = () => {
-    navigate("/zonas");
+    // Redirección basada en el rol del usuario
+    if (userData.rol === "COLABORADOR") {
+      navigate("/mis-zonas");
+    } else {
+      // Por defecto o para ADMINISTRADOR
+      navigate("/zonas");
+    }
   };
 
   const handleActualizarClick = () => {

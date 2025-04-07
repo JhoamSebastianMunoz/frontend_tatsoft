@@ -20,6 +20,7 @@ import DetalleSolicitud from "./components/pages/administrator/DetalleSolicitud"
 
 // Páginas de zonas
 import Zonas from "./components/pages/gestionZonas/Zonas";
+import MisZonas from "./components/pages/gestionZonas/MisZonas"
 import GestionZonas from "./components/pages/gestionZonas/GestionZonas";
 import EditarZona from "./components/pages/gestionZonas/EditarZona";
 import RegistrarZona from "./components/pages/gestionZonas/RegistraZona";
@@ -222,6 +223,15 @@ const App = () => {
           <ProtectedRoute
             element={<Zonas />}
             allowedRoles={["ADMINISTRADOR", "COLABORADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/mis-zonas"
+        element={
+          <ProtectedRoute
+            element={<MisZonas />}
+            allowedRoles={["COLABORADOR"]}
           />
         }
       />
