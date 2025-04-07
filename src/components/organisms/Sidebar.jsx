@@ -208,10 +208,10 @@ const Sidebar = () => {
     {
       name: "gest-clientes",
       label: "Registro de clientes",
-      path: "/registro/cliente",
+      path: "/solicitar/registrar/cliente",
       icon: "clients",
       subItems: [ "Solicitud de creación"],
-      subPaths: ["/registro/cliente"],
+      subPaths: ["/solicitar/registrar/cliente"],
     },
     {
       name: "gest-acumulados",

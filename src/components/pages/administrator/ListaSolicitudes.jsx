@@ -5,9 +5,8 @@ import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
 import Alerta from "../../molecules/Alertas";
-import Buscador from "../../molecules/Buscador";
-import FiltroOpciones from "../../molecules/FiltroOpciones";
 import Loading from "../../Loading/Loading";
+import { clientService } from "../../../context/services/ApiService";
 
 /**
  * Componente para mostrar y gestionar la lista de solicitudes pendientes
@@ -17,6 +16,7 @@ const ListaSolicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [filteredSolicitudes, setFilteredSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [processingRequest, setProcessingRequest] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAlerta, setShowAlerta] = useState(false);
@@ -27,79 +27,25 @@ const ListaSolicitudes = () => {
     onCancelar: null
   });
   const [selectedSolicitudId, setSelectedSolicitudId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
 
-  // Simular carga de solicitudes de la API
+  // Cargar solicitudes desde la API
   useEffect(() => {
     const fetchSolicitudes = async () => {
       try {
         setLoading(true);
-        // Datos de ejemplo simplificados
-        const mockData = [
-          {
-            id: 1,
-            fecha: "2023-08-15T14:30:00",
-            usuario: "Carlos Rodriguez",
-            descripcion: "Solicitud de creación de cliente: Supermercado El Progreso",
-            estado: "pendiente",
-            datos: {
-              razonSocial: "Supermercado El Progreso S.A.S",
-              nombreCompleto: "Juan Carlos Mendez",
-              direccion: "Calle 45 #12-34",
-              telefono: "3105556677",
-              nit: "900123456-7"
-            }
-          },
-          {
-            id: 2,
-            fecha: "2023-08-14T09:15:00",
-            usuario: "Maria Lopez",
-            descripcion: "Solicitud de creación de cliente: Tienda Naturista Vida Sana",
-            estado: "pendiente",
-            datos: {
-              razonSocial: "Vida Sana Ltda",
-              nombreCompleto: "Luis Alberto Garces",
-              direccion: "Carrera 23 #56-78",
-              telefono: "3158889900",
-              nit: "800987654-3"
-            }
-          },
-          {
-            id: 3,
-            fecha: "2023-08-13T16:45:00",
-            usuario: "Pedro Gomez",
-            descripcion: "Solicitud de creación de producto: Galletas Integrales 500g",
-            estado: "pendiente",
-            datos: {
-              nombre: "Galletas Integrales",
-              marca: "NutriSnacks",
-              precio: 12500,
-              descripcion: "Galletas integrales con semillas, caja de 500g",
-              categoria: "Alimentos"
-            }
-          },
-          {
-            id: 4,
-            fecha: "2023-08-12T10:30:00",
-            usuario: "Ana Martinez",
-            descripcion: "Solicitud de creación de zona: Sector Suroccidental",
-            estado: "pendiente",
-            datos: {
-              nombre: "Sector Suroccidental",
-              ciudad: "Medellín",
-              descripcion: "Zona que comprende los barrios El Poblado, Envigado y Sabaneta"
-            }
-          }
-        ];
+        const response = await clientService.getPendingRequests();
         
-        setTimeout(() => {
-          setSolicitudes(mockData);
-          setFilteredSolicitudes(mockData);
-          setLoading(false);
-        }, 1000);
-        
+        if (response && response.data) {
+          setSolicitudes(response.data);
+          setFilteredSolicitudes(response.data);
+        } else {
+          throw new Error("No se recibieron datos de solicitudes");
+        }
       } catch (err) {
         console.error("Error al cargar solicitudes:", err);
         setError("Ocurrió un error al cargar las solicitudes. Por favor, intente nuevamente.");
+      } finally {
         setLoading(false);
       }
     };
@@ -107,16 +53,16 @@ const ListaSolicitudes = () => {
     fetchSolicitudes();
   }, []);
 
-  // Simplificar el useEffect de filtrado
+  // Filtrado de solicitudes
   useEffect(() => {
     let filtered = [...solicitudes];
     
-    // Solo aplicar búsqueda por término
+    // Aplicar búsqueda por término
     if (searchTerm.trim() !== "") {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(sol => 
-        sol.descripcion.toLowerCase().includes(term) ||
-        sol.usuario.toLowerCase().includes(term)
+        (sol.razon_social && sol.razon_social.toLowerCase().includes(term)) ||
+        (sol.nombre_completo_cliente && sol.nombre_completo_cliente.toLowerCase().includes(term))
       );
     }
     
@@ -127,8 +73,8 @@ const ListaSolicitudes = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleVerDetalles = (id) => {
-    navigate(`/solicitudes/detalle/${id}`);
+  const toggleExpandDetails = (id) => {
+    setExpandedId(expandedId === id ? null : id);
   };
 
   const handleAceptarSolicitud = (id) => {
@@ -155,19 +101,19 @@ const ListaSolicitudes = () => {
 
   const confirmarAceptarSolicitud = async (id) => {
     try {
-      setLoading(true);
-      // Aquí iría la llamada a la API para aceptar la solicitud
-      // await solicitudesService.aceptarSolicitud(id);
+      setProcessingRequest(true);
+      // Llamada a la API para aceptar la solicitud
+      const response = await clientService.processClientRequest(id, 'accept');
       
-      // Simular respuesta exitosa
-      setTimeout(() => {
+      if (response && response.data) {
         // Actualizar la lista eliminando la solicitud aceptada
-        const updatedSolicitudes = solicitudes.filter(sol => sol.id !== id);
+        const updatedSolicitudes = solicitudes.filter(sol => sol.id_cliente !== id);
         setSolicitudes(updatedSolicitudes);
         setFilteredSolicitudes(updatedSolicitudes.filter(sol => {
           if (searchTerm.trim() !== "") {
-            return sol.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   sol.usuario.toLowerCase().includes(searchTerm.toLowerCase());
+            const term = searchTerm.toLowerCase();
+            return (sol.razon_social && sol.razon_social.toLowerCase().includes(term)) ||
+                   (sol.nombre_completo_cliente && sol.nombre_completo_cliente.toLowerCase().includes(term));
           }
           return true;
         }));
@@ -177,9 +123,9 @@ const ListaSolicitudes = () => {
           mensaje: "La solicitud ha sido aceptada exitosamente.",
           onAceptar: () => setShowAlerta(false)
         });
-        setLoading(false);
-      }, 1000);
-      
+      } else {
+        throw new Error("Error al procesar la solicitud");
+      }
     } catch (err) {
       console.error("Error al aceptar solicitud:", err);
       setAlertaConfig({
@@ -187,25 +133,27 @@ const ListaSolicitudes = () => {
         mensaje: "Error al aceptar la solicitud. Por favor, intente nuevamente.",
         onAceptar: () => setShowAlerta(false)
       });
-      setLoading(false);
+    } finally {
+      setProcessingRequest(false);
+      setShowAlerta(true);
     }
   };
 
   const confirmarRechazarSolicitud = async (id) => {
     try {
-      setLoading(true);
-      // Aquí iría la llamada a la API para rechazar la solicitud
-      // await solicitudesService.rechazarSolicitud(id);
+      setProcessingRequest(true);
+      // Llamada a la API para rechazar la solicitud
+      const response = await clientService.processClientRequest(id, 'reject');
       
-      // Simular respuesta exitosa
-      setTimeout(() => {
+      if (response && response.data) {
         // Actualizar la lista eliminando la solicitud rechazada
-        const updatedSolicitudes = solicitudes.filter(sol => sol.id !== id);
+        const updatedSolicitudes = solicitudes.filter(sol => sol.id_cliente !== id);
         setSolicitudes(updatedSolicitudes);
         setFilteredSolicitudes(updatedSolicitudes.filter(sol => {
           if (searchTerm.trim() !== "") {
-            return sol.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   sol.usuario.toLowerCase().includes(searchTerm.toLowerCase());
+            const term = searchTerm.toLowerCase();
+            return (sol.razon_social && sol.razon_social.toLowerCase().includes(term)) ||
+                   (sol.nombre_completo_cliente && sol.nombre_completo_cliente.toLowerCase().includes(term));
           }
           return true;
         }));
@@ -215,9 +163,9 @@ const ListaSolicitudes = () => {
           mensaje: "La solicitud ha sido rechazada.",
           onAceptar: () => setShowAlerta(false)
         });
-        setLoading(false);
-      }, 1000);
-      
+      } else {
+        throw new Error("Error al procesar la solicitud");
+      }
     } catch (err) {
       console.error("Error al rechazar solicitud:", err);
       setAlertaConfig({
@@ -225,12 +173,16 @@ const ListaSolicitudes = () => {
         mensaje: "Error al rechazar la solicitud. Por favor, intente nuevamente.",
         onAceptar: () => setShowAlerta(false)
       });
-      setLoading(false);
+    } finally {
+      setProcessingRequest(false);
+      setShowAlerta(true);
     }
   };
 
   // Función para formatear la fecha
   const formatearFecha = (fechaStr) => {
+    if (!fechaStr) return 'Fecha no disponible';
+    
     const fecha = new Date(fechaStr);
     return fecha.toLocaleDateString('es-CO', { 
       year: 'numeric', 
@@ -239,20 +191,6 @@ const ListaSolicitudes = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  // Obtener icono según el tipo de solicitud
-  const getIconoTipo = (tipo) => {
-    switch (tipo.toLowerCase()) {
-      case 'cliente':
-        return "gest-clientes";
-      case 'producto':
-        return "gest-productos";
-      case 'zona':
-        return "gest-zonas";
-      default:
-        return "opciones";
-    }
   };
 
   if (loading && solicitudes.length === 0) {
@@ -286,19 +224,21 @@ const ListaSolicitudes = () => {
             <div className="w-full">
               <div className="mt-2 mb-4">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
-                  Solicitud de Clientes
+                  Solicitudes de Clientes
                 </h1>
               </div>
 
               <div className="flex flex-col space-y-3 w-full">
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
-                  <div className="mb-6">
-                    <Buscador 
-                      placeholder="Buscar solicitudes..." 
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                  </div>
+
+                  {processingRequest && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+                      <div className="bg-white p-5 rounded-lg flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700 mb-4"></div>
+                        <Tipografia>Procesando solicitud...</Tipografia>
+                      </div>
+                    </div>
+                  )}
 
                   {filteredSolicitudes.length === 0 ? (
                     <div className="bg-gray-50 rounded-lg p-8 text-center">
@@ -310,46 +250,86 @@ const ListaSolicitudes = () => {
                     <div className="grid gap-4">
                       {filteredSolicitudes.map((solicitud) => (
                         <div 
-                          key={solicitud.id} 
-                          className="bg-white rounded-lg shadow-md p-4 border-l-4 border-primary"
+                          key={solicitud.id_cliente} 
+                          className="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                             <div className="flex items-start space-x-3 mb-3 sm:mb-0">
                               <div>
-                                <Tipografia variant="h6" className="font-semibold text-primary">
-                                  {solicitud.descripcion}
+                                <Tipografia variant="h6" className="font-semibold text-gray-800">
+                                  Solicitud de nuevo cliente: {solicitud.razon_social}
                                 </Tipografia>
                                 <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
                                   <Tipografia variant="body2" className="text-gray-600">
                                     <span className="flex items-center">
-                                      <Icono name="correo" size={14} className="mr-1" />
-                                      {solicitud.usuario}
+                                      <Icono name="user" size={14} className="mr-1" />
+                                      {solicitud.nombre_completo_cliente}
                                     </span>
                                   </Tipografia>
                                   <Tipografia variant="body2" className="text-gray-600">
-                                    {formatearFecha(solicitud.fecha)}
+                                    {formatearFecha(solicitud.fecha_registro)}
                                   </Tipografia>
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 ml-auto">
                               <Botones 
-                                label="Ver detalles" 
-                                variant="outlined"
-                                onClick={() => handleVerDetalles(solicitud.id)} 
+                                label={expandedId === solicitud.id_cliente ? "Ocultar" : "Ver detalles"} 
+                                tipo="secundario"
+                                onClick={() => toggleExpandDetails(solicitud.id_cliente)} 
+                                size="small"
                               />
                               <Botones 
                                 label="Aceptar" 
-                                variant="contained"
-                                onClick={() => handleAceptarSolicitud(solicitud.id)} 
+                                tipo="primario"
+                                onClick={() => handleAceptarSolicitud(solicitud.id_cliente)} 
+                                size="small"
                               />
                               <Botones 
                                 label="Rechazar" 
-                                variant="danger"
-                                onClick={() => handleRechazarSolicitud(solicitud.id)} 
+                                tipo="cancelar"
+                                onClick={() => handleRechazarSolicitud(solicitud.id_cliente)} 
+                                size="small"
                               />
                             </div>
                           </div>
+
+                          {/* Panel desplegable con detalles */}
+                          {expandedId === solicitud.id_cliente && (
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 transition-all duration-300">
+                              <h3 className="text-md font-semibold text-gray-700 mb-3">Información del Cliente</h3>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-white rounded-md p-3 shadow-sm">
+                                  <div className="mb-2">
+                                    <p className="text-sm font-medium text-gray-500">Razón Social</p>
+                                    <p className="text-gray-800">{solicitud.razon_social || "No disponible"}</p>
+                                  </div>
+                                  <div className="mb-2">
+                                    <p className="text-sm font-medium text-gray-500">NIT/RUT</p>
+                                    <p className="text-gray-800">{solicitud.rut_nit || "No disponible"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-500">Nombre Completo</p>
+                                    <p className="text-gray-800">{solicitud.nombre_completo_cliente || "No disponible"}</p>
+                                  </div>
+                                </div>
+                                <div className="bg-white rounded-md p-3 shadow-sm">
+                                  <div className="mb-2">
+                                    <p className="text-sm font-medium text-gray-500">Dirección</p>
+                                    <p className="text-gray-800">{solicitud.direccion || "No disponible"}</p>
+                                  </div>
+                                  <div className="mb-2">
+                                    <p className="text-sm font-medium text-gray-500">Teléfono</p>
+                                    <p className="text-gray-800">{solicitud.telefono || "No disponible"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-500">ID Zona</p>
+                                    <p className="text-gray-800">{solicitud.id_zona_de_trabajo || "No asignada"}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -357,13 +337,47 @@ const ListaSolicitudes = () => {
                   
                   {showAlerta && (
                     <div className="fixed inset-0 flex items-center justify-center z-50">
-                      <Alerta
-                        tipo={alertaConfig.tipo}
-                        mensaje={alertaConfig.mensaje}
-                        onAceptar={alertaConfig.onAceptar}
-                        onCancelar={alertaConfig.onCancelar}
-                        className="bg-white rounded-lg shadow-xl"
-                      />
+                      <div className="fixed inset-0 bg-black bg-opacity-50"></div>
+                      <div className="bg-white rounded-lg p-6 shadow-2xl relative z-10 w-full max-w-md mx-4">
+                        <div className="flex flex-col items-center text-center">
+                          {alertaConfig.tipo === "eliminacion" && (
+                            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                              <Icono name="eliminarAlert" size={40} className="text-red-500" />
+                            </div>
+                          )}
+                          {alertaConfig.tipo === "confirmacion" && (
+                            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                              <Icono name="confirmar" size={40} className="text-blue-500" />
+                            </div>
+                          )}
+                          {alertaConfig.tipo === "informacion" && (
+                            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                              <Icono name="confirmar" size={40} className="text-green-500" />
+                            </div>
+                          )}
+                          
+                          <Tipografia variant="subtitle1" className="font-bold text-lg mb-3">
+                            {alertaConfig.mensaje}
+                          </Tipografia>
+                          
+                          <div className="w-full flex flex-col sm:flex-row justify-center gap-4 mt-2">
+                            {alertaConfig.onCancelar && (
+                              <Botones
+                                tipo="secundario"
+                                label="Cancelar"
+                                onClick={alertaConfig.onCancelar}
+                                className="w-full sm:w-auto"
+                              />
+                            )}
+                            <Botones
+                              tipo={alertaConfig.tipo === "eliminacion" ? "cancelar" : "primario"}
+                              label={alertaConfig.tipo === "informacion" ? "Aceptar" : (alertaConfig.tipo === "eliminacion" ? "Rechazar" : "Aceptar")}
+                              onClick={alertaConfig.onAceptar}
+                              className="w-full sm:w-auto"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

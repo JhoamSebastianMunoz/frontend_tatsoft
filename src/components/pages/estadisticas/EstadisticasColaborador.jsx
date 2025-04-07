@@ -819,12 +819,6 @@ const EstadisticasColaborador = () => {
                 onClick={() => navigate("/ventas/historial")}
                 className="w-full sm:w-auto"
               />
-              <Boton
-                label="Volver a Estadísticas de Ventas"
-                onClick={() => navigate("/ventas/estadisticas")}
-                variant="secondary"
-                className="w-full sm:w-auto"
-              />
             </div>
           </div>
         </main>

@@ -33,6 +33,7 @@ import EditarCliente from "./components/pages/customers/EditarCliente";
 import GestionClientes from "./components/pages/customers/GestionClientes";
 import RegistroCliente from "./components/pages/customers/RegistroCliente";
 import VerCliente from "./components/pages/customers/VerCliente";
+import SolicitudRegistroCliente from "./components/pages/collaborator/SolicitudRegistroCliente";
 
 // Páginas de productos
 import RegistrarProducto from "./components/pages/gestionProductos/RegistrarProducto";
@@ -212,6 +213,15 @@ const App = () => {
           <ProtectedRoute
             element={<DetalleSolicitud />}
             allowedRoles={["ADMINISTRADOR"]}
+          />
+        }
+      />
+      <Route
+        path="/solicitar/registrar/cliente"
+        element={
+          <ProtectedRoute
+            element={<SolicitudRegistroCliente />}
+            allowedRoles={["COLABORADOR"]}
           />
         }
       />
