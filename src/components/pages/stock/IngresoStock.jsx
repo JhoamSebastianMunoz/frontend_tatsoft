@@ -155,7 +155,7 @@ const IngresoStock = () => {
       type: "warning",
       message: "¿Desea cancelar el ingreso? Esta acción no se puede deshacer.",
       onConfirm: () => {
-        navigate("/inventario");
+        navigate("/historial-ingresos");
       },
       onCancel: () => setAlert({ ...alert, show: false }),
     });
@@ -208,7 +208,7 @@ const IngresoStock = () => {
           message: "El ingreso se ha registrado correctamente.",
           onConfirm: () => {
             setAlert({ ...alert, show: false });
-            navigate("/inventario");
+            navigate("/historial-ingresos");
           },
         });
       }
@@ -348,7 +348,7 @@ const IngresoStock = () => {
                 label="Ver Historial"
                 tipo="primario"
                 type="submit"
-                onClick={() => navigate("/inventario")}
+                onClick={() => navigate("/historial-ingresos")}
                 className="w-full sm:w-auto bg-[#F78220] hover:bg-[#F78220]/90 text-white px-4 py-2 rounded-lg"
                 icon="arrow-left"
               />
@@ -476,7 +476,7 @@ const IngresoStock = () => {
                       
                       {ingreso.cantidad && (
                         <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-100">
-                          <Tipografia size="sm" className="text-blue-800 font-medium">
+                          <Tipografia size="sm" className="text-green-700 font-medium">
                             Stock Actualizado
                           </Tipografia>
                           <div className="text-2xl font-bold text-green-600">

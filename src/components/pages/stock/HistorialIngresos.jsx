@@ -52,8 +52,8 @@ const HistorialIngresos = () => {
         const historialFormateado = response.data.map(item => {
           console.log("Item original:", item);
           return {
-            id: item.id_producto,
-            id_registro: item.id_registro || item.id_producto, // Usar id_producto como fallback
+            id: item.id_registro,
+            id_registro: item.id_registro, // Usar id_producto como fallback
             fecha: formatearFecha(item.fecha_ingreso),
             producto: item.nombre_producto,
             cantidad: item.cantidad_ingresada,
@@ -169,9 +169,20 @@ const HistorialIngresos = () => {
         const response = await productService.getStockDetails(id_registro);
         console.log("Respuesta de detalles completa:", response);
         
-        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-          console.log("Detalles obtenidos:", response.data[0]);
-          setDetalleIngreso(response.data[0]);
+        // Verificamos si la respuesta contiene datos directamente como objeto
+        if (response.data) {
+          if (Array.isArray(response.data) && response.data.length > 0) {
+            // Si es un array, tomamos el primer elemento
+            console.log("Detalles obtenidos (array):", response.data[0]);
+            setDetalleIngreso(response.data[0]);
+          } else if (typeof response.data === 'object' && response.data.id_registro) {
+            // Si es un objeto con la propiedad id_registro, lo usamos directamente
+            console.log("Detalles obtenidos (objeto):", response.data);
+            setDetalleIngreso(response.data);
+          } else {
+            console.log("Formato de respuesta no reconocido:", response.data);
+            setError("No se encontraron detalles para este ingreso.");
+          }
           setExpandedRow(id);
         } else {
           console.log("No se encontraron detalles en la respuesta:", response.data);
