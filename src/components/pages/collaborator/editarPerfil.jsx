@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { userService } from "../../../context/services/ApiService";
 import AvatarTexto from "../../../components/molecules/AvatarTexto";
@@ -8,12 +8,16 @@ import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
 import Loading from "../../Loading/Loading";
 import Sidebar from "../../organisms/Sidebar";
-import { Link } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 
 const EditarPerfil = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Obtener la ruta anterior desde el state o usar una ruta predeterminada
+  const prevPath = location.state?.from || "/perfil";
+  
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -133,8 +137,8 @@ const EditarPerfil = () => {
 
       setTimeout(() => {
         setShowSuccessAlert(false);
-        // Opcional: redirigir al usuario de vuelta al perfil después de actualizar
-        // navigate("/profile");
+        // Redirigir al usuario a la página anterior después de actualizar
+        navigate(prevPath);
       }, 3000);
     } catch (err) {
       setError(err.message || "Error al actualizar el perfil");
@@ -146,6 +150,11 @@ const EditarPerfil = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Función para volver a la página anterior
+  const handleGoBack = () => {
+    navigate(prevPath);
   };
 
   if (loading) {
@@ -161,9 +170,9 @@ const EditarPerfil = () => {
         <div className="flex justify-center px-4 py-6 pt-5 transition-all duration-300 ml-16">
           <div className="w-full max-w-4xl">
             <div className="flex items-center mb-6">
-              <Link to="/profile" className="mr-4">
-                <IoArrowBack className="text-gray-600 text-xl" />
-              </Link>
+              <button onClick={handleGoBack} className="mr-4">
+                <IoArrowBack className="text-gray-600 text-2xl hover:text-orange-500 transition-colors" />
+              </button>
               <h1 className="text-2xl font-semibold text-gray-800">
                 Editar Perfil
               </h1>
@@ -308,15 +317,13 @@ const EditarPerfil = () => {
                   </div>
 
                   <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <Link to="/perfil" className="w-full sm:w-auto">
-                      <Botones
-                        tipo="secundario"
-                        label="Cancelar"
-                        size="medium"
-                        onClick={() => navigate("/perfil")}
-                        className="w-full sm:w-auto"
-                      />
-                    </Link>
+                    <Botones
+                      tipo="secundario"
+                      label="Cancelar"
+                      size="medium"
+                      onClick={handleGoBack}
+                      className="w-full sm:w-auto"
+                    />
                     <Botones
                       tipo="primario"
                       label={submitting ? "Guardando..." : "Guardar"}

@@ -178,7 +178,7 @@ const Profile = () => {
                   {esAdministrador && (
                     <Botones
                       label="Editar Perfil"
-                      onClick={() => navigate("/perfil/editar")}
+                      onClick={() => navigate("/editar/perfil")}
                       className="w-full sm:w-auto"
                     />
                   )}
