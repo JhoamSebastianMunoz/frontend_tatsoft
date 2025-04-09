@@ -140,6 +140,13 @@ const GestionUsuarios = () => {
     }
   };
 
+  // Función para editar usuario con navegación mejorada
+  const handleEditarUsuario = (userId) => {
+    navigate(`/editar/usuario/${userId}`, {
+      state: { from: location.pathname }
+    });
+  };
+
   if (loading) {
     return <Loading message="Cargando usuarios..." />;
   }
@@ -396,11 +403,7 @@ const GestionUsuarios = () => {
                                   label="Editar"
                                   size="small"
                                   tipo="primario"
-                                  onClick={() =>
-                                    navigate(
-                                      `/editar/usuario/${usuario.id_usuario}`
-                                    )
-                                  }
+                                  onClick={() => handleEditarUsuario(usuario.id_usuario)}
                                   className="w-full bg-[#F78220] hover:bg-[#e67316] text-white py-2 rounded-md"
                                 />
                               </div>

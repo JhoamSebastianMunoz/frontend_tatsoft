@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { userService } from "../../../context/services/ApiService";
 import AvatarTexto from "../../../components/molecules/AvatarTexto";
 import CampoTextoProfile from "../../../components/atoms/CamposTextoProfile";
@@ -14,6 +14,11 @@ import Sidebar from '../../organisms/Sidebar';
 const EditarUsuario = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Obtener la ruta anterior desde el state o usar una ruta predeterminada
+  const prevPath = location.state?.from || "/gestion/usuarios";
+
   const [userData, setUserData] = useState({
     nombre: "",
     apellido: "",
@@ -152,8 +157,8 @@ const EditarUsuario = () => {
         
         setOriginalData(updatedData);
         setUserData(updatedData);
-      setSuccess(true);
-      setShowAlert(true);
+        setSuccess(true);
+        setShowAlert(true);
       }
 
     } catch (error) {
@@ -203,7 +208,8 @@ const EditarUsuario = () => {
   };
 
   const handleVolver = () => {
-    navigate(`/gestion/usuarios`);
+    // Navegar a la ruta anterior almacenada
+    navigate(prevPath);
   };
 
   const nombreStr = userData.nombre || '';
