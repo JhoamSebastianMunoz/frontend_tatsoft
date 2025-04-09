@@ -24,14 +24,14 @@ const scrollStyle = `
 const GestionProductos = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   // Estados para datos
   const [productos, setProductos] = useState([]);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
   const [productImages, setProductImages] = useState({});
-  
+
   // Estados para UI
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -40,14 +40,14 @@ const GestionProductos = () => {
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [verTarjetas, setVerTarjetas] = useState(true);
-  
+
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6); // Ajustado para mostrar 3x2 en vista de tarjetas
-  
+
   // Ref para cerrar el menú al hacer clic fuera
   const menuRef = useRef(null);
-  
+
   // Cerrar el menú cuando se hace clic fuera
   useEffect(() => {
     function handleClickOutside(event) {
@@ -55,97 +55,112 @@ const GestionProductos = () => {
         setOpenMenuId(null);
       }
     }
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   // Cargar productos y categorías al montar el componente
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Cargar categorías
         const categoriasResponse = await productService.getAllCategories();
         if (categoriasResponse.data && Array.isArray(categoriasResponse.data)) {
           setCategorias(categoriasResponse.data);
         }
-        
+
         // Cargar productos
         const productosResponse = await productService.getAllProducts();
         if (productosResponse.data && Array.isArray(productosResponse.data)) {
           // Modificamos los productos para añadir color a los precios
-          const productosConColorPrecio = productosResponse.data.map(producto => ({
-            ...producto,
-            colorPrecio: 'text-orange-500'
-          }));
-          
+          const productosConColorPrecio = productosResponse.data.map(
+            (producto) => ({
+              ...producto,
+              colorPrecio: "text-orange-500",
+            })
+          );
+
           setProductos(productosConColorPrecio);
           setProductosFiltrados(productosConColorPrecio);
-          
+
           // Cargar imágenes para los productos
           const imagePromises = productosResponse.data.map(async (producto) => {
             if (producto.id_imagen) {
               try {
-                const imageUrl = await imageService.getImageUrl(producto.id_imagen);
+                const imageUrl = await imageService.getImageUrl(
+                  producto.id_imagen
+                );
                 if (imageUrl) {
                   return { id: producto.id_producto, url: imageUrl };
                 }
               } catch (error) {
-                console.error('Error cargando imagen para producto', producto.id_producto, error);
+                console.error(
+                  "Error cargando imagen para producto",
+                  producto.id_producto,
+                  error
+                );
               }
             }
             return { id: producto.id_producto, url: null };
           });
-          
+
           const productImagesResults = await Promise.all(imagePromises);
           const imagesMap = {};
           productImagesResults.forEach(({ id, url }) => {
             imagesMap[id] = url;
           });
-          
+
           setProductImages(imagesMap);
         }
       } catch (error) {
         console.error("Error cargando datos:", error);
-        setError("No se pudieron cargar los productos. Por favor, intenta de nuevo más tarde.");
+        setError(
+          "No se pudieron cargar los productos. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
-  
+
   // Filtrar productos según búsqueda y categoría
   useEffect(() => {
     let resultado = [...productos];
-    
+
     // Filtrar por término de búsqueda
     if (searchTerm.trim() !== "") {
-      resultado = resultado.filter(producto =>
-        producto.nombre_producto.toLowerCase().includes(searchTerm.toLowerCase())
+      resultado = resultado.filter((producto) =>
+        producto.nombre_producto
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       );
     }
-    
+
     // Filtrar por categoría seleccionada
-    if (categoriaSeleccionada !== 'Todas') {
-      resultado = resultado.filter(producto =>
-        producto.id_categoria === parseInt(categoriaSeleccionada)
+    if (categoriaSeleccionada !== "Todas") {
+      resultado = resultado.filter(
+        (producto) => producto.id_categoria === parseInt(categoriaSeleccionada)
       );
     }
-    
+
     setProductosFiltrados(resultado);
     setCurrentPage(1); // Resetear a primera página cuando cambian los filtros
   }, [searchTerm, categoriaSeleccionada, productos]);
-  
+
   // Cálculos para paginación
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = productosFiltrados.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = productosFiltrados.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(productosFiltrados.length / itemsPerPage);
 
   const handleSearchChange = (e) => {
@@ -189,17 +204,19 @@ const GestionProductos = () => {
 
   const confirmarEliminacion = async () => {
     if (!productoAEliminar) return;
-    
+
     try {
       setLoading(true);
-      
+
       // Primero, obtenemos el producto para saber si tiene imagen
-      const productoResponse = await productService.getProductById(productoAEliminar);
+      const productoResponse = await productService.getProductById(
+        productoAEliminar
+      );
       const imageId = productoResponse.data?.id_imagen;
-      
+
       // Eliminar el producto
       await productService.deleteProduct(productoAEliminar);
-      
+
       // Después de eliminar el producto, eliminar su imagen si existe
       if (imageId) {
         try {
@@ -209,12 +226,13 @@ const GestionProductos = () => {
           // No interrumpimos el flujo si falla la eliminación de la imagen
         }
       }
-      
+
       // Actualizar la lista de productos
-      setProductos(productos.filter(p => p.id_producto !== productoAEliminar));
+      setProductos(
+        productos.filter((p) => p.id_producto !== productoAEliminar)
+      );
       setShowDeleteModal(false);
       setProductoAEliminar(null);
-      
     } catch (error) {
       console.error("Error eliminando producto:", error);
       setError("Ocurrió un error al eliminar el producto.");
@@ -227,14 +245,14 @@ const GestionProductos = () => {
     setShowDeleteModal(false);
     setProductoAEliminar(null);
   };
-  
+
   // Handlers para paginación
   const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
-  
+
   const handlePrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
   if (loading && productos.length === 0) {
@@ -244,7 +262,10 @@ const GestionProductos = () => {
   // Renderizamos un ProductoItem personalizado con menú desplegable
   const renderProductoItem = (producto) => {
     return (
-      <div key={producto.id_producto} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative">
+      <div
+        key={producto.id_producto}
+        className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 relative"
+      >
         <div></div>
         <div className="absolute top-3 right-3 z-10">
           <button
@@ -257,7 +278,7 @@ const GestionProductos = () => {
               </svg>
             </div>
           </button>
-         
+
           {openMenuId === producto.id_producto && (
             <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
               <ul className="py-1 text-sm text-gray-600">
@@ -277,7 +298,7 @@ const GestionProductos = () => {
             </div>
           )}
         </div>
-       
+
         {/* Imagen del producto - Ajustada para mejor visualización */}
         <div
           className="cursor-pointer h-48"
@@ -297,11 +318,15 @@ const GestionProductos = () => {
             </div>
           ) : (
             <div className="h-full bg-gray-100 flex items-center justify-center">
-              <Icono name="gest-productos" size={50} className="text-gray-400" />
+              <Icono
+                name="gest-productos"
+                size={50}
+                className="text-gray-400"
+              />
             </div>
           )}
         </div>
-       
+
         {/* Información del producto */}
         <div
           className="p-4 flex-grow cursor-pointer"
@@ -310,41 +335,46 @@ const GestionProductos = () => {
           <h3 className="font-medium text-lg text-gray-900 break-words mb-2 truncate">
             {producto.nombre_producto}
           </h3>
-         
+
           <p className="text-gray-600 break-words text-sm mb-2">
-            <strong>Precio:</strong> <span className="text-orange-600 font-medium">${parseFloat(producto.precio).toFixed(2)}</span>
+            <strong>Precio:</strong>{" "}
+            <span className="text-orange-600 font-medium">
+              ${parseFloat(producto.precio).toFixed(2)}
+            </span>
           </p>
-         
+
           <p className="text-gray-600 break-words text-sm mb-2">
-            <strong>Categoría:</strong> {categorias.find(c => c.id_categoria === producto.id_categoria)?.nombre_categoria || "Sin categoría"}
+            <strong>Categoría:</strong>{" "}
+            {categorias.find((c) => c.id_categoria === producto.id_categoria)
+              ?.nombre_categoria || "Sin categoría"}
           </p>
-         
+
           <p className="text-gray-600 text-sm mb-2 line-clamp-2">
             {producto.descripcion || "Sin descripción"}
           </p>
-         
+
           <p className="mt-2">
-            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800`}>
+            <span
+              className={`inline-block px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800`}
+            >
               {producto.estado || "Activo"}
             </span>
           </p>
         </div>
-       
+
         {/* Botón de editar - Reducido a la mitad del tamaño */}
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 mt-auto">
-          <div className="flex justify-center items-center">
-            <button
-              onClick={() => handleEditarProducto(producto.id_producto)}
-              className="w-1/2" // Reducido a la mitad
-            >
-              <Boton
-                tipo="primario"
-                label="Editar"
-                size="small"
-                className="w-full py-1 text-xs h-8" // Tamaño reducido
-              />
-            </button>
-          </div>
+        <div className="px-4 py-2 mt-auto w-full">
+          <button
+            onClick={() => handleEditarProducto(producto.id_producto)}
+            className="w-full"
+          >
+            <Boton
+              tipo="primario"
+              label="Editar"
+              size="large"
+              className="w-full text-xs "
+            />
+          </button>
         </div>
       </div>
     );
@@ -361,13 +391,15 @@ const GestionProductos = () => {
           <Sidebar />
         </div>
       </div>
-     
+
       <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de productos</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">
+              Gestión de productos
+            </h1>
           </div>
-         
+
           <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
@@ -380,7 +412,7 @@ const GestionProductos = () => {
                   </span>
                 </div>
               </div>
-             
+
               <div className="mt-4 sm:mt-0 flex w-full sm:w-auto justify-center sm:justify-end">
                 {user && user.rol === "ADMINISTRADOR" && (
                   <Boton
@@ -415,14 +447,14 @@ const GestionProductos = () => {
               </div>
             </div>
           </div>
-         
+
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded">
               <p className="font-medium">Error</p>
               <p>{error}</p>
             </div>
           )}
-         
+
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
@@ -435,7 +467,7 @@ const GestionProductos = () => {
                   value={searchTerm}
                 />
               </div>
-             
+
               <div className="flex flex-col justify-end">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Categoría
@@ -446,18 +478,15 @@ const GestionProductos = () => {
                   onChange={handleCategoriaChange}
                 >
                   <option value="Todas">Todas las categorías</option>
-                  {categorias.map(cat => (
-                    <option
-                      key={cat.id_categoria}
-                      value={cat.id_categoria}
-                    >
+                  {categorias.map((cat) => (
+                    <option key={cat.id_categoria} value={cat.id_categoria}>
                       {cat.nombre_categoria}
                     </option>
                   ))}
                 </select>
               </div>
-             
-              {(searchTerm || categoriaSeleccionada !== 'Todas') && (
+
+              {(searchTerm || categoriaSeleccionada !== "Todas") && (
                 <div className="mt-1 flex justify-end md:col-span-3">
                   <button
                     onClick={() => {
@@ -484,7 +513,7 @@ const GestionProductos = () => {
               )}
             </div>
           </div>
-         
+
           {/* Lista de productos */}
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -495,15 +524,19 @@ const GestionProductos = () => {
                 </span>
               </h3>
             </div>
-           
+
             {/* Mensaje de no resultados */}
             {productosFiltrados.length === 0 ? (
               <div className="col-span-full py-8 flex flex-col items-center justify-center text-center">
                 <div className="bg-gray-100 p-4 rounded-full mb-3">
-                  <Icono name="gest-productos" size={60} className="text-gray-400" />
+                  <Icono
+                    name="gest-productos"
+                    size={60}
+                    className="text-gray-400"
+                  />
                 </div>
                 <p className="text-gray-500">
-                  {searchTerm || categoriaSeleccionada !== 'Todas'
+                  {searchTerm || categoriaSeleccionada !== "Todas"
                     ? "No hay productos que coincidan con tu búsqueda. Intenta con otros filtros."
                     : "Aún no hay productos registrados. Comienza agregando un nuevo producto."}
                 </p>
@@ -519,10 +552,9 @@ const GestionProductos = () => {
             ) : verTarjetas ? (
               // Vista de tarjetas
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {currentItems.map(producto => renderProductoItem(producto))}
+                {currentItems.map((producto) => renderProductoItem(producto))}
               </div>
             ) : (
-           
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <div className="inline-block min-w-full align-middle px-4 sm:px-0">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -547,10 +579,14 @@ const GestionProductos = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {currentItems.map((producto) => (
-                        <tr key={producto.id_producto} className="hover:bg-gray-50">
+                        <tr
+                          key={producto.id_producto}
+                          className="hover:bg-gray-50"
+                        >
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                             <div className="font-medium text-gray-900 truncate max-w-[120px] sm:max-w-xs flex items-center">
-                              {producto.id_imagen && productImages[producto.id_producto] ? (
+                              {producto.id_imagen &&
+                              productImages[producto.id_producto] ? (
                                 <img
                                   src={productImages[producto.id_producto]}
                                   alt={producto.nombre_producto}
@@ -558,7 +594,11 @@ const GestionProductos = () => {
                                 />
                               ) : (
                                 <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center mr-2">
-                                  <Icono name="gest-productos" size={20} className="text-gray-400" />
+                                  <Icono
+                                    name="gest-productos"
+                                    size={20}
+                                    className="text-gray-400"
+                                  />
                                 </div>
                               )}
                               {producto.nombre_producto}
@@ -570,7 +610,9 @@ const GestionProductos = () => {
                             </span>
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-gray-500 truncate max-w-[120px] sm:max-w-xs">
-                            {categorias.find(c => c.id_categoria === producto.id_categoria)?.nombre_categoria || "Sin categoría"}
+                            {categorias.find(
+                              (c) => c.id_categoria === producto.id_categoria
+                            )?.nombre_categoria || "Sin categoría"}
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
@@ -579,11 +621,29 @@ const GestionProductos = () => {
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
                             <div className="flex justify-end gap-2">
-                              <button onClick={() => handleEditarProducto(producto.id_producto)}>
-                                <Boton tipo="primario" label="Editar" size="small" className="py-1 text-xs h-8 w-16" />
+                              <button
+                                onClick={() =>
+                                  handleEditarProducto(producto.id_producto)
+                                }
+                              >
+                                <Boton
+                                  tipo="primario"
+                                  label="Editar"
+                                  size="small"
+                                  className="py-1 text-xs h-8 w-16"
+                                />
                               </button>
-                              <button onClick={() => handleEliminarProducto(producto.id_producto)}>
-                                <Boton tipo="cancelar" label="Eliminar" size="small" className="py-1 text-xs h-8 w-16" />
+                              <button
+                                onClick={() =>
+                                  handleEliminarProducto(producto.id_producto)
+                                }
+                              >
+                                <Boton
+                                  tipo="cancelar"
+                                  label="Eliminar"
+                                  size="small"
+                                  className="py-1 text-xs h-8 w-16"
+                                />
                               </button>
                             </div>
                           </td>
@@ -598,7 +658,9 @@ const GestionProductos = () => {
               <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
                 <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
                   <p>
-                    Mostrando <span className="font-medium">{indexOfFirstItem + 1}</span> a{" "}
+                    Mostrando{" "}
+                    <span className="font-medium">{indexOfFirstItem + 1}</span>{" "}
+                    a{" "}
                     <span className="font-medium">
                       {Math.min(indexOfLastItem, productosFiltrados.length)}
                     </span>{" "}
@@ -625,7 +687,7 @@ const GestionProductos = () => {
                     >
                       Anterior
                     </button>
-                 
+
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
                       if (totalPages <= 5) {
@@ -637,22 +699,22 @@ const GestionProductos = () => {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                     
+
                       return (
                         <button
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
                           className={`relative inline-flex items-center px-4 py-2 border ${
                             currentPage === pageNum
-                              ? 'text-gray-700 z-10'
-                              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
+                              ? "text-gray-700 z-10"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
                           } text-sm font-medium`}
                         >
                           {pageNum}
                         </button>
                       );
                     })}
-                   
+
                     <button
                       onClick={handleNextPage}
                       disabled={currentPage === totalPages}
@@ -671,7 +733,7 @@ const GestionProductos = () => {
           </div>
         </Tipografia>
       </div>
-     
+
       {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 ">
           <div className="bg-white rounded-lg p-6 shadow-lg w-80">

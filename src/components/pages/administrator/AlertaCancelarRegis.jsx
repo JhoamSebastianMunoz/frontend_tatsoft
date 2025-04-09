@@ -44,6 +44,7 @@ const AlertaCancelar = ({ onClose, onConfirm, onCancel }) => {
               className="w-full sm:flex-1 text-sm sm:text-base py-2"
             />
             <Boton
+              tipo="alerta"
               label="Aceptar"
               onClick={handleConfirmar}
               className="w-full sm:flex-1 text-sm sm:text-base py-2"
