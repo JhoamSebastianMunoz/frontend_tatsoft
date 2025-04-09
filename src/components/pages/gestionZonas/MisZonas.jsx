@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {areaService, userService} from "../../../context/services/ApiService";
+import { areaService, userService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
 import Sidebar from "../../organisms/Sidebar";
@@ -26,14 +26,13 @@ const MisZonas = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  
   useEffect(() => {
     const fetchZonas = async () => {
       try {
         setLoading(true);
         // Importante: aquí faltaba ejecutar la función con ()
         const response = await userService.getUserOwnZonas();
-        
+
         // La estructura de la respuesta es diferente, hay que acceder a response.data.zonas
         const zonasData = response.data.zonas || [];
         setZonas(zonasData);
@@ -114,7 +113,12 @@ const MisZonas = () => {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <div className="flex flex-col px-4 pt-5 pb-6 w-full">
+        <div className="mt-4 mb-5">
+          <Tipografia className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">
+            Mis Zonas
+          </Tipografia>
+        </div>
+        <div className="flex flex-col px-4 pt-2 pb-6 w-full">
           {error && (
             <div className="mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md">
               <Tipografia className="text-red-700">{error}</Tipografia>
@@ -130,16 +134,6 @@ const MisZonas = () => {
                   >
                     Mis Zonas Asignadas
                   </Tipografia>
-
-                  <div className="flex flex-wrap justify-center gap-2 mb-7 w-full sm:w-auto">
-                    <Boton
-                      label="Nuevo cliente"
-                      tipo="primario"
-                      onClick={handleNuevoCliente}
-                      size="small"
-                      className="w-full sm:w-auto"
-                    />
-                  </div>
                 </div>
                 <div className="rounded-lg">
                   {loading && !zonas.length ? (

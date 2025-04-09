@@ -25,6 +25,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const esAdministrador = user && user.rol === "ADMINISTRADOR";
+
   // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
@@ -173,12 +175,13 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="mt-4 md:mt-0">
-                  <Botones
-                    label="Editar perfil"
-                    tipo="primario"
-                    onClick={() => navigate("/editar/perfil")}
-                    className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md focus:outline-none"
-                  />
+                  {esAdministrador && (
+                    <Botones
+                      label="Editar Perfil"
+                      onClick={() => navigate("/perfil/editar")}
+                      className="w-full sm:w-auto"
+                    />
+                  )}
                 </div>
               </div>
             </div>

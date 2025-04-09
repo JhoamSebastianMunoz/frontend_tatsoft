@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { saleService } from "../../../context/services/ApiService";
+import { presaleService } from "../../../context/services/ApiService";
 
 // Componentes
 import Sidebar from "../../organisms/Sidebar";
@@ -21,7 +21,6 @@ import Loading from "../../Loading/Loading";
 import Tipografia from "../../atoms/Tipografia";
 import Boton from "../../atoms/Botones";
 import Icono from "../../atoms/Iconos";
-
 
 const CHART_COLORS = {
   clientes: "#5E60CE",
@@ -52,7 +51,7 @@ const EstadisticasColaborador = () => {
     new Date().getFullYear()
   );
 
-  // Obtener lista de años disponibles
+  // Obtener lista de años disponibles (últimos 3 años)
   const [aniosDisponibles, setAniosDisponibles] = useState([]);
 
   // Nombres de los meses para el filtro
@@ -71,206 +70,6 @@ const EstadisticasColaborador = () => {
     "Diciembre",
   ];
 
-  // Datos quemados para demostración
-  const datosQuemadosClientes = [
-    {
-      id_cliente: 1,
-      nombre_cliente: "Juan Pérez Martínez",
-      total_compras: 5824.5,
-      cantidad_compras: 12,
-      razon_social: "Distribuidora El Sol S.A.",
-    },
-    {
-      id_cliente: 2,
-      nombre_cliente: "María Rodríguez López",
-      total_compras: 4389.75,
-      cantidad_compras: 7,
-      razon_social: "Comercial Rodríguez S.A.S",
-    },
-    {
-      id_cliente: 3,
-      nombre_cliente: "Carlos Gómez Díaz",
-      total_compras: 3957.2,
-      cantidad_compras: 9,
-      razon_social: "Importaciones Gómez Ltda.",
-    },
-    {
-      id_cliente: 4,
-      nombre_cliente: "Ana Fernández Ruiz",
-      total_compras: 3245.0,
-      cantidad_compras: 5,
-      razon_social: "Tiendas Ana S.A.",
-    },
-    {
-      id_cliente: 5,
-      nombre_cliente: "Roberto Sánchez",
-      total_compras: 2980.3,
-      cantidad_compras: 8,
-      razon_social: "Comercializadora RBS",
-    },
-    {
-      id_cliente: 6,
-      nombre_cliente: "Laura Torres Vega",
-      total_compras: 2650.45,
-      cantidad_compras: 6,
-      razon_social: "Almacenes Torres",
-    },
-    {
-      id_cliente: 7,
-      nombre_cliente: "Miguel Ángel Rivas",
-      total_compras: 2345.8,
-      cantidad_compras: 5,
-      razon_social: "Distribuciones Rivas",
-    },
-    {
-      id_cliente: 8,
-      nombre_cliente: "Patricia Mendoza",
-      total_compras: 2100.0,
-      cantidad_compras: 4,
-      razon_social: "Comercializadora PM",
-    },
-    {
-      id_cliente: 9,
-      nombre_cliente: "Fernando López",
-      total_compras: 1870.25,
-      cantidad_compras: 3,
-      razon_social: "Tiendas FL Express",
-    },
-    {
-      id_cliente: 10,
-      nombre_cliente: "Claudia Morales",
-      total_compras: 1540.6,
-      cantidad_compras: 3,
-      razon_social: "CM Distribuciones",
-    },
-  ];
-
-  const datosQuemadosProductosMasVendidos = [
-    {
-      id_producto: 1,
-      nombre_producto: "Laptop Gamer XTreme",
-      cantidad_vendida: 42,
-      monto_total: 38500,
-    },
-    {
-      id_producto: 2,
-      nombre_producto: "Smartphone Galaxy S22",
-      cantidad_vendida: 38,
-      monto_total: 25650,
-    },
-    {
-      id_producto: 3,
-      nombre_producto: "Smart TV 55 pulgadas",
-      cantidad_vendida: 25,
-      monto_total: 18750,
-    },
-    {
-      id_producto: 4,
-      nombre_producto: "Auriculares Bluetooth",
-      cantidad_vendida: 60,
-      monto_total: 6000,
-    },
-    {
-      id_producto: 5,
-      nombre_producto: "Tablet Pro 12",
-      cantidad_vendida: 22,
-      monto_total: 13200,
-    },
-    {
-      id_producto: 6,
-      nombre_producto: "Monitor Curvo 32",
-      cantidad_vendida: 18,
-      monto_total: 7920,
-    },
-    {
-      id_producto: 7,
-      nombre_producto: "Cámara Digital HD",
-      cantidad_vendida: 15,
-      monto_total: 7500,
-    },
-    {
-      id_producto: 8,
-      nombre_producto: "Impresora Multifuncional",
-      cantidad_vendida: 12,
-      monto_total: 4200,
-    },
-    {
-      id_producto: 9,
-      nombre_producto: "Router WiFi 6",
-      cantidad_vendida: 20,
-      monto_total: 3980,
-    },
-    {
-      id_producto: 10,
-      nombre_producto: "Disco Duro Externo 2TB",
-      cantidad_vendida: 28,
-      monto_total: 3920,
-    },
-  ];
-
-  const datosQuemadosProductosMenosVendidos = [
-    {
-      id_producto: 11,
-      nombre_producto: "Teclado Mecánico Gamer",
-      cantidad_vendida: 3,
-      monto_total: 450,
-    },
-    {
-      id_producto: 12,
-      nombre_producto: "Adaptador HDMI a VGA",
-      cantidad_vendida: 4,
-      monto_total: 120,
-    },
-    {
-      id_producto: 13,
-      nombre_producto: "Cargador Portátil",
-      cantidad_vendida: 5,
-      monto_total: 250,
-    },
-    {
-      id_producto: 14,
-      nombre_producto: "Cable USB tipo C",
-      cantidad_vendida: 6,
-      monto_total: 90,
-    },
-    {
-      id_producto: 15,
-      nombre_producto: "Soporte para Laptop",
-      cantidad_vendida: 4,
-      monto_total: 200,
-    },
-    {
-      id_producto: 16,
-      nombre_producto: "Funda para Tablet",
-      cantidad_vendida: 7,
-      monto_total: 175,
-    },
-    {
-      id_producto: 17,
-      nombre_producto: "Lector de Tarjetas",
-      cantidad_vendida: 3,
-      monto_total: 75,
-    },
-    {
-      id_producto: 18,
-      nombre_producto: "Batería de Reemplazo",
-      cantidad_vendida: 2,
-      monto_total: 180,
-    },
-    {
-      id_producto: 19,
-      nombre_producto: "Pasta Térmica Premium",
-      cantidad_vendida: 5,
-      monto_total: 100,
-    },
-    {
-      id_producto: 20,
-      nombre_producto: "Hub USB 4 puertos",
-      cantidad_vendida: 4,
-      monto_total: 120,
-    },
-  ];
-
   // Función para formatear moneda
   const formatearMoneda = (valor) => {
     return new Intl.NumberFormat("es-CO", {
@@ -280,54 +79,102 @@ const EstadisticasColaborador = () => {
     }).format(valor);
   };
 
-  // Cargar datos (usando datos quemados)
+  // Función para calcular las fechas según el filtro seleccionado
+  const calcularFechasFiltro = () => {
+    const fechaActual = new Date();
+    let fechaInicio, fechaFin;
+
+    if (filtroTiempo === "todo") {
+      // Para "todo", consideramos los últimos 5 años hasta hoy
+      fechaInicio = new Date(fechaActual.getFullYear() - 5, 0, 1);
+      fechaFin = new Date();
+    } else if (filtroTiempo === "mes") {
+      // Para filtro por mes
+      fechaInicio = new Date(anioSeleccionado, mesSeleccionado, 1);
+      if (mesSeleccionado === 11) {
+        fechaFin = new Date(anioSeleccionado + 1, 0, 0);
+      } else {
+        fechaFin = new Date(anioSeleccionado, mesSeleccionado + 1, 0);
+      }
+    } else if (filtroTiempo === "anio") {
+      // Para filtro por año
+      fechaInicio = new Date(anioSeleccionado, 0, 1);
+      fechaFin = new Date(anioSeleccionado, 11, 31);
+    }
+
+    // Formatear fechas para la API (YYYY-MM-DD)
+    const formatearFecha = (fecha) => {
+      return fecha.toISOString().split("T")[0];
+    };
+
+    return {
+      fechaInicio: formatearFecha(fechaInicio),
+      fechaFin: formatearFecha(fechaFin),
+    };
+  };
+
+  // Cargar datos desde la API
   const cargarDatos = async () => {
     setLoading(true);
     setError(null);
+    
+    // Limpiar datos anteriores
+    setTopClientes([]);
+    setTopProductos([]);
+    setMenosVendidos([]);
 
     try {
-      // Simulación de carga de datos
-      setTimeout(() => {
-        const clientesFiltrados = aplicarFiltros(datosQuemadosClientes);
-        const productosFiltrados = aplicarFiltros(
-          datosQuemadosProductosMasVendidos
-        );
-        const menosVendidosFiltrados = aplicarFiltros(
-          datosQuemadosProductosMenosVendidos
-        );
+      const { fechaInicio, fechaFin } = calcularFechasFiltro();
 
-        setTopClientes(clientesFiltrados);
-        setTopProductos(productosFiltrados);
-        setMenosVendidos(menosVendidosFiltrados);
+      // Intentar cargar datos en paralelo
+      try {
+        // Usamos Promise.allSettled para que si falla una solicitud, las otras continúen
+        const [clientesResp, prodMasVendidosResp, prodMenosVendidosResp] = await Promise.allSettled([
+          presaleService.getTopClientes(fechaInicio, fechaFin),
+          presaleService.getTopProductosVendidos(fechaInicio, fechaFin),
+          presaleService.getTopProductosMenosVendidos(fechaInicio, fechaFin)
+        ]);
 
-        // Extraer años de los datos (en un caso real, esto vendría de los datos)
-        const años = [2023, 2024, 2025];
-        setAniosDisponibles(años);
+        // Procesar resultados de clientes
+        if (clientesResp.status === 'fulfilled' && clientesResp.value.data) {
+          setTopClientes(clientesResp.value.data);
+        }
 
-        setLoading(false);
-      }, 800);
+        // Procesar resultados de productos más vendidos
+        if (prodMasVendidosResp.status === 'fulfilled' && prodMasVendidosResp.value.data) {
+          setTopProductos(prodMasVendidosResp.value.data);
+        }
+
+        // Procesar resultados de productos menos vendidos
+        if (prodMenosVendidosResp.status === 'fulfilled' && prodMenosVendidosResp.value.data) {
+          setMenosVendidos(prodMenosVendidosResp.value.data);
+        }
+
+        // Si todas las solicitudes fallaron con 404 o no hay datos, mostrar mensaje informativo
+        if (
+          (clientesResp.status === 'rejected' && clientesResp.reason?.response?.status === 404) &&
+          (prodMasVendidosResp.status === 'rejected' && prodMasVendidosResp.reason?.response?.status === 404) &&
+          (prodMenosVendidosResp.status === 'rejected' && prodMenosVendidosResp.reason?.response?.status === 404)
+        ) {
+          setError("No hay información disponible para el periodo seleccionado.");
+        }
+        
+      } catch (err) {
+        // Este bloque solo se ejecutará si hay un error al intentar hacer las peticiones
+        console.error("Error al intentar hacer las solicitudes:", err);
+        setError("No hay información disponible para el periodo seleccionado.");
+      }
+
+      // Generar años disponibles (año actual y los 2 anteriores)
+      const anioActual = new Date().getFullYear();
+      setAniosDisponibles([anioActual - 2, anioActual - 1, anioActual]);
+
+      setLoading(false);
     } catch (err) {
-      setError(
-        "Error al cargar los datos: " + (err.message || "Error desconocido")
-      );
-      console.error(err);
+      console.error("Error general cargando estadísticas:", err);
+      setError("No hay información disponible para el periodo seleccionado.");
       setLoading(false);
     }
-  };
-
-  // Aplicar filtros a los datos según el periodo seleccionado
-  const aplicarFiltros = (datos) => {
-    // Esto es una simulación. En un caso real, se filtrarían los datos
-    // según la fecha de cada transacción
-    if (filtroTiempo === "mes") {
-      // Simular filtro por mes
-      return datos.slice(0, Math.ceil(datos.length * 0.7));
-    } else if (filtroTiempo === "anio") {
-      // Simular filtro por año
-      return datos.slice(0, Math.ceil(datos.length * 0.9));
-    }
-
-    return datos;
   };
 
   // Cargar datos al montar el componente
@@ -349,10 +196,9 @@ const EstadisticasColaborador = () => {
 
       return {
         name: primerNombre,
-        total: cliente.total_compras,
+        total: parseFloat(cliente.monto_total),
         tooltipName: cliente.nombre_cliente,
-        razonSocial: cliente.razon_social,
-        cantidadCompras: cliente.cantidad_compras,
+        cantidadCompras: cliente.total_compras,
       };
     });
   };
@@ -367,7 +213,7 @@ const EstadisticasColaborador = () => {
       return {
         name: primerNombre,
         cantidad: producto.cantidad_vendida,
-        monto: producto.monto_total,
+        monto: parseFloat(producto.monto_total),
         tooltipName: producto.nombre_producto,
       };
     });
@@ -381,9 +227,6 @@ const EstadisticasColaborador = () => {
         <div className="bg-white p-4 border border-gray-200 shadow-md rounded-lg">
           <p className="font-semibold text-gray-800">
             Nombre: {data.tooltipName}
-          </p>
-          <p className="text-sm text-gray-600">
-            Razón Social: {data.razonSocial}
           </p>
           <p className="text-sm text-gray-600">
             Total compras: {formatearMoneda(data.total)}
@@ -441,9 +284,9 @@ const EstadisticasColaborador = () => {
             </div>
 
             {error && (
-              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+              <div className="bg-amber-50 border-l-4 border-amber-400 text-amber-700 p-4 mb-4 rounded">
                 <div className="flex items-center">
-                  <Icono name="eliminarAlert" size={20} />
+                  <Icono name="warning" size={20} />
                   <span className="ml-2 text-sm md:text-base">{error}</span>
                 </div>
               </div>
@@ -539,279 +382,298 @@ const EstadisticasColaborador = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <h2 className="text-lg font-semibold text-black mb-4">
-                Top 10 Clientes que Más Compran
-                {filtroTiempo === "mes" &&
-                  ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
-                {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
-              </h2>
+            {!error && (
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+                <h2 className="text-lg font-semibold text-black mb-4">
+                  Top 10 Clientes que Más Compran
+                  {filtroTiempo === "mes" &&
+                    ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
+                  {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
+                </h2>
 
-              <div className="h-[450px]">
-                {topClientes.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={formatClientesData()}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="name"
-                        angle={-45}
-                        textAnchor="end"
-                        height={100}
-                        interval={0}
-                        tick={{ fontSize: 13 }}
-                      />
-                      <YAxis
-                        tickFormatter={(value) =>
-                          formatearMoneda(value).replace("$", "")
-                        }
-                      />
-                      <Tooltip content={<CustomTooltipClientes />} />
-                      <Legend />
-                      <Bar
-                        dataKey="total"
-                        name="Total de Compras"
-                        fill={CHART_COLORS.clientes}
-                        radius={[8, 8, 0, 0]}
-                        stroke="#FFFFFF"
-                        strokeWidth={1}
-                        animationDuration={1500}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    No hay suficientes datos para mostrar el gráfico en el
-                    periodo seleccionado
-                  </div>
-                )}
+                <div className="h-[450px]">
+                  {topClientes.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={formatClientesData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={100}
+                          interval={0}
+                          tick={{ fontSize: 13 }}
+                        />
+                        <YAxis
+                          tickFormatter={(value) =>
+                            formatearMoneda(value).replace("$", "")
+                          }
+                        />
+                        <Tooltip content={<CustomTooltipClientes />} />
+                        <Legend />
+                        <Bar
+                          dataKey="total"
+                          name="Total de Compras"
+                          fill={CHART_COLORS.clientes}
+                          radius={[8, 8, 0, 0]}
+                          stroke="#FFFFFF"
+                          strokeWidth={1}
+                          animationDuration={1500}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      No hay datos para mostrar en el periodo seleccionado
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Top 10 Productos Más Vendidos - ESTILO GRADIENTE */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Top 10 Productos Más Vendidos
-                {filtroTiempo === "mes" &&
-                  ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
-                {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
-              </h2>
+            {!error && (
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  Top 10 Productos Más Vendidos
+                  {filtroTiempo === "mes" &&
+                    ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
+                  {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
+                </h2>
 
-              <div className="h-96">
-                {topProductos.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={formatProductosData(topProductos)}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <defs>
-                        <linearGradient
-                          id="colorCantidad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#98DDCA"
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#98DDCA"
-                            stopOpacity={0.1}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="colorMonto"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor={CHART_COLORS.productosMasVendidos.monto}
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={CHART_COLORS.productosMasVendidos.monto}
-                            stopOpacity={0.1}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="name"
-                        angle={-45}
-                        textAnchor="end"
-                        height={100}
-                        interval={0}
-                        tick={{ fontSize: 13 }}
-                      />
-                      <YAxis
-                        yAxisId="left"
-                        orientation="left"
-                        stroke="#98DDCA"
-                      />
-                      <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        stroke={CHART_COLORS.productosMasVendidos.monto}
-                        tickFormatter={(value) =>
-                          formatearMoneda(value).replace("$", "")
-                        }
-                      />
-                      <Tooltip content={<CustomTooltipProductos />} />
-                      <Legend />
-                      <Area
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="cantidad"
-                        name="Cantidad Vendida"
-                        stroke="#98DDCA"
-                        fillOpacity={1}
-                        fill="url(#colorCantidad)"
-                      />
-                      <Area
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="monto"
-                        name="Monto Total"
-                        stroke={CHART_COLORS.productosMasVendidos.monto}
-                        fillOpacity={1}
-                        fill="url(#colorMonto)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    No hay suficientes datos para mostrar el gráfico en el
-                    periodo seleccionado
-                  </div>
-                )}
+                <div className="h-96">
+                  {topProductos.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={formatProductosData(topProductos)}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <defs>
+                          <linearGradient
+                            id="colorCantidad"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#98DDCA"
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#98DDCA"
+                              stopOpacity={0.1}
+                            />
+                          </linearGradient>
+                          <linearGradient
+                            id="colorMonto"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor={CHART_COLORS.productosMasVendidos.monto}
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor={CHART_COLORS.productosMasVendidos.monto}
+                              stopOpacity={0.1}
+                            />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={100}
+                          interval={0}
+                          tick={{ fontSize: 13 }}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          orientation="left"
+                          stroke="#98DDCA"
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          stroke={CHART_COLORS.productosMasVendidos.monto}
+                          tickFormatter={(value) =>
+                            formatearMoneda(value).replace("$", "")
+                          }
+                        />
+                        <Tooltip content={<CustomTooltipProductos />} />
+                        <Legend />
+                        <Area
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="cantidad"
+                          name="Cantidad Vendida"
+                          stroke="#98DDCA"
+                          fillOpacity={1}
+                          fill="url(#colorCantidad)"
+                        />
+                        <Area
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="monto"
+                          name="Monto Total"
+                          stroke={CHART_COLORS.productosMasVendidos.monto}
+                          fillOpacity={1}
+                          fill="url(#colorMonto)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      No hay datos para mostrar en el periodo seleccionado
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Top 10 Productos Menos Vendidos - ESTILO GRADIENTE */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Top 10 Productos Menos Vendidos
-                {filtroTiempo === "mes" &&
-                  ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
-                {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
-              </h2>
+            {!error && (
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  Top 10 Productos Menos Vendidos
+                  {filtroTiempo === "mes" &&
+                    ` - ${nombresMeses[mesSeleccionado]} ${anioSeleccionado}`}
+                  {filtroTiempo === "anio" && ` - ${anioSeleccionado}`}
+                </h2>
 
-              <div className="h-96">
-                {menosVendidos.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={formatProductosData(menosVendidos)}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <defs>
-                        <linearGradient
-                          id="colorMenosCantidad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor={
-                              CHART_COLORS.productosMenosVendidos.cantidad
-                            }
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={
-                              CHART_COLORS.productosMenosVendidos.cantidad
-                            }
-                            stopOpacity={0.1}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="colorMenosMonto"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor={
-                              CHART_COLORS.productosMenosVendidos.monto
-                            }
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={
-                              CHART_COLORS.productosMenosVendidos.monto
-                            }
-                            stopOpacity={0.1}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="name"
-                        angle={-45}
-                        textAnchor="end"
-                        height={100}
-                        interval={0}
-                        tick={{ fontSize: 13 }}
-                      />
-                      <YAxis
-                        yAxisId="left"
-                        orientation="left"
-                        stroke={CHART_COLORS.productosMenosVendidos.cantidad}
-                      />
-                      <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        stroke={CHART_COLORS.productosMenosVendidos.monto}
-                        tickFormatter={(value) =>
-                          formatearMoneda(value).replace("$", "")
-                        }
-                      />
-                      <Tooltip content={<CustomTooltipProductos />} />
-                      <Legend />
-                      <Area
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="cantidad"
-                        name="Cantidad Vendida"
-                        stroke={CHART_COLORS.productosMenosVendidos.cantidad}
-                        fillOpacity={1}
-                        fill="url(#colorMenosCantidad)"
-                      />
-                      <Area
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="monto"
-                        name="Monto Total"
-                        stroke={CHART_COLORS.productosMenosVendidos.monto}
-                        fillOpacity={1}
-                        fill="url(#colorMenosMonto)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    No hay suficientes datos para mostrar el gráfico en el
-                    periodo seleccionado
-                  </div>
-                )}
+                <div className="h-96">
+                  {menosVendidos.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={formatProductosData(menosVendidos)}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <defs>
+                          <linearGradient
+                            id="colorMenosCantidad"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor={
+                                CHART_COLORS.productosMenosVendidos.cantidad
+                              }
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor={
+                                CHART_COLORS.productosMenosVendidos.cantidad
+                              }
+                              stopOpacity={0.1}
+                            />
+                          </linearGradient>
+                          <linearGradient
+                            id="colorMenosMonto"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor={
+                                CHART_COLORS.productosMenosVendidos.monto
+                              }
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor={
+                                CHART_COLORS.productosMenosVendidos.monto
+                              }
+                              stopOpacity={0.1}
+                            />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={100}
+                          interval={0}
+                          tick={{ fontSize: 13 }}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          orientation="left"
+                          stroke={CHART_COLORS.productosMenosVendidos.cantidad}
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          stroke={CHART_COLORS.productosMenosVendidos.monto}
+                          tickFormatter={(value) =>
+                            formatearMoneda(value).replace("$", "")
+                          }
+                        />
+                        <Tooltip content={<CustomTooltipProductos />} />
+                        <Legend />
+                        <Area
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="cantidad"
+                          name="Cantidad Vendida"
+                          stroke={CHART_COLORS.productosMenosVendidos.cantidad}
+                          fillOpacity={1}
+                          fill="url(#colorMenosCantidad)"
+                        />
+                        <Area
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="monto"
+                          name="Monto Total"
+                          stroke={CHART_COLORS.productosMenosVendidos.monto}
+                          fillOpacity={1}
+                          fill="url(#colorMenosMonto)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      No hay datos para mostrar en el periodo seleccionado
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
+            {/* Mensaje cuando no hay datos pero hay error */}
+            {error && (
+              <div className="bg-white rounded-lg shadow-md p-12 mb-6 text-center">
+                <div className="flex flex-col items-center justify-center">
+                  <Icono name="dataNotFound" size={80} className="text-amber-400 mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No hay información disponible</h3>
+                  <p className="text-gray-600 mb-6">
+                    No se encontraron datos estadísticos para el periodo seleccionado.
+                  </p>
+                  <p className="text-gray-500 text-sm mb-4">
+                    Prueba seleccionando un periodo diferente donde haya ventas registradas.
+                  </p>
+                </div>
+              </div>
+            )}
+            
             {/* Botones de navegación */}
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 mb-8">
               <Boton

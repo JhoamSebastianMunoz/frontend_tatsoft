@@ -27,6 +27,7 @@ const HistorialPreventas = () => {
   const [colaboradores, setColaboradores] = useState([]);
   const [imprimiendoPreventa, setImprimiendoPreventa] = useState(null);
   const [detalleParaImprimir, setDetalleParaImprimir] = useState(null);
+  const [menuAbierto, setMenuAbierto] = useState(null);
 
   // Formatear fecha para mostrar
   const formatearFecha = (fechaString) => {
@@ -40,6 +41,29 @@ const HistorialPreventas = () => {
       minute: "2-digit",
     });
   };
+
+  // Función para abrir/cerrar el menú
+  const toggleMenu = (id) => {
+    if (menuAbierto === id) {
+      setMenuAbierto(null);
+    } else {
+      setMenuAbierto(id);
+    }
+  };
+
+  // Función para cerrar el menú cuando se haga clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuAbierto !== null && !event.target.closest(".menu-dropdown")) {
+        setMenuAbierto(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuAbierto]);
 
   // Cargar colaboradores si el usuario es administrador
   useEffect(() => {
@@ -559,13 +583,11 @@ const HistorialPreventas = () => {
       <Tipografia>
         <Sidebar />
         <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
-          <div className="w-full bg-white  mb-4">
-            <div className="px-2 sm:px-4 lg:px-8 py-2">
+            <div className="py-2">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 Historial de Preventas
               </h1>
             </div>
-          </div>
 
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 sm:p-3 mb-2 rounded">
@@ -682,63 +704,164 @@ const HistorialPreventas = () => {
                             </div>
                           </div>
 
-                          <div className="border-t border-gray-200 pt-2 mt-2">
-                            <div className="text-base font-semibold text-gray-900 mb-3">
-                              Total: $
-                              {Number(preventa.total).toLocaleString("es-CO")}
-                            </div>
+                          <div className="flex justify-end mt-2 menu-dropdown relative">
+                            <button
+                              onClick={() =>
+                                toggleMenu(`mobile-${preventa.id_preventa}`)
+                              }
+                              className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 flex items-center justify-center"
+                            >
+                              <span className="mr-1">Acciones</span>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className={`h-4 w-4 transition-transform ${
+                                  menuAbierto ===
+                                  `mobile-${preventa.id_preventa}`
+                                    ? "transform rotate-180"
+                                    : ""
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
 
-                            <div className="flex flex-wrap gap-2">
-                              <Boton
-                                label="Ver"
-                                tipo="primario"
-                                onClick={() =>
-                                verDetallesPreventa(preventa.id_preventa)
-                                }
-                                className="text-xs sm:text-sm"
-                              />
-                              <Boton
-                                label={
-                                  imprimiendoPreventa === preventa.id_preventa
-                                    ? "Cargando..."
-                                    : "Imprimir"
-                                }
-                                tipo="secundario"
-                                onClick={() =>
-                                  handleImprimir(preventa.id_preventa)
-                                }
-                                disabled={
-                                  imprimiendoPreventa === preventa.id_preventa
-                                }
-                                className="text-xs sm:text-sm"
-                              />
+                            {menuAbierto ===
+                              `mobile-${preventa.id_preventa}` && (
+                              <div className="absolute right-0 mt-10 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                                <button
+                                  onClick={() => {
+                                    verDetallesPreventa(preventa.id_preventa);
+                                    setMenuAbierto(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  <div className="flex items-center">
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 mr-2"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                      />
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                      />
+                                    </svg>
+                                    Ver Detalles
+                                  </div>
+                                </button>
 
-                              {preventa.estado === "Pendiente" &&
-                                user.rol === "ADMINISTRADOR" && (
-                                  <>
-                                    <Boton
-                                      label="Confirmar"
-                                      tipo="success"
-                                      size="small"
-                                      onClick={() =>
-                                        confirmarPreventa(preventa.id_preventa)
-                                      }
-                                      className="text-xs py-1 px-2 text-green-600"
-                                    />
-                                    <Boton
-                                      label="Cancelar"
-                                      tipo="danger"
-                                      size="small"
-                                      onClick={() =>
-                                        handleCancelarPreventa(
-                                          preventa.id_preventa
-                                        )
-                                      }
-                                      className="text-xs py-1 px-2 text-red-600"
-                                    />
-                                  </>
-                                )}
-                            </div>
+                                <button
+                                  onClick={() => {
+                                    handleImprimir(preventa.id_preventa);
+                                    setMenuAbierto(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  disabled={
+                                    imprimiendoPreventa === preventa.id_preventa
+                                  }
+                                >
+                                  <div className="flex items-center">
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 mr-2"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                      />
+                                    </svg>
+                                    {imprimiendoPreventa ===
+                                    preventa.id_preventa
+                                      ? "Imprimiendo..."
+                                      : "Imprimir"}
+                                  </div>
+                                </button>
+
+                                {preventa.estado === "Pendiente" &&
+                                  user.rol === "ADMINISTRADOR" && (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          confirmarPreventa(
+                                            preventa.id_preventa
+                                          );
+                                          setMenuAbierto(null);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-100"
+                                      >
+                                        <div className="flex items-center">
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4 mr-2"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M5 13l4 4L19 7"
+                                            />
+                                          </svg>
+                                          Confirmar
+                                        </div>
+                                      </button>
+
+                                      <button
+                                        onClick={() => {
+                                          handleCancelarPreventa(
+                                            preventa.id_preventa
+                                          );
+                                          setMenuAbierto(null);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-100"
+                                      >
+                                        <div className="flex items-center">
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4 mr-2"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M6 18L18 6M6 6l12 12"
+                                            />
+                                          </svg>
+                                          Cancelar
+                                        </div>
+                                      </button>
+                                    </>
+                                  )}
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -777,61 +900,161 @@ const HistorialPreventas = () => {
                               {preventa.nombre_colaborador}
                             </div>
                           )}
-                          <div className="text-sm font-medium">
-                            <div className="flex flex-col gap-1">
-                              {preventa.estado === "Pendiente" &&
-                                user.rol === "ADMINISTRADOR" && (
-                                  <div className="flex gap-1 mb-1">
-                                    <Boton
-                                      label="Confirmar"
-                                      tipo="success"
-                                      size="small"
-                                      onClick={() =>
-                                        confirmarPreventa(preventa.id_preventa)
-                                      }
-                                      className="text-xs py-1 px-2 text-green-600"
-                                    />
-                                    <Boton
-                                      label="Cancelar"
-                                      tipo="danger"
-                                      size="small"
-                                      onClick={() =>
-                                        handleCancelarPreventa(
-                                          preventa.id_preventa
-                                        )
-                                      }
-                                      className="text-xs py-1 px-2 text-red-600"
-                                    />
-                                  </div>
-                                )}
-                              <div className="flex gap-1">
-                                <Boton
-                                  label="Ver"
-                                  tipo="primario"
-                                  size="small"
-                                  onClick={() =>
-                                  verDetallesPreventa(preventa.id_preventa)
-                                  }
-                                  className="text-xs py-1 px-2"
+
+                          <div className="text-sm font-medium relative menu-dropdown">
+                            <button
+                              onClick={() => toggleMenu(preventa.id_preventa)}
+                              className="px-3 py-2 bg-orange-100 hover:bg-orange-200 rounded-lg text-gray-700 flex items-center justify-center"
+                            >
+                              <span className="mr-1">Acciones</span>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className={`h-4 w-4 transition-transform ${
+                                  menuAbierto === preventa.id_preventa
+                                    ? "transform rotate-180"
+                                    : ""
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
                                 />
-                                <Boton
-                                  label={
-                                    imprimiendoPreventa === preventa.id_preventa
-                                      ? "..."
-                                      : "Imprimir"
-                                  }
-                                  tipo="secundario"
-                                  size="small"
-                                  onClick={() =>
-                                    handleImprimir(preventa.id_preventa)
-                                  }
+                              </svg>
+                            </button>
+
+                            {menuAbierto === preventa.id_preventa && (
+                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                                <button
+                                  onClick={() => {
+                                    verDetallesPreventa(preventa.id_preventa);
+                                    setMenuAbierto(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  <div className="flex items-center">
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 mr-2"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                      />
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                      />
+                                    </svg>
+                                    Ver Detalles
+                                  </div>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    handleImprimir(preventa.id_preventa);
+                                    setMenuAbierto(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                   disabled={
                                     imprimiendoPreventa === preventa.id_preventa
                                   }
-                                  className="text-xs py-1 px-2"
-                                />
+                                >
+                                  <div className="flex items-center">
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 mr-2"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                      />
+                                    </svg>
+                                    {imprimiendoPreventa ===
+                                    preventa.id_preventa
+                                      ? "Imprimiendo..."
+                                      : "Imprimir"}
+                                  </div>
+                                </button>
+
+                                {preventa.estado === "Pendiente" &&
+                                  user.rol === "ADMINISTRADOR" && (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          confirmarPreventa(
+                                            preventa.id_preventa
+                                          );
+                                          setMenuAbierto(null);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-100"
+                                      >
+                                        <div className="flex items-center">
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4 mr-2"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M5 13l4 4L19 7"
+                                            />
+                                          </svg>
+                                          Confirmar
+                                        </div>
+                                      </button>
+
+                                      <button
+                                        onClick={() => {
+                                          handleCancelarPreventa(
+                                            preventa.id_preventa
+                                          );
+                                          setMenuAbierto(null);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-100"
+                                      >
+                                        <div className="flex items-center">
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4 mr-2"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M6 18L18 6M6 6l12 12"
+                                            />
+                                          </svg>
+                                          Cancelar
+                                        </div>
+                                      </button>
+                                    </>
+                                  )}
                               </div>
-                            </div>
+                            )}
                           </div>
                         </div>
                       </div>

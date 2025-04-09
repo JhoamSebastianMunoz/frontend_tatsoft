@@ -15,6 +15,8 @@ const HistorialVentas = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const esAdministrador = user && user.rol === "ADMINISTRADOR";
+
   const [ventas, setVentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,7 +24,7 @@ const HistorialVentas = () => {
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [filtro, setFiltro] = useState("Todos");
-  
+
   // Estados para paginación
   const [paginaActual, setPaginaActual] = useState(1);
   const ventasPorPagina = 10; // Número de ventas por página
@@ -37,13 +39,13 @@ const HistorialVentas = () => {
     switch (tipoFiltro) {
       case "Semana":
         inicio.setDate(hoy.getDate() - 7);
-        setFechaInicio(inicio.toISOString().split('T')[0]);
-        setFechaFin(hoy.toISOString().split('T')[0]);
+        setFechaInicio(inicio.toISOString().split("T")[0]);
+        setFechaFin(hoy.toISOString().split("T")[0]);
         break;
       case "Mes":
         inicio.setMonth(hoy.getMonth() - 1);
-        setFechaInicio(inicio.toISOString().split('T')[0]);
-        setFechaFin(hoy.toISOString().split('T')[0]);
+        setFechaInicio(inicio.toISOString().split("T")[0]);
+        setFechaFin(hoy.toISOString().split("T")[0]);
         break;
       case "Todos":
         setFechaInicio("");
@@ -140,7 +142,10 @@ const HistorialVentas = () => {
   // Paginación
   const indexUltimaVenta = paginaActual * ventasPorPagina;
   const indexPrimeraVenta = indexUltimaVenta - ventasPorPagina;
-  const ventasPaginaActual = ventasFiltradas.slice(indexPrimeraVenta, indexUltimaVenta);
+  const ventasPaginaActual = ventasFiltradas.slice(
+    indexPrimeraVenta,
+    indexUltimaVenta
+  );
   const totalPaginas = Math.ceil(ventasFiltradas.length / ventasPorPagina);
 
   const formatearFecha = (fechaString) => {
@@ -265,7 +270,7 @@ const HistorialVentas = () => {
                 >
                   Última Semana
                 </button>
-                <button 
+                <button
                   className={`px-4 py-2 whitespace-nowrap rounded-md ${
                     filtro === "Mes"
                       ? "bg-orange-100 text-orange-700 font-medium"
@@ -282,7 +287,9 @@ const HistorialVentas = () => {
             <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-1">Buscar</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1">
+                    Buscar
+                  </label>
                   <CampoTexto
                     placeholder="Buscar por cliente o número de venta"
                     value={filtroBusqueda}
@@ -292,7 +299,9 @@ const HistorialVentas = () => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-1">Fecha Inicio</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1">
+                    Fecha Inicio
+                  </label>
                   <input
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -305,7 +314,9 @@ const HistorialVentas = () => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-1">Fecha Fin</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1">
+                    Fecha Fin
+                  </label>
                   <input
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -317,8 +328,11 @@ const HistorialVentas = () => {
                   />
                 </div>
               </div>
-              
-              {(filtroBusqueda || fechaInicio || fechaFin || filtro !== "Todos") && (
+
+              {(filtroBusqueda ||
+                fechaInicio ||
+                fechaFin ||
+                filtro !== "Todos") && (
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={limpiarFiltros}
@@ -348,14 +362,17 @@ const HistorialVentas = () => {
                 <h3 className="font-medium text-gray-900 mb-2 sm:mb-0">
                   Ventas Confirmadas
                   <span className="ml-2 text-sm font-normal text-gray-700">
-                    Mostrando {ventasFiltradas.length > 0 ? indexPrimeraVenta + 1 : 0} a{" "}
-                    {Math.min(indexUltimaVenta, ventasFiltradas.length)} de {ventasFiltradas.length}
+                    Mostrando{" "}
+                    {ventasFiltradas.length > 0 ? indexPrimeraVenta + 1 : 0} a{" "}
+                    {Math.min(indexUltimaVenta, ventasFiltradas.length)} de{" "}
+                    {ventasFiltradas.length}
                   </span>
                 </h3>
-                
+
                 {ventasFiltradas.length > 0 && (
                   <div className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
-                    {ventasFiltradas.length} {ventasFiltradas.length === 1 ? "venta" : "ventas"}
+                    {ventasFiltradas.length}{" "}
+                    {ventasFiltradas.length === 1 ? "venta" : "ventas"}
                   </div>
                 )}
               </div>
@@ -372,9 +389,11 @@ const HistorialVentas = () => {
                           <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Fecha de Venta
                           </th>
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Colaborador
-                          </th>
+                          {esAdministrador && (
+                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Colaborador
+                            </th>
+                          )}
                           <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Cliente
                           </th>
@@ -402,11 +421,13 @@ const HistorialVentas = () => {
                                 {formatearFecha(venta.fecha_confirmacion)}
                               </span>
                             </td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">
-                                {venta.nombre_colaborador}
-                              </span>
-                            </td>
+                            {esAdministrador && (
+                              <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                <span className="text-sm text-gray-900">
+                                  {venta.nombre_colaborador}
+                                </span>
+                              </td>
+                            )}
                             <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                               <span className="text-sm text-gray-900">
                                 {venta.razon_social || "Cliente General"}
@@ -423,7 +444,9 @@ const HistorialVentas = () => {
                                   label="Ver Detalles"
                                   tipo="primario"
                                   size="small"
-                                  onClick={() => verDetallesVenta(venta.id_preventa)}
+                                  onClick={() =>
+                                    verDetallesVenta(venta.id_preventa)
+                                  }
                                 />
                               )}
                             </td>
@@ -435,7 +458,8 @@ const HistorialVentas = () => {
                 </div>
               ) : (
                 <div className="text-center py-10 text-gray-500">
-                  No se encontraron ventas con los criterios de búsqueda actuales
+                  No se encontraron ventas con los criterios de búsqueda
+                  actuales
                 </div>
               )}
 
@@ -444,7 +468,11 @@ const HistorialVentas = () => {
                 <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
                   <div className="text-sm text-gray-700 mb-2 sm:mb-0 text-center sm:text-left">
                     <p>
-                      Mostrando <span className="font-medium">{ventasFiltradas.length > 0 ? indexPrimeraVenta + 1 : 0}</span> a{" "}
+                      Mostrando{" "}
+                      <span className="font-medium">
+                        {ventasFiltradas.length > 0 ? indexPrimeraVenta + 1 : 0}
+                      </span>{" "}
+                      a{" "}
                       <span className="font-medium">
                         {Math.min(indexUltimaVenta, ventasFiltradas.length)}
                       </span>{" "}
@@ -460,16 +488,16 @@ const HistorialVentas = () => {
                       className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                       aria-label="Pagination"
                     >
-                      <button 
+                      <button
                         className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                         onClick={() => cambiarPagina(paginaActual - 1)}
                         disabled={paginaActual === 1}
                       >
                         Anterior
                       </button>
-                      
+
                       {/* Generar botones de página */}
-                      {[...Array(totalPaginas).keys()].map(x => (
+                      {[...Array(totalPaginas).keys()].map((x) => (
                         <button
                           key={x + 1}
                           onClick={() => cambiarPagina(x + 1)}
@@ -482,8 +510,8 @@ const HistorialVentas = () => {
                           {x + 1}
                         </button>
                       ))}
-                      
-                      <button 
+
+                      <button
                         className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                         onClick={() => cambiarPagina(paginaActual + 1)}
                         disabled={paginaActual === totalPaginas}
@@ -498,14 +526,14 @@ const HistorialVentas = () => {
           </div>
         </main>
       </Tipografia>
-      
+
       <style jsx>{`
         .no-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
         }
         .no-scrollbar::-webkit-scrollbar {
-          display: none;  /* Chrome, Safari and Opera */
+          display: none; /* Chrome, Safari and Opera */
         }
       `}</style>
     </div>

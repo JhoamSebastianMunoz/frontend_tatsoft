@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
-import Buscador from "../../molecules/Buscador";
+import CampoTexto from "../../atoms/CamposTexto";
 import Sidebar from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
@@ -127,7 +127,7 @@ const Acumulados = () => {
           nombre_cliente: devolucion.razon_social || "Cliente #" + devolucion.id_cliente,
           fecha_venta: devolucion.fecha_confirmacion,
           tipo_venta: "Devolución",
-          total_venta: parseFloat(devolucion.total_devuelto || 0) * -1, // Valor negativo para devoluciones
+          total_venta: parseFloat(devolucion.total_devuelto || devolucion.total_devueltos || 0) * -1, // Valor negativo para devoluciones
           id_colaborador: devolucion.id_colaborador,
           nombre_colaborador: devolucion.nombre_colaborador
         }));
@@ -274,12 +274,24 @@ const Acumulados = () => {
     
     // Filtrar por término de búsqueda (cliente, número de venta)
     if (searchTerm.trim() !== "") {
-      filtradosPorPeriodo = filtradosPorPeriodo.filter(
-        item => 
-          item.nombre_cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.numero_venta.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (item.nombre_colaborador && item.nombre_colaborador.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      const termino = searchTerm.toLowerCase();
+      
+      filtradosPorPeriodo = filtradosPorPeriodo.filter(item => {
+        // Verificar que los campos existan antes de llamar a toLowerCase()
+        const clienteMatch = item.nombre_cliente && 
+          item.nombre_cliente.toLowerCase().includes(termino);
+        
+        const numeroMatch = item.numero_venta && 
+          item.numero_venta.toString().toLowerCase().includes(termino);
+        
+        // Verificar que nombre_colaborador existe antes de usar toLowerCase
+        const colaboradorMatch = item.nombre_colaborador && 
+          typeof item.nombre_colaborador === 'string' && 
+          item.nombre_colaborador.toLowerCase().includes(termino);
+        
+        // Devolver true si cualquiera de las condiciones coincide
+        return clienteMatch || numeroMatch || colaboradorMatch;
+      });
     }
     
     // Actualizar el estado de filtrados
@@ -896,7 +908,7 @@ verDetalles = (item) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Buscar
                 </label>
-                <Buscador
+                <CampoTexto
                   placeholder="Buscar por cliente o número de venta"
                   onChange={handleSearchChange}
                   value={searchTerm}
