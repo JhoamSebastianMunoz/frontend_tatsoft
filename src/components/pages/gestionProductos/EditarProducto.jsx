@@ -370,12 +370,7 @@ const EditarProducto = () => {
       </div>
       
       <Tipografia>
-      <div className="flex-1 md:pl-20 w-full max-w-screen-xl mx-auto lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">
-        {/* Header  */}
-        <div className="mt-2 mb-4 ml-10">
-                <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">Editar Producto</h1>
-        </div>
-       
+      <div className="flex-1 md:pl-20 w-full max-w-screen-xl mx-auto lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">  
         {/* Contenido principal */}
         <div className="md:pl-[350px] pl-4 pt-10 md:pt-4">
           <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl mx-auto">
