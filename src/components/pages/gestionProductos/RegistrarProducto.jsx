@@ -20,7 +20,7 @@ const RegistrarProducto = () => {
     precio: "",
     cantidad_ingreso: "",
     descripcion: "",
-    id_categoria: ""
+    id_categoria: "",
   });
 
   // Estados para manejo de UI
@@ -34,10 +34,13 @@ const RegistrarProducto = () => {
 
   // Estados para alertas
   const [showCancelarAlerta, setShowCancelarAlerta] = useState(false);
-  const [showRegistroExitosoAlerta, setShowRegistroExitosoAlerta] = useState(false);
+  const [showRegistroExitosoAlerta, setShowRegistroExitosoAlerta] =
+    useState(false);
   const [showSeleccionadoAlerta, setShowSeleccionadoAlerta] = useState(false);
-  const [showCancelarCategoriaAlerta, setShowCancelarCategoriaAlerta] = useState(false);
-  const [showCategoriaCreadaAlerta, setShowCategoriaCreadaAlerta] = useState(false);
+  const [showCancelarCategoriaAlerta, setShowCancelarCategoriaAlerta] =
+    useState(false);
+  const [showCategoriaCreadaAlerta, setShowCategoriaCreadaAlerta] =
+    useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [categoriaError, setCategoriaError] = useState("");
@@ -64,7 +67,9 @@ const RegistrarProducto = () => {
         }
       } catch (error) {
         console.error("Error cargando categorías:", error);
-        setError("No se pudieron cargar las categorías. Por favor, intenta de nuevo más tarde.");
+        setError(
+          "No se pudieron cargar las categorías. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
@@ -83,7 +88,7 @@ const RegistrarProducto = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -91,7 +96,7 @@ const RegistrarProducto = () => {
     setFormData({
       ...formData,
       categoria: categoria.nombre_categoria,
-      id_categoria: categoria.id_categoria
+      id_categoria: categoria.id_categoria,
     });
     setShowCategorias(false);
   };
@@ -101,20 +106,24 @@ const RegistrarProducto = () => {
     if (file) {
       // Comprobar tamaño y tipo de archivo
       const maxSize = 5 * 1024 * 1024; // 5MB
-      const acceptedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      
+      const acceptedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
       if (file.size > maxSize) {
-        setError(`El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo 5MB.`);
+        setError(
+          `El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(
+            2
+          )}MB). Máximo 5MB.`
+        );
         return;
       }
-      
+
       if (!acceptedTypes.includes(file.type)) {
         setError(`Tipo de archivo no permitido. Solo se permiten: JPG, PNG.`);
         return;
       }
-      
+
       console.log("Archivo seleccionado:", file.name, file.type, file.size);
-      
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -128,12 +137,17 @@ const RegistrarProducto = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       let imageId = null;
-      
+
       // Validación adicional
-      if (!formData.nombre_producto || !formData.precio || !formData.cantidad_ingreso || !formData.id_categoria) {
+      if (
+        !formData.nombre_producto ||
+        !formData.precio ||
+        !formData.cantidad_ingreso ||
+        !formData.id_categoria
+      ) {
         setError("Por favor, complete todos los campos obligatorios");
         setLoading(false);
         return;
@@ -145,37 +159,43 @@ const RegistrarProducto = () => {
         // Crear un objeto FormData correctamente para la subida
         const imageFormData = new FormData();
         // Es importante que el nombre del campo sea exactamente 'image', como espera el backend
-        imageFormData.append('image', imageFile);
-        
+        imageFormData.append("image", imageFile);
+
         try {
           console.log("Enviando imagen:", imageFile);
           // Verificamos que el FormData contiene la imagen
           for (let [key, value] of imageFormData.entries()) {
-            console.log(`${key}: ${value instanceof File ? value.name : value}`);
+            console.log(
+              `${key}: ${value instanceof File ? value.name : value}`
+            );
           }
-          
+
           const imageResponse = await imageService.uploadImage(imageFormData);
           console.log("Respuesta de subida de imagen:", imageResponse);
-          
+
           // Inspeccionar la estructura completa de la respuesta para entender dónde está el ID
-          console.log("Estructura completa de la respuesta:", JSON.stringify(imageResponse.data, null, 2));
-          
+          console.log(
+            "Estructura completa de la respuesta:",
+            JSON.stringify(imageResponse.data, null, 2)
+          );
+
           // Intentar las diferentes posibles ubicaciones del ID
-          imageId = imageResponse.data.id || 
-                   imageResponse.data.fileName || 
-                   imageResponse.data.imageId;
-          
+          imageId =
+            imageResponse.data.id ||
+            imageResponse.data.fileName ||
+            imageResponse.data.imageId;
+
           // Si tenemos una URL pero no un ID, usamos el nombre del archivo de la URL
           if (!imageId && imageResponse.data.url) {
-            const urlParts = imageResponse.data.url.split('/');
+            const urlParts = imageResponse.data.url.split("/");
             imageId = urlParts[urlParts.length - 1];
           }
-          
+
           // Si todavía no tenemos ID, usamos el nombre del archivo original
           if (!imageId && imageFile) {
             imageId = imageFile.name;
           }
-          
+
           console.log("ID de imagen obtenido:", imageId);
         } catch (imageError) {
           console.error("Error al subir la imagen:", imageError);
@@ -197,18 +217,18 @@ const RegistrarProducto = () => {
         id_categoria: parseInt(formData.id_categoria),
         estado: "Activo",
         // El campo id_imagen es obligatorio según el backend
-        id_imagen: imageId || "default_image"  // Proporcionamos un valor por defecto si no hay imagen
+        id_imagen: imageId || "default_image", // Proporcionamos un valor por defecto si no hay imagen
       };
-      
+
       console.log("Enviando datos del producto:", productoData);
-      
+
       try {
         const response = await productService.createProduct(productoData);
         console.log("Respuesta de creación de producto:", response);
-        
+
         if (response && response.data) {
           setShowRegistroExitosoAlerta(true);
-          
+
           // Limpiar formulario
           setFormData({
             nombre_producto: "",
@@ -216,11 +236,11 @@ const RegistrarProducto = () => {
             precio: "",
             cantidad_ingreso: "",
             descripcion: "",
-            id_categoria: ""
+            id_categoria: "",
           });
           setImageFile(null);
           setImagePreview(null);
-          
+
           setTimeout(() => {
             navigate("/gestion-productos");
           }, 2000);
@@ -231,14 +251,20 @@ const RegistrarProducto = () => {
         console.error("Error al crear el producto:", error);
         if (error.response && error.response.data) {
           console.log("Detalles del error:", error.response.data);
-          setError(`Error al crear el producto: ${error.response.data.message || 'Intente nuevamente'}`);
+          setError(
+            `Error al crear el producto: ${
+              error.response.data.message || "Intente nuevamente"
+            }`
+          );
         } else {
           setError("Error al crear el producto. Por favor, intenta de nuevo.");
         }
       }
     } catch (error) {
       console.error("Error al registrar producto:", error);
-      setError("Ocurrió un error al registrar el producto. Por favor, intenta de nuevo.");
+      setError(
+        "Ocurrió un error al registrar el producto. Por favor, intenta de nuevo."
+      );
     } finally {
       setLoading(false);
     }
@@ -290,7 +316,7 @@ const RegistrarProducto = () => {
       setLoading(true);
       const response = await productService.createCategory({
         nombre_categoria: nuevaCategoria,
-        descripcion: `Categoría para productos` // Descripción genérica predeterminada
+        descripcion: `Categoría para productos`, // Descripción genérica predeterminada
       });
 
       // Actualizar lista de categorías
@@ -299,7 +325,7 @@ const RegistrarProducto = () => {
 
       // Seleccionar la nueva categoría
       const nuevaCategoriaObj = categoriasResponse.data.find(
-        c => c.nombre_categoria === nuevaCategoria
+        (c) => c.nombre_categoria === nuevaCategoria
       );
 
       if (nuevaCategoriaObj) {
@@ -312,10 +338,11 @@ const RegistrarProducto = () => {
       setTimeout(() => {
         setShowCategoriaCreadaAlerta(false);
       }, 2000);
-
     } catch (error) {
       console.error("Error creando categoría:", error);
-      setCategoriaError("No se pudo crear la categoría. Por favor, intenta de nuevo.");
+      setCategoriaError(
+        "No se pudo crear la categoría. Por favor, intenta de nuevo."
+      );
     } finally {
       setLoading(false);
     }
@@ -338,7 +365,9 @@ const RegistrarProducto = () => {
       <div className="flex-1 pl-3 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">
         <div className="mt-4 mb-5">
           <Tipografia>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Registrar Producto</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">
+              Registrar Producto
+            </h1>
           </Tipografia>
         </div>
         <Tipografia>
@@ -349,132 +378,157 @@ const RegistrarProducto = () => {
             </div>
           )}
         </Tipografia>
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-5">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-lg shadow-md p-5"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
               <Tipografia>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Imagen del producto (opcional)
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Tamaño máximo: 5MB. Formatos aceptados: JPG, PNG.
-                </p>
-               
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500 transition-colors">
-                  <div className="space-y-1 text-center">
-                    {imagePreview ? (
-                      <div className="relative">
-                        <img
-                          src={imagePreview}
-                          alt="Vista previa"
-                          className="mx-auto h-48 w-auto object-contain"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview(null);
-                          }}
-                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <Icono name="gest-productos" size={40} className="mx-auto text-gray-400" />
-                        <div className="flex text-sm text-gray-600">
-                          <label
-                            htmlFor="file-upload"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500"
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Imagen del producto (opcional)
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Tamaño máximo: 5MB. Formatos aceptados: JPG, PNG.
+                  </p>
+
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500 transition-colors">
+                    <div className="space-y-1 text-center">
+                      {imagePreview ? (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Vista previa"
+                            className="mx-auto h-48 w-auto object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreview(null);
+                            }}
+                            className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                           >
-                            <span>Subir imagen</span>
-                            <input
-                              id="file-upload"
-                              name="file-upload"
-                              type="file"
-                              className="sr-only"
-                              accept="image/*"
-                              onChange={handleImageChange}
-                            />
-                          </label>
-                          <p className="pl-1">o arrastra y suelta</p>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG</p>
-                      </>
-                    )}
+                      ) : (
+                        <>
+                          <Icono
+                            name="gest-productos"
+                            size={40}
+                            className="mx-auto text-gray-400"
+                          />
+                          <div className="flex text-sm text-gray-600">
+                            <label
+                              htmlFor="file-upload"
+                              className="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500"
+                            >
+                              <span>Subir imagen</span>
+                              <input
+                                id="file-upload"
+                                name="file-upload"
+                                type="file"
+                                className="sr-only"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                              />
+                            </label>
+                            <p className="pl-1">o arrastra y suelta</p>
+                          </div>
+                          <p className="text-xs text-gray-500">PNG, JPG</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
               </Tipografia>
               <div>
                 <Tipografia>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre del producto *
-                </label>
-                <input
-                  type="text"
-                  name="nombre_producto"
-                  value={formData.nombre_producto}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del producto *
+                  </label>
+                  <input
+                    type="text"
+                    name="nombre_producto"
+                    value={formData.nombre_producto}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                  />
                 </Tipografia>
               </div>
               <div>
                 <Tipografia>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Precio *
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    name="precio"
-                    value={formData.precio}
-                    onChange={handleInputChange}
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    required
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Precio *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      name="precio"
+                      value={formData.precio}
+                      onChange={handleInputChange}
+                      className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      required
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </Tipografia>
               </div>
             </div>
             <div className="space-y-6">
               <div>
                 <Tipografia>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría *
-                </label>
-                <div className="relative">
-                  <select
-                    name="id_categoria"
-                    value={formData.id_categoria}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
-                    required
-                  >
-                    <option value="">Selecciona una categoría</option>
-                    {categorias.map(cat => (
-                      <option key={cat.id_categoria} value={cat.id_categoria}>
-                        {cat.nombre_categoria}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Categoría *
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="id_categoria"
+                      value={formData.id_categoria}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
+                      required
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.id_categoria} value={cat.id_categoria}>
+                          {cat.nombre_categoria}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg
+                        className="h-4 w-4 text-gray-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                </div>
                 </Tipografia>
                 <div className="mt-2">
                   <button
@@ -488,34 +542,34 @@ const RegistrarProducto = () => {
               </div>
               <div>
                 <Tipografia>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cantidad *
-                </label>
-                <input
-                  type="number"
-                  name="cantidad_ingreso"
-                  value={formData.cantidad_ingreso}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                  min="0"
-                />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Cantidad *
+                  </label>
+                  <input
+                    type="number"
+                    name="cantidad_ingreso"
+                    value={formData.cantidad_ingreso}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                    min="0"
+                  />
                 </Tipografia>
               </div>
               <div>
                 <Tipografia>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripción *
-                </label>
-                <textarea
-                  name="descripcion"
-                  value={formData.descripcion}
-                  onChange={handleInputChange}
-                  rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Describe el producto"
-                  required
-                />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descripción *
+                  </label>
+                  <textarea
+                    name="descripcion"
+                    value={formData.descripcion}
+                    onChange={handleInputChange}
+                    rows="4"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Describe el producto"
+                    required
+                  />
                 </Tipografia>
               </div>
             </div>
@@ -535,7 +589,6 @@ const RegistrarProducto = () => {
               disabled={loading || isUploading}
               className="order-1 sm:order-2"
             />
-           
           </div>
         </form>
         {/* Modales */}
@@ -548,22 +601,25 @@ const RegistrarProducto = () => {
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
                 ¿Estás seguro de que deseas cancelar?
               </Tipografia>
-              <Tipografia size="base" className="text-center text-gray-600 ml-10">
+              <Tipografia
+                size="base"
+                className="text-center text-gray-600 ml-10"
+              >
                 Los cambios no guardados se perderán.
               </Tipografia>
               <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-3">
                 <Boton
+                  tipo="secundario"
+                  label="Cancelar"
+                  onClick={() => setShowCancelarAlerta(false)}
+                  className="w-full sm:w-[200px] h-[45px] order-1"
+                />
+                <Boton
                   tipo="primario"
                   label="Continuar"
                   size="small"
-                  onClick={() => setShowCancelarAlerta(false)}
-                  className="w-full sm:w-[200px] h-[45px] order-2 sm:order-1"
-                />
-                <Boton
-                  tipo="secundario"
-                  label="Cancelar"
                   onClick={confirmarCancelar}
-                  className="w-full sm:w-[200px] h-[45px] order-1 sm:order-2"
+                  className="w-full sm:w-[200px] h-[45px] order-2"
                 />
               </div>
             </div>
@@ -574,8 +630,18 @@ const RegistrarProducto = () => {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
             <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm">
               <div className="flex justify-center mb-4 text-green-500">
-                <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-16 h-16"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
@@ -600,12 +666,22 @@ const RegistrarProducto = () => {
                   onClick={cerrarModalNuevaCategoria}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nombre de la categoría *
@@ -621,7 +697,7 @@ const RegistrarProducto = () => {
                   <p className="mt-1 text-sm text-red-600">{categoriaError}</p>
                 )}
               </div>
-              
+
               <div className="flex justify-end gap-3">
                 <Boton
                   tipo="secundario"
@@ -671,8 +747,18 @@ const RegistrarProducto = () => {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
             <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm">
               <div className="flex justify-center mb-4 text-green-500">
-                <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-16 h-16"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
