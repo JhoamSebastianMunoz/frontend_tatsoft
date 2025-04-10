@@ -305,10 +305,10 @@ const RegistrarZona = () => {
       </div>
 
       {/* Contenido principal */}
-      <main className="w-full md:pl-[280px] pt-[64px] md:pt-4 pl-10">
+      <main className="w-full mx-4 p-4">
         <div className="px-4 md:px-6 lg:px-8">
           <Tipografia>
-            <div className="py-4">
+            <div className="py-3 px-8 md:px-44">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Registrar Zona</h1>
             </div>
             {error && (
@@ -316,7 +316,7 @@ const RegistrarZona = () => {
                 <p className="text-red-600">{error}</p>
               </div>
             )}
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl ml-6 md:mx-auto">
               <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 md:p-8 mb-6">
                 <div className="mb-8">
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">

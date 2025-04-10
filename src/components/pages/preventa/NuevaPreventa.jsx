@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { presaleService, productService, clientService, userService } from "../../../context/services/ApiService";
+import {
+  presaleService,
+  productService,
+  clientService,
+  userService,
+} from "../../../context/services/ApiService";
 import { imageService } from "../../../context/services/ImageService";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 
 // Componentes
-import Encabezado from "../../../components/molecules/Encabezado";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Boton from "../../../components/atoms/Botones";
 import CampoTexto from "../../../components/atoms/CamposTexto";
@@ -18,12 +22,15 @@ const NuevaPreventa = () => {
   const navigate = useNavigate();
   const { id: clientId } = useParams();
   const { user } = useAuth();
-  
+
   const [loading, setLoading] = useState(false);
   const [clienteInfo, setClienteInfo] = useState(null);
   const [productos, setProductos] = useState([]);
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);
   const [busquedaProducto, setBusquedaProducto] = useState("");
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [productImages, setProductImages] = useState({});
@@ -61,18 +68,22 @@ const NuevaPreventa = () => {
               return { id: producto.id_producto, url: imageUrl };
             }
           } catch (error) {
-            console.error('Error cargando imagen para producto', producto.id_producto, error);
+            console.error(
+              "Error cargando imagen para producto",
+              producto.id_producto,
+              error
+            );
           }
         }
         return { id: producto.id_producto, url: null };
       });
-      
+
       const productImagesResults = await Promise.all(imagePromises);
       const imagesMap = {};
       productImagesResults.forEach(({ id, url }) => {
         imagesMap[id] = url;
       });
-      
+
       setProductImages(imagesMap);
     } catch (err) {
       console.error("Error al cargar productos:", err);
@@ -105,9 +116,14 @@ const NuevaPreventa = () => {
         if (user.rol === "ADMINISTRADOR") {
           response = await clientService.getAllClients();
         } else if (zonaSeleccionada) {
-          console.log("Obteniendo clientes para zona:", zonaSeleccionada.id_zona_de_trabajo);
-          response = await userService.getClientesZona(zonaSeleccionada.id_zona_de_trabajo);
-          
+          console.log(
+            "Obteniendo clientes para zona:",
+            zonaSeleccionada.id_zona_de_trabajo
+          );
+          response = await userService.getClientesZona(
+            zonaSeleccionada.id_zona_de_trabajo
+          );
+
           // Según la documentación, la respuesta incluye los clientes en response.data.clientes
           if (response.data?.clientes) {
             setClientes(response.data.clientes);
@@ -122,7 +138,7 @@ const NuevaPreventa = () => {
       } catch (err) {
         console.error("Error al cargar clientes:", err);
         let errorMessage = "No se pudieron cargar los clientes.";
-        
+
         // Manejar errores específicos según la documentación
         if (err.response) {
           switch (err.response.status) {
@@ -130,17 +146,20 @@ const NuevaPreventa = () => {
               errorMessage = "La zona especificada no existe.";
               break;
             case 401:
-              errorMessage = "Sesión expirada. Por favor, inicie sesión nuevamente.";
+              errorMessage =
+                "Sesión expirada. Por favor, inicie sesión nuevamente.";
               break;
             case 403:
-              errorMessage = "No tiene permisos para acceder a esta información.";
+              errorMessage =
+                "No tiene permisos para acceder a esta información.";
               break;
             case 500:
-              errorMessage = "Error interno del servidor. Por favor, intente más tarde.";
+              errorMessage =
+                "Error interno del servidor. Por favor, intente más tarde.";
               break;
           }
         }
-        
+
         setError(errorMessage);
         setClientes([]);
       } finally {
@@ -157,7 +176,7 @@ const NuevaPreventa = () => {
   useEffect(() => {
     const fetchClienteInfo = async () => {
       if (!clientId) return;
-      
+
       try {
         setLoading(true);
         const response = await clientService.getClientById(clientId);
@@ -175,22 +194,64 @@ const NuevaPreventa = () => {
   // Filtrar clientes según la búsqueda
   const clientesFiltrados = React.useMemo(() => {
     if (!Array.isArray(clientes)) return [];
-    
+
     return busquedaCliente.trim() === ""
       ? clientes
-      : clientes.filter(cliente => 
-          (cliente?.razon_social?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-           cliente?.nombre_completo_cliente?.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
-           cliente?.telefono?.includes(busquedaCliente))
+      : clientes.filter(
+          (cliente) =>
+            cliente?.razon_social
+              ?.toLowerCase()
+              .includes(busquedaCliente.toLowerCase()) ||
+            cliente?.nombre_completo_cliente
+              ?.toLowerCase()
+              .includes(busquedaCliente.toLowerCase()) ||
+            cliente?.telefono?.includes(busquedaCliente)
         );
   }, [clientes, busquedaCliente]);
 
-  // Filtrar productos según la búsqueda
-  const productosFiltrados = busquedaProducto.trim() === ""
-    ? productos
-    : productos.filter(p => 
-        p.nombre_producto?.toLowerCase().includes(busquedaProducto.toLowerCase())
+  useEffect(() => {
+    // Obtener las categorías del backend
+    const fetchCategorias = async () => {
+      try {
+        const categoriasResponse = await productService.getAllCategories();
+        setCategorias(categoriasResponse.data);
+      } catch (error) {
+        console.error("Error cargando categorías:", error);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
+
+  useEffect(() => {
+    let resultado = [...productos];
+
+    // Filtrar por término de búsqueda
+    if (busquedaProducto.trim() !== "") {
+      resultado = resultado.filter((p) =>
+        p.nombre_producto
+          ?.toLowerCase()
+          .includes(busquedaProducto.toLowerCase())
       );
+    }
+
+    // Filtrar por categoría
+    if (categoriaSeleccionada !== "Todas") {
+      resultado = resultado.filter(
+        (p) => p.id_categoria === parseInt(categoriaSeleccionada)
+      );
+    }
+
+    setProductosFiltrados(resultado);
+
+    // Log para depuración
+    console.log("Filtrado aplicado:", {
+      total: productos.length,
+      filtrados: resultado.length,
+      busqueda: busquedaProducto,
+      categoria: categoriaSeleccionada,
+    });
+  }, [busquedaProducto, categoriaSeleccionada, productos]);
 
   // Añadir producto a la lista de seleccionados
   const handleAddProduct = (producto) => {
@@ -202,10 +263,14 @@ const NuevaPreventa = () => {
       // Verificar stock disponible
       const nuevaCantidad = productoExistente.cantidad + 1;
       if (nuevaCantidad > (producto.cantidad_ingreso || 0)) {
-        setError(`No hay suficiente stock disponible para ${producto.nombre_producto}. Stock actual: ${producto.cantidad_ingreso || 0}`);
+        setError(
+          `No hay suficiente stock disponible para ${
+            producto.nombre_producto
+          }. Stock actual: ${producto.cantidad_ingreso || 0}`
+        );
         return;
       }
-      
+
       // Si ya existe, solo actualizar la cantidad
       setProductosSeleccionados(
         productosSeleccionados.map((p) =>
@@ -217,14 +282,18 @@ const NuevaPreventa = () => {
     } else {
       // Verificar stock disponible para nuevo producto
       if (1 > (producto.cantidad_ingreso || 0)) {
-        setError(`No hay suficiente stock disponible para ${producto.nombre_producto}. Stock actual: ${producto.cantidad_ingreso || 0}`);
+        setError(
+          `No hay suficiente stock disponible para ${
+            producto.nombre_producto
+          }. Stock actual: ${producto.cantidad_ingreso || 0}`
+        );
         return;
       }
-      
+
       // Si no existe, añadirlo con cantidad 1
       setProductosSeleccionados([
         ...productosSeleccionados,
-        { ...producto, cantidad: 1 }
+        { ...producto, cantidad: 1 },
       ]);
     }
   };
@@ -234,15 +303,20 @@ const NuevaPreventa = () => {
     setProductosSeleccionados(
       productosSeleccionados.map((p) => {
         if (p.id_producto === id) {
-          const nuevaCantidad = operacion === "aumentar" ? p.cantidad + 1 : p.cantidad - 1;
-          
+          const nuevaCantidad =
+            operacion === "aumentar" ? p.cantidad + 1 : p.cantidad - 1;
+
           // Verificar stock disponible
-          const producto = productos.find(prod => prod.id_producto === id);
+          const producto = productos.find((prod) => prod.id_producto === id);
           if (nuevaCantidad > (producto?.cantidad_ingreso || 0)) {
-            setError(`No hay suficiente stock disponible para ${producto?.nombre_producto}. Stock actual: ${producto?.cantidad_ingreso || 0}`);
+            setError(
+              `No hay suficiente stock disponible para ${
+                producto?.nombre_producto
+              }. Stock actual: ${producto?.cantidad_ingreso || 0}`
+            );
             return p;
           }
-          
+
           return { ...p, cantidad: Math.max(nuevaCantidad, 1) }; // No permitir cantidades menores a 1
         }
         return p;
@@ -274,7 +348,7 @@ const NuevaPreventa = () => {
     setError("");
     setSuccess(false);
     setZonaSeleccionada(null);
-    
+
     // Llamamos a las funciones para recargar datos
     if (user.rol === "COLABORADOR") {
       fetchZonasAsignadas();
@@ -296,14 +370,21 @@ const NuevaPreventa = () => {
     // Mostrar diálogo de confirmación
     const total = calcularSubtotal();
     const productosInfo = productosSeleccionados
-      .map(p => `- ${p.nombre_producto} (${p.cantidad} unidades) - $${(p.precio * p.cantidad).toLocaleString('es-CO')}`)
-      .join('\n');
+      .map(
+        (p) =>
+          `- ${p.nombre_producto} (${p.cantidad} unidades) - $${(
+            p.precio * p.cantidad
+          ).toLocaleString("es-CO")}`
+      )
+      .join("\n");
 
-    const mensajeConfirmacion = 
+    const mensajeConfirmacion =
       `¿Está seguro que desea crear la siguiente preventa?\n\n` +
-      `Cliente: ${clienteInfo.razon_social || clienteInfo.nombre_completo_cliente}\n` +
+      `Cliente: ${
+        clienteInfo.razon_social || clienteInfo.nombre_completo_cliente
+      }\n` +
       `Productos:\n${productosInfo}\n\n` +
-      `Total: $${total.toLocaleString('es-CO')}`;
+      `Total: $${total.toLocaleString("es-CO")}`;
 
     const confirmacion = window.confirm(mensajeConfirmacion);
     if (!confirmacion) return;
@@ -315,20 +396,20 @@ const NuevaPreventa = () => {
       // Preparar datos para la API
       const preventaData = {
         id_cliente: String(clienteInfo.id_cliente),
-        detalles: productosSeleccionados.map(p => ({
+        detalles: productosSeleccionados.map((p) => ({
           id_producto: Number(p.id_producto),
-          cantidad: Number(p.cantidad)
-        }))
+          cantidad: Number(p.cantidad),
+        })),
       };
 
       // Enviar datos al servicio
       const response = await presaleService.createPresale(preventaData);
-      
+
       // Solo si la respuesta es exitosa
       if (response && response.status === 201) {
-      setSuccess(true);
+        setSuccess(true);
         alert("Preventa creada exitosamente");
-        
+
         // Limpiar estados directamente en lugar de llamar a handleReset
         setClienteInfo(null);
         setProductosSeleccionados([]);
@@ -337,7 +418,7 @@ const NuevaPreventa = () => {
         setError("");
         setSuccess(false);
         setZonaSeleccionada(null);
-        
+
         // Redirigir inmediatamente
         navigate("/preventa/historial");
         return; // Finalizar función para evitar ejecución adicional
@@ -345,37 +426,45 @@ const NuevaPreventa = () => {
     } catch (err) {
       console.error("Error completo:", err);
       if (err.response && err.response.data) {
-        console.log("Respuesta del servidor:", JSON.stringify(err.response.data, null, 2));
+        console.log(
+          "Respuesta del servidor:",
+          JSON.stringify(err.response.data, null, 2)
+        );
       }
       let mensajeError = "";
-      
+
       if (err.response) {
         switch (err.response.status) {
           case 401:
-            mensajeError = "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
+            mensajeError =
+              "Su sesión ha expirado. Por favor, inicie sesión nuevamente.";
             break;
           case 403:
             mensajeError = "No tiene permisos para realizar esta acción.";
             break;
           case 422:
             const validationError = err.response.data.errors?.[0];
-            mensajeError = validationError ? 
-              `Error de validación: ${validationError.msg}` : 
-              "Error de validación en los datos enviados.";
+            mensajeError = validationError
+              ? `Error de validación: ${validationError.msg}`
+              : "Error de validación en los datos enviados.";
             break;
           case 500:
-            mensajeError = "Error interno del servidor. Por favor, intente más tarde.";
+            mensajeError =
+              "Error interno del servidor. Por favor, intente más tarde.";
             break;
           default:
-            mensajeError = err.response.data?.message || 
-                          "Error al procesar la solicitud. Por favor, intente nuevamente.";
+            mensajeError =
+              err.response.data?.message ||
+              "Error al procesar la solicitud. Por favor, intente nuevamente.";
         }
-      } else if (err.message?.includes('Network Error')) {
-        mensajeError = "Error de conexión con el servidor. Verifique su conexión a internet.";
+      } else if (err.message?.includes("Network Error")) {
+        mensajeError =
+          "Error de conexión con el servidor. Verifique su conexión a internet.";
       } else {
-        mensajeError = "Error inesperado. Por favor, intente nuevamente más tarde.";
+        mensajeError =
+          "Error inesperado. Por favor, intente nuevamente más tarde.";
       }
-      
+
       setError(mensajeError);
       alert(mensajeError);
     } finally {
@@ -406,15 +495,18 @@ const NuevaPreventa = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 ml-10 pl-6">
+      <Tipografia>
       <div className="w-full bg-white mb-4">
         <div className="px-2 sm:px-4 lg:px-8 py-2">
           <Tipografia>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nueva Preventa</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+              Nueva Preventa
+            </h1>
           </Tipografia>
         </div>
       </div>
 
-      <SidebarAdm/>
+      <SidebarAdm />
       <div className="container mx-auto px-2 sm:px-4 py-2">
         {/* Alertas */}
         {error && (
@@ -427,13 +519,15 @@ const NuevaPreventa = () => {
             </div>
           </div>
         )}
-        
+
         {success && (
           <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
             <div className="flex items-center">
               <Icono name="confirmar" size={20} />
               <Tipografia>
-                <span className="ml-2">Preventa registrada con éxito. Redirigiendo...</span>
+                <span className="ml-2">
+                  Preventa registrada con éxito. Redirigiendo...
+                </span>
               </Tipografia>
             </div>
           </div>
@@ -443,7 +537,10 @@ const NuevaPreventa = () => {
         {user.rol === "COLABORADOR" && (
           <div className="bg-white rounded-lg shadow-md p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
-              <Tipografia variant="h2" className="text-orange-700 font-bold text-lg">
+              <Tipografia
+                variant="h2"
+                className="text-orange-700 font-bold text-lg"
+              >
                 Zonas Asignadas
               </Tipografia>
               <div className="text-sm text-gray-600">
@@ -465,9 +562,11 @@ const NuevaPreventa = () => {
                     onClick={() => handleSeleccionarZona(zona)}
                     className={`
                       border rounded-lg p-4 cursor-pointer transition-all duration-200
-                      ${zonaSeleccionada?.id_zona_de_trabajo === zona.id_zona_de_trabajo
-                        ? 'bg-orange-50 border-orange-500 shadow-md'
-                        : 'hover:shadow-md hover:border-orange-300'
+                      ${
+                        zonaSeleccionada?.id_zona_de_trabajo ===
+                        zona.id_zona_de_trabajo
+                          ? "bg-orange-50 border-orange-500 shadow-md"
+                          : "hover:shadow-md hover:border-orange-300"
                       }
                     `}
                   >
@@ -479,14 +578,19 @@ const NuevaPreventa = () => {
                         </Tipografia>
                         {zona.ciudad && (
                           <div className="flex items-center text-sm text-gray-600">
-                            <Icono name="ubicacion" size={16} className="mr-1" />
+                            <Icono
+                              name="ubicacion"
+                              size={16}
+                              className="mr-1"
+                            />
                             <Tipografia>
                               <span>{zona.ciudad}</span>
                             </Tipografia>
                           </div>
                         )}
                       </div>
-                      {zonaSeleccionada?.id_zona_de_trabajo === zona.id_zona_de_trabajo && (
+                      {zonaSeleccionada?.id_zona_de_trabajo ===
+                        zona.id_zona_de_trabajo && (
                         <div className="text-orange-500">
                           <Icono name="confirmar" size={24} />
                         </div>
@@ -544,17 +648,17 @@ const NuevaPreventa = () => {
                       {/* Estado de la zona */}
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                         {zona.estado && (
-                          <div className={`text-xs px-2 py-1 rounded-full ${
-                            zona.estado === 'Activa' 
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            <Tipografia>
-                              {zona.estado}
-                            </Tipografia>
+                          <div
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              zona.estado === "Activa"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            <Tipografia>{zona.estado}</Tipografia>
                           </div>
                         )}
-                        
+
                         {zona.cantidad_clientes !== undefined && (
                           <div className="text-xs text-gray-600">
                             <Tipografia>
@@ -580,7 +684,10 @@ const NuevaPreventa = () => {
         {/* Información del cliente */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <div className="flex justify-between items-center mb-4">
-            <Tipografia variant="h2" className="text-orange-700 font-bold text-lg">
+            <Tipografia
+              variant="h2"
+              className="text-orange-700 font-bold text-lg"
+            >
               Información del Cliente
             </Tipografia>
             {clienteInfo && (
@@ -595,23 +702,34 @@ const NuevaPreventa = () => {
           {clienteInfo ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Tipografia className="text-gray-600 text-sm">Nombre / Razón Social</Tipografia>
+                <Tipografia className="text-gray-600 text-sm">
+                  Nombre / Razón Social
+                </Tipografia>
                 <Tipografia className="font-medium break-words">
-                  {clienteInfo.razon_social || clienteInfo.nombre_completo_cliente}
+                  {clienteInfo.razon_social ||
+                    clienteInfo.nombre_completo_cliente}
                 </Tipografia>
               </div>
               <div>
-                <Tipografia className="text-gray-600 text-sm">Teléfono</Tipografia>
-                <Tipografia className="font-medium break-words">{clienteInfo.telefono}</Tipografia>
+                <Tipografia className="text-gray-600 text-sm">
+                  Teléfono
+                </Tipografia>
+                <Tipografia className="font-medium break-words">
+                  {clienteInfo.telefono}
+                </Tipografia>
               </div>
               <div className="sm:col-span-2">
-                <Tipografia className="text-gray-600 text-sm">Dirección</Tipografia>
-                <Tipografia className="font-medium break-words">{clienteInfo.direccion}</Tipografia>
+                <Tipografia className="text-gray-600 text-sm">
+                  Dirección
+                </Tipografia>
+                <Tipografia className="font-medium break-words">
+                  {clienteInfo.direccion}
+                </Tipografia>
               </div>
             </div>
           ) : (
             <div>
-              <div className="mb-4">
+              <div className="mb-4 w-auto md:w-96">
                 <CampoTexto
                   placeholder="Buscar cliente por nombre, razón social o teléfono..."
                   value={busquedaCliente}
@@ -620,7 +738,8 @@ const NuevaPreventa = () => {
               </div>
               {!loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Array.isArray(clientesFiltrados) && clientesFiltrados.length > 0 ? (
+                  {Array.isArray(clientesFiltrados) &&
+                  clientesFiltrados.length > 0 ? (
                     clientesFiltrados.map((cliente) => (
                       <div
                         key={cliente.id_cliente}
@@ -629,7 +748,8 @@ const NuevaPreventa = () => {
                       >
                         <div className="space-y-2">
                           <Tipografia className="font-medium break-words">
-                            {cliente.razon_social || cliente.nombre_completo_cliente}
+                            {cliente.razon_social ||
+                              cliente.nombre_completo_cliente}
                           </Tipografia>
                           <Tipografia className="text-sm text-gray-600 break-words">
                             {cliente.telefono}
@@ -643,7 +763,7 @@ const NuevaPreventa = () => {
                   ) : (
                     <Tipografia>
                       <div className="col-span-full text-center py-1 text-gray-500">
-                        {!zonaSeleccionada && user.rol === "COLABORADOR" 
+                        {!zonaSeleccionada && user.rol === "COLABORADOR"
                           ? "Seleccione una zona para ver sus clientes"
                           : "No se encontraron clientes en esta zona"}
                       </div>
@@ -659,19 +779,122 @@ const NuevaPreventa = () => {
           )}
         </div>
 
-        {/* Búsqueda de productos */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <Tipografia variant="h2" className="text-orange-700 font-bold text-lg mb-4">
-            Productos Disponibles
-          </Tipografia>
-          
-          <div className="mb-4">
-            <CampoTexto
-              placeholder="Buscar productos..."
-              value={busquedaProducto}
-              onChange={(e) => setBusquedaProducto(e.target.value)}
-            />
+        {/* filtro de productos */}
+        <div className="bg-white rounded-lg shadow-md p-4 my-4">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <Tipografia
+              variant="h2"
+              className="text-orange-700 font-bold text-lg mb-4"
+            >
+              Productos Disponibles
+            </Tipografia>
+            {categoriaSeleccionada !== "Todas" && (
+              <div className="inline-flex items-center bg-orange-100 text-orange-800 text-xs rounded-full px-3 py-1">
+                <span>
+                  Categoría:{" "}
+                  {categorias.find(
+                    (c) => c.id_categoria === parseInt(categoriaSeleccionada)
+                  )?.nombre_categoria || categoriaSeleccionada}
+                </span>
+              </div>
+            )}
+
+            {busquedaProducto && (
+              <div className="inline-flex items-center bg-blue-100 text-blue-800 text-xs rounded-full px-3 py-1">
+                <span>Búsqueda: {busquedaProducto}</span>
+              </div>
+            )}
+
+            <div className="ml-auto text-xs text-gray-500">
+              Mostrando {productosFiltrados.length} de {productos.length}{" "}
+              productos
+            </div>
           </div>
+
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+            {/* Selector de categorías (a la izquierda) */}
+            <div className="w-full md:w-96">
+              <Tipografia className="block text-sm font-medium text-gray-700 mb-1">
+                Categoría
+              </Tipografia>
+              <Tipografia>
+              <select
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                value={categoriaSeleccionada}
+                onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+              >
+                <option value="Todas">Todas las categorías</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id_categoria} value={cat.id_categoria}>
+                    {cat.nombre_categoria}
+                  </option>
+                ))}
+              </select>
+              </Tipografia>
+            </div>
+
+            {/* Buscador de productos (a la derecha) */}
+            <div className="w-full md:w-96">
+              <Tipografia className="block text-sm font-medium text-gray-700 mb-1">
+                Buscar
+              </Tipografia>
+              <div className="relative">
+                <CampoTexto
+                  placeholder="Buscar productos..."
+                  value={busquedaProducto}
+                  onChange={(e) => setBusquedaProducto(e.target.value)}
+                />
+                {busquedaProducto && (
+                  <button
+                    onClick={() => setBusquedaProducto("")}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Botón para limpiar filtros (solo visible cuando hay filtros activos) */}
+          {(busquedaProducto || categoriaSeleccionada !== "Todas") && (
+            <div className="flex justify-end mt-2 mb-4">
+              <button
+                onClick={() => {
+                  setBusquedaProducto("");
+                  setCategoriaSeleccionada("Todas");
+                }}
+                className="text-sm text-orange-600 hover:text-orange-800 flex items-center transition-colors duration-150"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             {productosFiltrados.length > 0 ? (
               productosFiltrados.map((producto) => (
@@ -690,7 +913,7 @@ const NuevaPreventa = () => {
                             className="w-full h-full object-contain p-2"
                             onError={(e) => {
                               e.target.onerror = null;
-                              const imgMap = {...productImages};
+                              const imgMap = { ...productImages };
                               imgMap[producto.id_producto] = null;
                               setProductImages(imgMap);
                             }}
@@ -701,17 +924,28 @@ const NuevaPreventa = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Tipografia className="font-medium break-words line-clamp-2">
                           {producto.nombre_producto}
                         </Tipografia>
-                        <Tipografia className="text-purple-600 font-bold">
-                          ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
-                        </Tipografia>
-                        <Tipografia className="text-sm text-gray-500">
-                          Stock: {producto.cantidad_ingreso || 0}
-                        </Tipografia>
+                        <div className="flex justify-between items-center w-full">
+                          <Tipografia className="text-orange-700 font-bold">
+                            $
+                            {parseFloat(producto.precio || 0).toLocaleString(
+                              "es-CO"
+                            )}
+                          </Tipografia>
+                          <Tipografia
+                            className={`text-sm inline-flex items-center px-2.5 py-0.5 rounded-full md:text-sm ${
+                              (producto.cantidad_ingreso || 0) <= 10
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            Stock: {producto.cantidad_ingreso || 0}
+                          </Tipografia>
+                        </div>
                       </div>
                     </div>
                     <Boton
@@ -742,13 +976,19 @@ const NuevaPreventa = () => {
 
         {/* Productos seleccionados */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <Tipografia variant="h2" className="text-orange-700 font-bold text-lg mb-4">
+          <Tipografia
+            variant="h2"
+            className="text-orange-700 font-bold text-lg mb-4"
+          >
             Productos Seleccionados
           </Tipografia>
           {productosSeleccionados.length > 0 ? (
             <div className="space-y-4">
               {productosSeleccionados.map((producto) => (
-                <div key={producto.id_producto} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={producto.id_producto}
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex items-center space-x-4 w-full sm:w-auto">
                     {/* Imagen del producto seleccionado */}
                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
@@ -764,34 +1004,48 @@ const NuevaPreventa = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex-grow min-w-0">
-                      <Tipografia className="font-medium break-words">{producto.nombre_producto}</Tipografia>
+                      <Tipografia className="font-medium break-words">
+                        {producto.nombre_producto}
+                      </Tipografia>
                       <Tipografia className="text-purple-600">
-                        ${parseFloat(producto.precio || 0).toLocaleString('es-CO')}
+                        $
+                        {parseFloat(producto.precio || 0).toLocaleString(
+                          "es-CO"
+                        )}
                       </Tipografia>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3 mt-2 sm:mt-0">
                     <button
                       className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
-                      onClick={() => handleUpdateCantidad(producto.id_producto, "disminuir")}
+                      onClick={() =>
+                        handleUpdateCantidad(producto.id_producto, "disminuir")
+                      }
                     >
                       <Tipografia>-</Tipografia>
                     </button>
-                    <Tipografia className="font-medium">{producto.cantidad}</Tipografia>
+                    <Tipografia className="font-medium">
+                      {producto.cantidad}
+                    </Tipografia>
                     <button
                       className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
-                      onClick={() => handleUpdateCantidad(producto.id_producto, "aumentar")}
+                      onClick={() =>
+                        handleUpdateCantidad(producto.id_producto, "aumentar")
+                      }
                     >
                       <Tipografia>+</Tipografia>
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4 mt-2 sm:mt-0">
                     <Tipografia className="font-bold">
-                      ${((parseFloat(producto.precio) || 0) * producto.cantidad).toLocaleString('es-CO')}
+                      $
+                      {(
+                        (parseFloat(producto.precio) || 0) * producto.cantidad
+                      ).toLocaleString("es-CO")}
                     </Tipografia>
                     <button
                       className="text-red-500 hover:text-red-700"
@@ -807,7 +1061,7 @@ const NuevaPreventa = () => {
                 <div className="flex justify-between">
                   <Tipografia className="font-semibold">Subtotal</Tipografia>
                   <Tipografia className="font-bold">
-                    ${calcularSubtotal().toLocaleString('es-CO')}
+                    ${calcularSubtotal().toLocaleString("es-CO")}
                   </Tipografia>
                 </div>
               </div>
@@ -825,7 +1079,11 @@ const NuevaPreventa = () => {
                   tipo="primario"
                   label={loading ? "Enviando..." : "Crear Preventa"}
                   onClick={handleSubmitPreventa}
-                  disabled={loading || !clienteInfo || productosSeleccionados.length === 0}
+                  disabled={
+                    loading ||
+                    !clienteInfo ||
+                    productosSeleccionados.length === 0
+                  }
                 />
               </div>
             </div>
@@ -836,6 +1094,7 @@ const NuevaPreventa = () => {
           )}
         </div>
       </div>
+      </Tipografia>
     </div>
   );
 };

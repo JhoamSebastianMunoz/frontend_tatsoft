@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { userService } from "../../../context/services/ApiService";
 import Boton from "../../../components/atoms/Botones";
-import Buscador from "../../../components/molecules/Buscador";
+import CampoTexto from "../../atoms/CamposTexto";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Loading from "../../../components/Loading/Loading";
 import Sidebar from "../../organisms/Sidebar";
@@ -143,7 +143,7 @@ const GestionUsuarios = () => {
   // Función para editar usuario con navegación mejorada
   const handleEditarUsuario = (userId) => {
     navigate(`/editar/usuario/${userId}`, {
-      state: { from: location.pathname }
+      state: { from: location.pathname },
     });
   };
 
@@ -180,21 +180,22 @@ const GestionUsuarios = () => {
 
               <div className="flex flex-col space-y-3 w-full">
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
+                  <div className="flex justify-start w-full sm:w-auto">
+                    <Boton
+                      label="Registrar Usuario"
+                      tipo="primario"
+                      onClick={handleRegistrarUsuario}
+                      size="small"
+                      className="w-full sm:w-auto"
+                    />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
                   <div className="flex flex-col space-y-1">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-1">
-                      <div className="flex justify-start w-full sm:w-auto">
-                        <Boton
-                          label="Registrar Usuario"
-                          tipo="primario"
-                          onClick={handleRegistrarUsuario}
-                          size="small"
-                          className="w-full sm:w-auto"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <div className="w-full">
+                    {/* Contenedor flex para tener filtro y buscador en la misma línea */}
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                      {/* Filtro por rol (a la izquierda) */}
+                      <div className="w-full md:w-auto">
                         <Tipografia className="text-gray-800 mb-1 px-1 text-base">
                           Filtrar por rol:
                         </Tipografia>
@@ -225,43 +226,48 @@ const GestionUsuarios = () => {
                         </div>
                       </div>
 
-                      <div className="w-full mt-1">
-                        <Buscador
+                      {/* Buscador (a la derecha) */}
+                      <div className="w-full md:w-72 lg:w-96">
+                        <Tipografia className="text-gray-800 mb-1 px-1 text-base">
+                          Buscar
+                        </Tipografia>
+                        <CampoTexto
                           placeholder="Buscar usuarios por nombre"
                           onChange={handleBusquedaChange}
                           value={busqueda}
                         />
                       </div>
-
-                      {busqueda && (
-                        <div className="mt-2 flex items-center">
-                          <span className="text-xs text-gray-500 mr-2">
-                            Filtrando por:
-                          </span>
-                          <div className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center">
-                            <span>{busqueda}</span>
-                            <button
-                              onClick={() => setBusqueda("")}
-                              className="ml-1 text-orange-600 hover:text-orange-800"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Tag de filtro activo (debajo de ambos) */}
+                    {busqueda && (
+                      <div className="mt-2 flex items-center">
+                        <span className="text-xs text-gray-500 mr-2">
+                          Filtrando por:
+                        </span>
+                        <div className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center">
+                          <span>{busqueda}</span>
+                          <button
+                            onClick={() => setBusqueda("")}
+                            className="ml-1 text-orange-600 hover:text-orange-800"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -403,7 +409,9 @@ const GestionUsuarios = () => {
                                   label="Editar"
                                   size="small"
                                   tipo="primario"
-                                  onClick={() => handleEditarUsuario(usuario.id_usuario)}
+                                  onClick={() =>
+                                    handleEditarUsuario(usuario.id_usuario)
+                                  }
                                   className="w-full bg-[#F78220] hover:bg-[#e67316] text-white py-2 rounded-md"
                                 />
                               </div>

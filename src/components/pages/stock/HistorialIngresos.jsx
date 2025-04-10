@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Tipografia from "../../atoms/Tipografia";
 import Icono from "../../atoms/Iconos";
 import Botones from "../../atoms/Botones";
-import Buscador from "../../molecules/Buscador";
+import CampoTexto from "../../atoms/CamposTexto";
 import Sidebar from "../../organisms/Sidebar";
 import { useAuth } from "../../../context/AuthContext";
 // Importar el servicio productService que ya está configurado
@@ -89,6 +89,21 @@ const HistorialIngresos = () => {
     obtenerHistorial();
   }, []);
 
+  // Efecto para actualizar la búsqueda en tiempo real cuando cambia searchTerm
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      // Si no hay término de búsqueda, aplicamos solo los otros filtros
+      handleFilteredSearch();
+    } else {
+      // Aplicar búsqueda en tiempo real
+      const delayDebounce = setTimeout(() => {
+        handleFilteredSearch();
+      }, 300); // Pequeño delay para evitar muchas actualizaciones seguidas
+
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [searchTerm]);
+
   // Función para formatear fechas (convertir de ISO a formato dd/mm/yyyy)
   const formatearFecha = (fecha) => {
     if (!fecha) return "";
@@ -107,8 +122,8 @@ const HistorialIngresos = () => {
     return `$${precio.toLocaleString('es-CO')}`;
   };
 
-  // Aplicar filtros
-  const handleSearch = () => {
+  // Aplicar filtros sin modificar searchTerm (para uso interno)
+  const handleFilteredSearch = () => {
     // Filtrar por término de búsqueda (nombre del producto)
     let filtrados = historialIngresos;
     
@@ -145,6 +160,21 @@ const HistorialIngresos = () => {
     
     setHistorialFiltrado(filtrados);
     console.log("Filtros aplicados:", { searchTerm, fechaDesde, fechaHasta, usuarioResponsable });
+  };
+
+  // Aplicar filtros (función para el botón "Aplicar Filtros")
+  const handleSearch = () => {
+    handleFilteredSearch();
+  };
+
+  // Manejar cambios en el campo de búsqueda
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Función para limpiar la búsqueda
+  const clearSearch = () => {
+    setSearchTerm("");
   };
 
   // Función para convertir fecha de formato español (dd/mm/yyyy) a ISO (yyyy-mm-dd)
@@ -265,6 +295,32 @@ const HistorialIngresos = () => {
                   <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {historialFiltrado.length} Registros
                   </span>
+                  {searchTerm && (
+                    <div className="ml-2 flex items-center">
+                      <span className="text-xs text-gray-500">Buscando:</span>
+                      <div className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full flex items-center">
+                        <span>{searchTerm}</span>
+                        <button
+                          onClick={clearSearch}
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -285,11 +341,23 @@ const HistorialIngresos = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Producto
                 </label>
-                <Buscador
-                  placeholder="Buscar por nombre"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <div className="relative">
+                  <CampoTexto
+                    placeholder="Buscar por nombre"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                  {searchTerm && (
+                    <button 
+                      onClick={clearSearch}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
               
               <div>

@@ -6,7 +6,7 @@ import { useAuth } from "../../../context/AuthContext";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
-import Buscador from "../../molecules/Buscador";
+import CampoTexto from "../../../components/atoms/CamposTexto";
 import Sidebar from "../../organisms/Sidebar";
 import Loading from "../../Loading/Loading";
 import ProductoItem from "../../molecules/ProductoItem";
@@ -392,15 +392,15 @@ const GestionProductos = () => {
         </div>
       </div>
 
-      <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
+      <div className="bg-slate-50 flex-1 pl-12 pr-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
               Gestión de productos
             </h1>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
@@ -461,7 +461,7 @@ const GestionProductos = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Buscar
                 </label>
-                <Buscador
+                <CampoTexto
                   placeholder="Buscar producto "
                   onChange={handleSearchChange}
                   value={searchTerm}
