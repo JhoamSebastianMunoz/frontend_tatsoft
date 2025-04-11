@@ -370,9 +370,9 @@ const EditarProducto = () => {
       </div>
       
       <Tipografia>
-      <div className="flex-1 md:pl-20 w-full max-w-screen-xl mx-auto lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">  
+      <div className="flex-1 md:pl-16 w-full max-w-screen-xl mx-auto lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-5">  
         {/* Contenido principal */}
-        <div className="md:pl-[350px] pl-4 pt-10 md:pt-4">
+        <div className="md:pl-[350px] pl-8 pr-4 pt-10 md:pt-4">
           <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl mx-auto">
             {error && (
               <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -383,6 +383,9 @@ const EditarProducto = () => {
            
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+              Editar Producto
+            </h1>
                 <div className="md:col-span-2">
                   <Tipografia size="sm" className="block text-gray-700 mb-1">Nombre del Producto*</Tipografia>
                   <input

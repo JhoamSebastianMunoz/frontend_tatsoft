@@ -352,7 +352,7 @@ const App = () => {
 
       {/* Rutas de Inventario */}
       <Route
-        path="/inventario"
+        path="/inventario/:id"
         element={
           <ProtectedRoute
             element={<IngresoStock />}

@@ -181,7 +181,7 @@ const GestionProductos = () => {
   };
 
   const handleStock = (id) => {
-    navigate(`/editar-producto/${id}`);
+    navigate(`/inventario/${id}`);
     setOpenMenuId(null);
   };
 
@@ -354,11 +354,15 @@ const GestionProductos = () => {
           </p>
 
           <p className="mt-2">
-            <span
-              className={`inline-block px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800`}
+            <Tipografia
+              className={`text-sm inline-flex items-center px-2.5 py-0.5 rounded-full md:text-sm ${
+                (producto.cantidad_ingreso || 0) <= 10
+                  ? "bg-red-100 text-red-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
             >
-              {producto.estado || "Activo"}
-            </span>
+              Stock: {producto.cantidad_ingreso || 0}
+            </Tipografia>
           </p>
         </div>
 
