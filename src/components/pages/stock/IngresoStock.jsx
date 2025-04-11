@@ -148,17 +148,9 @@ const IngresoStock = () => {
     setSearchTerm(producto.nombre_producto);
     setShowProductList(false);
   };
-
+  
   const handleCancelar = () => {
-    setAlert({
-      show: true,
-      type: "warning",
-      message: "¿Desea cancelar el ingreso? Esta acción no se puede deshacer.",
-      onConfirm: () => {
-        navigate("/historial-ingresos");
-      },
-      onCancel: () => setAlert({ ...alert, show: false }),
-    });
+    navigate("/historial-ingresos");
   };
 
   const handleSubmit = async (e) => {
@@ -269,8 +261,8 @@ const IngresoStock = () => {
                 <Icono name="check" size={30} className="text-green-500" />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-                <Icono name="alert-triangle" size={30} className="text-amber-500" />
+              <div className="">
+                <Icono name="cancelar" size={60} color="red" />
               </div>
             )}
             
