@@ -430,15 +430,6 @@ const GestionZonas = () => {
                               Ver Clientes
                             </li>
                             <li
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                              onClick={() => {
-                                navigate(`/editar-zona/${zona.id_zona_de_trabajo}`);
-                                setMenuAbierto(null);
-                              }}
-                            >
-                              Ver Zona
-                            </li>
-                            <li
                               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                               onClick={() => {
                                 handleEliminarClick(zona);
@@ -458,7 +449,7 @@ const GestionZonas = () => {
                         {zona.nombre_zona_trabajo}
                       </h3>
                       <p className="text-gray-600 break-words text-sm mb-2">
-                        <strong>Ubicación:</strong> {formatCoordenadas(zona)}
+                        <strong>Descripción:</strong>
                       </p>
                       <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                         {zona.descripcion}

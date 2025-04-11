@@ -132,7 +132,7 @@ const MisZonas = () => {
                     variant="subtitle"
                     className="text-black font-bold mb-3 sm:mb-0"
                   >
-                    Mis Zonas Asignadas
+                    Zonas Asignadas
                   </Tipografia>
                 </div>
                 <div className="rounded-lg">

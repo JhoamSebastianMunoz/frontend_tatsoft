@@ -1,39 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Icono from "../../../components/atoms/Iconos";
 import Boton from "../../../components/atoms/Botones";
 import Sidebar from "../../organisms/Sidebar";
-// Importamos la biblioteca de Leaflet para el mapa
-import L from 'leaflet';
-import { MapContainer, TileLayer, FeatureGroup, Polygon } from "react-leaflet";
-import { EditControl } from "react-leaflet-draw";
-import "leaflet/dist/leaflet.css";
-import "leaflet-draw/dist/leaflet.draw.css";
-
-// Coordenadas centrales del departamento del Quindío, Colombia
-const QUINDIO_CENTER = [4.5339, -75.6803]; // Armenia, Quindío
-const QUINDIO_ZOOM = 11; // Zoom apropiado para ver el departamento
-
-// Arreglo para los iconos de Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
 
 const EditarZona = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const mapRef = useRef(null);
-  const featureGroupRef = useRef(null);
   
   const [zona, setZona] = useState({
     nombre_zona_trabajo: "",
-    descripcion: "",
-    coordenadas: []
+    descripcion: ""
   });
   
   const [zonaOriginal, setZonaOriginal] = useState(null);
@@ -42,42 +21,6 @@ const EditarZona = () => {
   const [guardado, setGuardado] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [mapaListo, setMapaListo] = useState(false);
-  
-  // Configuración para el componente Draw de Leaflet
-  const drawOptions = {
-    rectangle: {
-      shapeOptions: {
-        color: '#3388ff',
-        weight: 3
-      },
-      showArea: false,
-      metric: false
-    },
-    polygon: {
-      shapeOptions: {
-        color: '#3388ff',
-        weight: 3
-      },
-      showArea: false,
-      metric: false,
-      allowIntersection: false
-    },
-    circle: false,
-    circlemarker: false,
-    marker: false,
-    polyline: false
-  };
-  
-  // Aseguramos que el mapa se cargue solo después del renderizado completo
-  useEffect(() => {
-    setMapaListo(true);
-  }, []);
-
-  useEffect(() => {
-    console.log("Estado modoEdicion:", modoEdicion);
-  }, [modoEdicion]);
   
   // Cargar datos de la zona al iniciar
   useEffect(() => {
@@ -90,20 +33,9 @@ const EditarZona = () => {
           const zonaData = Array.isArray(response.data) ? response.data[0] : response.data;
           
           if (zonaData && zonaData.nombre_zona_trabajo) {
-            // Procesar las coordenadas desde el formato que viene de la API
-            let coordenadas = [];
-            if (zonaData.coordenadas) {
-              // Si las coordenadas ya vienen como array de objetos {lat, lng}
-              coordenadas = zonaData.coordenadas;
-            } else if (zonaData.latitud && zonaData.longitud) {
-              // Si solo viene un punto como latitud/longitud 
-              coordenadas = [{ lat: zonaData.latitud, lng: zonaData.longitud }];
-            }
-            
             const datosZona = {
               nombre_zona_trabajo: zonaData.nombre_zona_trabajo || "",
-              descripcion: zonaData.descripcion || "",
-              coordenadas: coordenadas
+              descripcion: zonaData.descripcion || ""
             };
             
             setZona(datosZona);
@@ -119,7 +51,6 @@ const EditarZona = () => {
         setError("Error al cargar los datos de la zona. Por favor, intenta de nuevo más tarde.");
       } finally {
         setLoading(false);
-        setModoEdicion(false);
       }
     };
 
@@ -134,8 +65,7 @@ const EditarZona = () => {
   const hayCambiosSinGuardar = () => {
     if (!zonaOriginal) return false;
     return zona.nombre_zona_trabajo !== zonaOriginal.nombre_zona_trabajo ||
-           zona.descripcion !== zonaOriginal.descripcion ||
-           JSON.stringify(zona.coordenadas) !== JSON.stringify(zonaOriginal.coordenadas);
+           zona.descripcion !== zonaOriginal.descripcion;
   };
 
   const handleChange = (e) => {
@@ -145,53 +75,6 @@ const EditarZona = () => {
       [name]: value
     }));
   };
-
-  // Función para manejar cuando se dibuja un área en el mapa
-  const handleAreaCreated = (e) => {
-    const { layerType, layer } = e;
-    
-    if (layerType === 'polygon' || layerType === 'rectangle') {
-      // Obtener las coordenadas del polígono dibujado
-      const coordenadas = layer.getLatLngs()[0].map(latlng => ({
-        lat: latlng.lat,
-        lng: latlng.lng
-      }));
-      
-      // Guardar las coordenadas en el estado
-      setZona(prev => ({
-        ...prev,
-        coordenadas: coordenadas
-      }));
-    }
-  };
-
-  // Función para manejar la edición de un área
-  const handleAreaEdited = (e) => {
-    const layers = e.layers;
-    layers.eachLayer((layer) => {
-      const coordenadas = layer.getLatLngs()[0].map(latlng => ({
-        lat: latlng.lat,
-        lng: latlng.lng
-      }));
-      
-      setZona(prev => ({
-        ...prev,
-        coordenadas: coordenadas
-      }));
-    });
-  };
-
-  // Función para manejar la eliminación de un área
-  const handleAreaDeleted = () => {
-    setZona(prev => ({
-      ...prev,
-      coordenadas: []
-    }));
-  };
-
-  const handleEditarClick = () => {
-    setModoEdicion(true);
-  };
   
   const handleGuardarClick = (e) => {
     e.preventDefault();
@@ -199,12 +82,6 @@ const EditarZona = () => {
     // Validar campos requeridos
     if (!zona.nombre_zona_trabajo || !zona.descripcion) {
       setError("Por favor completa todos los campos requeridos");
-      return;
-    }
-    
-    // Verificar si se han seleccionado coordenadas en el mapa (si se está editando)
-    if (modoEdicion && (!zona.coordenadas || zona.coordenadas.length === 0)) {
-      setError("Por favor selecciona un área en el mapa");
       return;
     }
     
@@ -220,8 +97,7 @@ const EditarZona = () => {
       // Preparar datos para la API
       const zonaData = {
         nombre_zona_trabajo: zona.nombre_zona_trabajo,
-        descripcion: zona.descripcion,
-        coordenadas: zona.coordenadas
+        descripcion: zona.descripcion
       };
       
       await areaService.updateArea(id, zonaData);
@@ -229,7 +105,6 @@ const EditarZona = () => {
       // Actualizar el estado original con los nuevos datos guardados
       setZonaOriginal({...zona});
       setGuardado(true);
-      setModoEdicion(false);
       
       setTimeout(() => {
         setGuardado(false);
@@ -246,31 +121,12 @@ const EditarZona = () => {
     if (hayCambiosSinGuardar()) {
       setMostrarAlertaCancelar(true);
     } else {
-      // Si no hay cambios, simplemente volver al modo vista
-      if (modoEdicion) {
-        setModoEdicion(false);
-        // Restaurar datos originales
-        setZona({...zonaOriginal});
-      } else {
-        navigate("/gestion-zonas");
-      }
+      navigate("/gestion-zonas");
     }
   };
 
   const handleConfirmarCancelar = () => {
     setMostrarAlertaCancelar(false);
-    
-    if (modoEdicion) {
-      // Si estamos en modo edición, volver al modo vista y restaurar datos originales
-      setModoEdicion(false);
-      setZona({...zonaOriginal});
-    } else {
-      // Si estamos en modo vista, volver a la lista de zonas
-      navigate("/gestion-zonas");
-    }
-  };
-
-  const handleVolverClick = () => {
     navigate("/gestion-zonas");
   };
 
@@ -288,7 +144,7 @@ const EditarZona = () => {
         <Tipografia>
           <div className="mt-4 mb-5">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-8">
-              {modoEdicion ? "Editar Zona" : "Información de la Zona"}
+              Editar Zona
             </h1>
           </div>
           {error && (
@@ -313,8 +169,7 @@ const EditarZona = () => {
                       name="nombre_zona_trabajo"
                       value={zona.nombre_zona_trabajo}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out ${!modoEdicion ? 'bg-gray-100' : ''}`}
-                      disabled={!modoEdicion}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out"
                     />
                   </div>
 
@@ -326,102 +181,25 @@ const EditarZona = () => {
                       name="descripcion"
                       value={zona.descripcion}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out h-32 ${!modoEdicion ? 'bg-gray-100' : ''}`}
-                      disabled={!modoEdicion}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out h-32"
                     />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 block">
-                      Ubicación
-                    </label>
-                    <div className="border border-gray-300 rounded-lg overflow-hidden h-[300px] sm:h-[400px]" id="map-container">
-                      {mapaListo && (
-                        <MapContainer 
-                          center={QUINDIO_CENTER} 
-                          zoom={QUINDIO_ZOOM} 
-                          style={{ width: '100%', height: '100%' }}
-                          ref={mapRef}
-                        >
-                          <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                          />
-                          
-                          {/* Si estamos en modo vista, mostrar el polígono sin controles de edición */}
-                          {!modoEdicion && zona.coordenadas && zona.coordenadas.length > 0 && (
-                            <Polygon 
-                              positions={zona.coordenadas.map(coord => [coord.lat, coord.lng])}
-                              pathOptions={{ color: '#3388ff', weight: 3 }}
-                            />
-                          )}
-                          
-                          {/* Si estamos en modo edición, mostrar los controles de dibujo */}
-                          {modoEdicion && (
-                            <FeatureGroup ref={featureGroupRef}>
-                              <EditControl
-                                position="topright"
-                                onCreated={handleAreaCreated}
-                                onEdited={handleAreaEdited}
-                                onDeleted={handleAreaDeleted}
-                                draw={drawOptions}
-                              />
-                              
-                              {/* Si ya hay coordenadas, mostrarlas como un polígono editable */}
-                              {zona.coordenadas && zona.coordenadas.length > 0 && (
-                                <Polygon 
-                                  positions={zona.coordenadas.map(coord => [coord.lat, coord.lng])}
-                                  pathOptions={{ color: '#3388ff', weight: 3 }}
-                                />
-                              )}
-                            </FeatureGroup>
-                          )}
-                        </MapContainer>
-                      )}
-                    </div>
-                    {modoEdicion && (
-                      <p className="text-sm text-gray-500">
-                        {zona.coordenadas && zona.coordenadas.length > 0 
-                          ? `Área seleccionada con ${zona.coordenadas.length} puntos. Puedes editar o eliminar el área dibujada.`
-                          : "Dibuja un polígono o rectángulo para seleccionar el área de la zona."}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-end pt-6 border-t border-gray-100">
-                {!modoEdicion ? (
-                  <>
-                    <Boton
-                      onClick={handleVolverClick}
-                      label="Volver"
-                      tipo="secundario"
-                      className="w-full sm:w-auto"
-                    />
-                    <Boton
-                      onClick={handleEditarClick}
-                      label="Editar"
-                      tipo="primario"
-                      className="w-full sm:w-auto"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Boton
-                      onClick={handleCancelar}
-                      label="Cancelar"
-                      tipo="secundario"
-                      className="w-full sm:w-auto"
-                    />
-                    <Boton
-                      onClick={handleGuardarClick}
-                      label="Guardar cambios"
-                      tipo="primario"
-                      className="w-full sm:w-auto"
-                    />
-                  </>
-                )}
+                <Boton
+                  onClick={handleCancelar}
+                  label="Cancelar"
+                  tipo="secundario"
+                  className="w-full sm:w-auto"
+                />
+                <Boton
+                  onClick={handleGuardarClick}
+                  label="Guardar cambios"
+                  tipo="primario"
+                  className="w-full sm:w-auto"
+                />
               </div>
             </div>
           </div>
@@ -502,13 +280,13 @@ const EditarZona = () => {
             <div className="bg-gray-50 px-6 py-4 flex flex-col gap-3">
               <Boton
                 onClick={handleConfirmarCancelar}
-                label={modoEdicion ? "Descartar cambios" : "Salir sin guardar"}
+                label="Salir sin guardar"
                 tipo="cancelar"
                 className="w-full"
               />
               <Boton
                 onClick={() => setMostrarAlertaCancelar(false)}
-                label={modoEdicion ? "Continuar editando" : "Continuar"}
+                label="Continuar editando"
                 tipo="secundario"
                 className="w-full"
               />

@@ -799,12 +799,6 @@ const NuevaPreventa = () => {
               </div>
             )}
 
-            {busquedaProducto && (
-              <div className="inline-flex items-center bg-blue-100 text-blue-800 text-xs rounded-full px-3 py-1">
-                <span>Búsqueda: {busquedaProducto}</span>
-              </div>
-            )}
-
             <div className="ml-auto text-xs text-gray-500">
               Mostrando {productosFiltrados.length} de {productos.length}{" "}
               productos

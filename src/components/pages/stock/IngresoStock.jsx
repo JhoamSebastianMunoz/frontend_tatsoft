@@ -149,17 +149,19 @@ const IngresoStock = () => {
     setShowProductList(false);
   };
 
-  const handleCancelar = () => {
-    setAlert({
-      show: true,
-      type: "warning",
-      message: "¿Desea cancelar el ingreso? Esta acción no se puede deshacer.",
-      onConfirm: () => {
-        navigate("/historial-ingresos");
-      },
-      onCancel: () => setAlert({ ...alert, show: false }),
-    });
-  };
+ const handleCancelar = () => {
+  setAlert({
+    show: true,
+    type: "warning", // Este es el tipo correcto para una alerta de cancelación (no success)
+    message: "¿Desea cancelar el ingreso? Esta acción no se puede deshacer.",
+    onConfirm: () => {
+      navigate("/historial-ingresos");
+    },
+    onCancel: () => {
+      setAlert(prevAlert => ({ ...prevAlert, show: false }));
+    }
+  });
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
