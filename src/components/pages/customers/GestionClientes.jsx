@@ -5,7 +5,8 @@ import Boton from "../../atoms/Botones";
 import Buscador from "../../molecules/Buscador";
 import Tipografia from "../../atoms/Tipografia";
 import Loading from "../../Loading/Loading";
-import Sidebar from "../../organisms/Sidebar"
+import Sidebar from "../../organisms/Sidebar";
+import Icono from "../../atoms/Iconos";
 
 const GestionClientes = () => {
   const navigate = useNavigate();
@@ -16,34 +17,98 @@ const GestionClientes = () => {
   const [menuAbierto, setMenuAbierto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [clienteAEliminar, setClienteAEliminar] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        setLoading(true);
-        const response = await clientService.getAllClients();
-        setClientes(response.data);
-      } catch (err) {
-        console.error("Error al cargar clientes:", err);
-        setError("Error al cargar la lista de clientes. Por favor, intenta de nuevo más tarde.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchClientes();
   }, []);
 
- 
+  const fetchClientes = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      // Llamada directa a la API sin procesamiento intermedio
+      const response = await fetch('https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/get-clients', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log("Datos completos de clientes recibidos:", data);
+      
+      if (Array.isArray(data)) {
+        // Log detallado para debugging
+        console.log("Estados de los clientes recibidos:", 
+          data.map(c => ({
+            id: c.id_cliente,
+            nombre: c.nombre_completo_cliente || c.razon_social,
+            estado: c.estado
+          }))
+        );
+        
+        // Conteo de clientes por estado
+        const conteoEstados = data.reduce((acc, c) => {
+          const estado = c.estado || "Sin estado";
+          acc[estado] = (acc[estado] || 0) + 1;
+          return acc;
+        }, {});
+        console.log("Distribución de estados:", conteoEstados);
+        
+        // No transformamos los datos, los usamos como vienen directamente de la API
+        setClientes(data);
+      } else {
+        console.error("Respuesta de la API no es un array:", data);
+        setClientes([]);
+        setError("El formato de datos recibido no es válido. Contacta al administrador.");
+      }
+    } catch (err) {
+      console.error("Error al cargar clientes:", err);
+      setError(`Error al cargar la lista de clientes: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para verificar si un cliente tiene el estado buscado
   const clientesFiltrados = clientes.filter(
     (cliente) => {
-      const tipoMatch = filtro === "Todos" || cliente.tipo === filtro;
+      // Registro detallado para debugging
+      console.log(`Cliente ID ${cliente.id_cliente} - Estado: "${cliente.estado}" - Filtro: "${filtro}"`);
       
+      // Filtrado por estado (Activo, Inactivo, Pendiente) - Más flexible para manejar variaciones
+      let estadoMatch = false;
+      
+      if (filtro === "Todos") {
+        // Si el filtro es "Todos", mostramos todos los clientes sin importar su estado
+        estadoMatch = true;
+      } else if (filtro === "Activos" && cliente.estado && String(cliente.estado).toLowerCase().includes("activ")) {
+        // Para clientes activos
+        estadoMatch = true;
+      } else if (filtro === "Inactivos" && cliente.estado && String(cliente.estado).toLowerCase().includes("inactiv")) {
+        // Para clientes inactivos
+        estadoMatch = true;
+      } else if (filtro === "Pendientes" && cliente.estado && String(cliente.estado).toLowerCase().includes("pendient")) {
+        // Para clientes pendientes
+        estadoMatch = true;
+      }
+      
+      // Buscar por nombre o razón social
       const searchMatch = !busqueda ||
-        cliente.razon_social?.toLowerCase().includes(busqueda.toLowerCase()) ||
-        cliente.nombre_completo_cliente?.toLowerCase().includes(busqueda.toLowerCase());
+        (cliente.razon_social && cliente.razon_social.toLowerCase().includes(busqueda.toLowerCase())) ||
+        (cliente.nombre_completo_cliente && cliente.nombre_completo_cliente.toLowerCase().includes(busqueda.toLowerCase()));
       
-      return tipoMatch && searchMatch;
+      // Registramos el resultado del filtrado
+      console.log(`  Resultado filtrado para cliente ${cliente.id_cliente}: ${estadoMatch && searchMatch ? "INCLUIDO" : "EXCLUIDO"}`);
+      
+      return estadoMatch && searchMatch;
     }
   );
 
@@ -53,15 +118,79 @@ const GestionClientes = () => {
 
   const handleEditarCliente = (cliente) => {
     localStorage.setItem("rutaOrigenEdicion", "/gestion/clientes");
-    navigate(`/editar/cliente/${cliente.id_cliente}`);
+    navigate(`/editar-cliente/${cliente.id_cliente}`);
   };
 
   const handleEliminarClick = (cliente) => {
-    // Implementa la lógica para eliminar el cliente
-    console.log("Eliminar cliente:", cliente);
+    setClienteAEliminar(cliente);
+    setShowConfirmDelete(true);
   };
 
-  if (loading) {
+  const confirmarEliminacion = async () => {
+    if (!clienteAEliminar) return;
+    
+    try {
+      setLoading(true);
+      // Realizar la llamada directa a la API para eliminar el cliente
+      const token = localStorage.getItem('token');
+      const url = `https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/delete-client/${clienteAEliminar.id_cliente}`;
+      
+      console.log(`Intentando eliminar cliente con ID: ${clienteAEliminar.id_cliente}`);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Error del servidor: ${response.status} ${response.statusText}. ${errorData}`);
+      }
+      
+      const data = await response.json();
+      console.log("Respuesta de eliminación:", data);
+      
+      setSuccessMessage(`El cliente ${clienteAEliminar.nombre_completo_cliente || clienteAEliminar.razon_social} ha sido eliminado con éxito.`);
+      // Actualizar la lista de clientes después de eliminar
+      fetchClientes();
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+      setError(`No se pudo eliminar el cliente. ${error.message}`);
+    } finally {
+      setLoading(false);
+      setShowConfirmDelete(false);
+      setClienteAEliminar(null);
+    }
+  };
+
+  const cancelarEliminacion = () => {
+    setShowConfirmDelete(false);
+    setClienteAEliminar(null);
+  };
+
+  // Manejo de mensajes de éxito y error
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  if (loading && clientes.length === 0) {
     return <Loading message="Cargando clientes..." />;
   }
 
@@ -75,26 +204,50 @@ const GestionClientes = () => {
           <Sidebar />
         </div>
       </div>
-    
+   
       <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
         <Tipografia>
           <div className="mt-4 mb-5">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Gestión de clientes</h1>
           </div>
-          
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4  ml-3">
+         
+          {/* Mensajes de éxito */}
+          {successMessage && (
+            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+              <div className="flex items-center">
+                <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <p>{successMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Mensajes de error */}
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+              <div className="flex items-center">
+                <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <p>{error}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">
                   <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
                     {clientes.length} Total
                   </span>
-                  <span className="bg-transparent text-orange-800  border border-orange-400 text-xs font-medium px-3 py-0.5 rounded-full">
+                  <span className="bg-transparent text-orange-800 border border-orange-400 text-xs font-medium px-3 py-0.5 rounded-full">
                     {clientesFiltrados.length} Filtrados
                   </span>
                 </div>
               </div>
-              
+             
               <div className="mt-4 sm:mt-0 flex w-full sm:w-auto justify-center sm:justify-end">
                 <Boton
                   tipo="primario"
@@ -126,15 +279,7 @@ const GestionClientes = () => {
               </div>
             </div>
           </div>
-          
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-              <p className="font-medium">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
-          
-
+         
           <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
@@ -147,7 +292,7 @@ const GestionClientes = () => {
                   value={busqueda}
                 />
               </div>
-              
+             
               {(busqueda || filtro !== "Todos") && (
                 <div className="mt-1 flex justify-end">
                   <button
@@ -175,7 +320,7 @@ const GestionClientes = () => {
               )}
             </div>
           </div>
-          
+         
           <div className="flex overflow-x-auto pb-1 no-scrollbar p-3 bg-white rounded-lg mb-4">
             <div className="flex gap-2 min-w-max px-1">
               <button
@@ -206,6 +351,14 @@ const GestionClientes = () => {
                 onClick={() => setFiltro("Inactivos")}>
                 Inactivos
               </button>
+              <button className={`px-4 py-2 whitespace-nowrap rounded-md ${
+                  filtro === "Pendientes"
+                    ? "bg-orange-100 text-orange-700 font-medium"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setFiltro("Pendientes")}>
+                Pendientes
+              </button>
             </div>
           </div>
    
@@ -218,7 +371,7 @@ const GestionClientes = () => {
                 </span>
               </h3>
             </div>
-            
+           
             {/* Mensaje de no resultados */}
             {clientesFiltrados.length === 0 ? (
               <div className="col-span-full py-8 flex flex-col items-center justify-center text-center">
@@ -244,7 +397,7 @@ const GestionClientes = () => {
                 </p>
               </div>
             ) : verTarjetas ? (
-              // Vista de tarjetas - Mejorado para pantallas pequeñas
+              // Vista de tarjetas
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {clientesFiltrados.map((cliente, index) => (
                   <div
@@ -253,9 +406,11 @@ const GestionClientes = () => {
                   >
                     <div
                       className={`h-2 ${
-                        cliente.activo
-                          ? "bg-slate-500"
-                          : "bg-gray-100"
+                        cliente.estado === "Activo"
+                          ? "bg-green-500"
+                          : cliente.estado === "Inactivo"
+                          ? "bg-red-500"
+                          : "bg-yellow-500"
                       }`}
                     ></div>
                     <div className="absolute top-3 right-3 z-10">
@@ -271,7 +426,7 @@ const GestionClientes = () => {
                           <path d="M8 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM8 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                         </svg>
                       </button>
-                      
+                     
                       {menuAbierto === cliente.id_cliente && (
                         <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
                           <ul className="py-1 text-sm text-gray-600">
@@ -287,7 +442,7 @@ const GestionClientes = () => {
                             <li
                               className="px-3 py-2 hover:bg-orange-100 cursor-pointer"
                               onClick={() => {
-                                navigate(`/editar-cliente/:id${cliente.id_cliente}`);
+                                handleEliminarClick(cliente);
                                 setMenuAbierto(null);
                               }}
                             >
@@ -297,40 +452,42 @@ const GestionClientes = () => {
                         </div>
                       )}
                     </div>
-                    
+                   
                     <div className="p-4 flex-grow">
                       <h3 className="font-medium text-lg text-gray-900 break-words mb-2">
                         {cliente.razon_social || cliente.nombre_completo_cliente}
                       </h3>
+                      <div className="flex mb-2">
+                        <span
+                          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                            cliente.estado === "Activo"
+                              ? "bg-green-100 text-green-800"
+                              : cliente.estado === "Inactivo"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {cliente.estado}
+                        </span>
+                      </div>
                       <p className="text-gray-600 break-words text-sm mb-2">
-                        <strong>Dueño:</strong> {cliente.nombre_completo_cliente}
+                        <strong>Contacto:</strong> {cliente.nombre_completo_cliente}
                       </p>
                       <p className="text-gray-600 break-words text-sm mb-2">
                         <strong>Teléfono:</strong> {cliente.telefono}
                       </p>
-                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                        {cliente.descripcion}
-                      </p>
-                      <p className="mt-2">
-                        <span
-                          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                            cliente.tipo === "Mayorista"
-                              ? "bg-orange-100 text-orange-800"
-                              : "bg-slate-100 text-slate-800"
-                          }`}
-                        >
-                          {cliente.tipo || "Cliente"}
-                        </span>
+                      <p className="text-gray-600 text-sm mb-2">
+                        <strong>Dirección:</strong> {cliente.direccion}
                       </p>
                     </div>
-                    
+                   
                     <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 mt-auto">
-                      <div className="flex justify-between items-center">
-                        <Link 
+                      <div className="flex justify-center">
+                        <Link
                           to={`/editar-cliente/${cliente.id_cliente}`}
                           className="w-full"
                         >
-                          <Boton tipo="primario" label="Editar" size="small" className="w-full" />
+                          <Boton tipo="primario" label="Editar" className="w-full" />
                         </Link>
                       </div>
                     </div>
@@ -338,23 +495,23 @@ const GestionClientes = () => {
                 ))}
               </div>
             ) : (
-              // Vista de tabla con scroll horizontal - Optimizado para móvil
+              // Vista de tabla con scroll horizontal
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <div className="inline-block min-w-full align-middle px-4 sm:px-0">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Razón Social
+                          Razón Social/Nombre
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Dueño
+                          Contacto
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Teléfono
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Tipo
+                          Estado
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Acciones
@@ -378,23 +535,36 @@ const GestionClientes = () => {
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                             <span
                               className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                cliente.tipo === "Mayorista"
-                                  ? "bg-orange-100 text-orange-800"
-                                  : "bg-orange-100 text-orange-800"
+                                cliente.estado === "Activo"
+                                  ? "bg-green-100 text-green-800"
+                                  : cliente.estado === "Inactivo"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
                               }`}
                             >
-                              {cliente.tipo || "Cliente"}
+                              {cliente.estado}
                             </span>
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
                             <div className="flex justify-end gap-2">
-                              <Link 
-                                to={`/editar-cliente/${cliente.id_cliente}`}
-                                className="inline-block"
-                              >
-                                <Boton tipo="primario" label="Editar" size="small" />
-                              </Link>
-                              <Boton tipo="cancelar" label="Eliminar" size="small" />
+                              <Boton
+                                tipo="secundario"
+                                label="Ver"
+                                size="small"
+                                onClick={() => handleVerCliente(cliente.id_cliente)}
+                              />
+                              <Boton 
+                                tipo="primario" 
+                                label="Editar" 
+                                size="small" 
+                                onClick={() => handleEditarCliente(cliente)}
+                              />
+                              <Boton 
+                                tipo="cancelar" 
+                                label="Eliminar" 
+                                size="small" 
+                                onClick={() => handleEliminarClick(cliente)}
+                              />
                             </div>
                           </td>
                         </tr>
@@ -404,7 +574,7 @@ const GestionClientes = () => {
                 </div>
               </div>
             )}
-            
+           
          
             {clientesFiltrados.length > 0 && (
               <div className="border-t border-gray-200 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between mt-4">
@@ -421,28 +591,60 @@ const GestionClientes = () => {
                     resultados
                   </p>
                 </div>
-                <div>
-                  <nav
-                    className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                    aria-label="Pagination"
-                  >
-                    <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                      Anterior
-                    </button>
-                    <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      1
-                    </button>
-                    <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                      Siguiente
-                    </button>
-                  </nav>
-                </div>
               </div>
             )}
           </div>
         </Tipografia>
       </div>
-      
+     
+      {/* Modal de confirmación para eliminar cliente */}
+      {showConfirmDelete && clienteAEliminar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex flex-col items-center text-center">
+              <div className="text-red-500 text-5xl mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-16 w-16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold mb-4">Confirmar eliminación</h2>
+              <p className="mb-6">
+                ¿Estás seguro de que deseas eliminar al cliente{" "}
+                <span className="font-semibold">
+                  {clienteAEliminar.razon_social || clienteAEliminar.nombre_completo_cliente}
+                </span>? 
+                Esta acción no se puede deshacer.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Boton
+                  tipo="cancelar"
+                  label="Cancelar"
+                  onClick={cancelarEliminacion}
+                  className="w-full"
+                />
+                <Boton
+                  tipo="alerta"
+                  label="Eliminar"
+                  onClick={confirmarEliminacion}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .no-scrollbar {
           -ms-overflow-style: none;  /* IE and Edge */
