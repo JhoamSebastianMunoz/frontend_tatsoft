@@ -739,15 +739,16 @@ const GestionProductos = () => {
       </div>
 
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 ">
-          <div className="bg-white rounded-lg p-6 shadow-lg w-80">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-96">
+            {" "}
             <div className="flex justify-center mb-4">
-              <Icono name="eliminarAlert" size={65} />
+              <Icono name="eliminarAlert" size={70} />
             </div>
             <Tipografia variant="h2" size="xl" className="text-center mb-4">
               ¿Estás seguro de que deseas eliminar este producto?
             </Tipografia>
-            <Tipografia size="base" className="text-center text-gray-600 ml-5">
+            <Tipografia size="base" className="text-center text-gray-600 ml-10 ">
               Esta acción no se puede deshacer.
             </Tipografia>
             <div className="flex justify-center space-x-3 mt-2">
