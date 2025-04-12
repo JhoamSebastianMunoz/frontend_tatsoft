@@ -129,7 +129,7 @@ const RegistrarZona = () => {
                   <Boton
                     onClick={handleGuardarClick}
                     label="Guardar"
-                    tipo="secundario"
+                    tipo="primario"
                     className="w-full sm:w-auto"
                   />
                 </div>
