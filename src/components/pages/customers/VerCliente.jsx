@@ -9,7 +9,7 @@ import { IoArrowBack } from "react-icons/io5";
 
 const VerCliente = () => {
   const [showAlert, setShowAlert] = useState(false);
-  const [clienteStatus, setClienteStatus] = useState("activo");
+  const [clienteStatus, setClienteStatus] = useState("Activo");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [clienteData, setClienteData] = useState({
@@ -19,10 +19,11 @@ const VerCliente = () => {
     celular: "",
     nit: "",
     direccion: "",
-    estado: "activo",
+    estado: "Activo",
     email: "",
     fechaCreacion: "",
   });
+
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -41,27 +42,46 @@ const VerCliente = () => {
         ) {
           const cliente = response.data[0];
           console.log("Cliente extraído:", cliente);
-
+          
           // Extraer nombre y apellido del nombre completo
           const nombreCompleto = cliente.nombre_completo_cliente
             ? cliente.nombre_completo_cliente.split(" ")
             : ["", ""];
-
+          
+          // Normalizar el estado para que siempre tenga la primera letra en mayúscula
+          let estadoNormalizado = "Activo"; // Valor por defecto
+          if (cliente.estado) {
+            // Convertir el estado a minúsculas para normalizar
+            const estadoLower = cliente.estado.toLowerCase();
+            
+            if (estadoLower.includes("activ")) {
+              estadoNormalizado = "Activo";
+            } else if (estadoLower.includes("inactiv")) {
+              estadoNormalizado = "Inactivo";
+            } else if (estadoLower.includes("pendient")) {
+              estadoNormalizado = "Pendiente";
+            }
+          }
+          
+          console.log("Estado normalizado:", estadoNormalizado);
+          
           // Mapear los datos del cliente al formato esperado por el componente
           const formattedData = {
+            id_cliente: cliente.id_cliente,
             razonSocial: cliente.razon_social || "",
             nombre: nombreCompleto[0] || "",
             apellido: nombreCompleto.slice(1).join(" ") || "",
             celular: cliente.telefono || "",
             nit: cliente.rut_nit || "",
             direccion: cliente.direccion || "",
-            estado: cliente.estado?.toLowerCase() || "activo",
+            estado: estadoNormalizado,
             fechaCreacion: formatearFecha(cliente.created_at) || "",
+            email: cliente.email || "",
           };
 
           console.log("Datos mapeados:", formattedData);
           setClienteData(formattedData);
-          setClienteStatus(formattedData.estado);
+          setClienteStatus(estadoNormalizado);
         } else {
           console.error("No se encontraron datos de cliente válidos");
           setError("No se pudieron encontrar los datos del cliente");
@@ -107,25 +127,37 @@ const VerCliente = () => {
   const handleConfirmStatusChange = async () => {
     try {
       setLoading(true);
-      // Nuevo estado: si está activo, pasa a inactivo y viceversa
-      const nuevoEstado = clienteStatus === "activo" ? "inactivo" : "activo";
-
-      // Obtener el ID real del cliente desde la API
-      const responseGet = await clientService.getClientById(id);
-      if (
-        !responseGet.data ||
-        !responseGet.data[0] ||
-        !responseGet.data[0].id_cliente
-      ) {
-        throw new Error("No se pudo obtener el ID real del cliente");
+      
+      // Determinar el nuevo estado según el estado actual
+      let nuevoEstado;
+      if (clienteStatus === "Activo") {
+        nuevoEstado = "Inactivo";
+      } else {
+        // Tanto para "Inactivo" como para "Pendiente", el nuevo estado será "Activo"
+        nuevoEstado = "Activo";
+      }
+      
+      // Obtener el ID real del cliente
+      if (!clienteData.id_cliente) {
+        throw new Error("No se pudo obtener el ID del cliente para actualizar");
       }
 
-      const clienteIdReal = responseGet.data[0].id_cliente;
+      const clienteIdReal = clienteData.id_cliente;
+      console.log("ID del cliente para actualización:", clienteIdReal);
 
       // Preparar los datos para actualizar
       const clienteToUpdate = {
-        estado: nuevoEstado === "activo" ? "Activo" : "Inactivo",
+        cedula: clienteData.cedula,
+        nombre_completo_cliente: `${clienteData.nombre} ${clienteData.apellido}`.trim(),
+        direccion: clienteData.direccion,
+        telefono: clienteData.celular,
+        rut_nit: clienteData.nit || "",
+        razon_social: clienteData.razonSocial || "",
+        estado: nuevoEstado,
+        id_zona_de_trabajo: clienteData.id_zona_de_trabajo || 1
       };
+
+      console.log("Datos a enviar para actualización:", clienteToUpdate);
 
       // Llamar a la API para actualizar el estado
       const token = localStorage.getItem("token");
@@ -143,12 +175,16 @@ const VerCliente = () => {
         }
       );
 
+      const responseText = await response.text();
+      console.log("Respuesta de actualización:", responseText);
+
       if (response.ok) {
         console.log(
           `Cliente ${
-            nuevoEstado === "activo" ? "habilitado" : "inhabilitado"
+            nuevoEstado === "Activo" ? "habilitado" : "inhabilitado"
           } correctamente`
         );
+        
         // Actualizar el estado local
         setClienteStatus(nuevoEstado);
         setClienteData((prev) => ({
@@ -156,8 +192,12 @@ const VerCliente = () => {
           estado: nuevoEstado,
         }));
       } else {
-        const errorText = await response.text();
-        throw new Error(`Error al cambiar estado: ${errorText}`);
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(`Error ${response.status}: ${errorData.error || response.statusText}`);
+        } catch (e) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
       }
     } catch (err) {
       console.error("Error al cambiar estado del cliente:", err);
@@ -172,9 +212,9 @@ const VerCliente = () => {
   };
 
   const handleEditarCliente = () => {
-    // Guardar la ruta de origen en localStorage (como en GestionClientes.jsx)
+    // Guardar la ruta de origen en localStorage
     localStorage.setItem("rutaOrigenEdicion", `/ver/cliente/${id}`);
-    // Navegar a la página de edición con el ID del cliente (usando la misma ruta que GestionClientes)
+    // Navegar a la página de edición con el ID del cliente
     navigate(`/editar-cliente/${id}`);
   };
 
@@ -182,11 +222,50 @@ const VerCliente = () => {
     navigate("/gestion/clientes");
   };
 
-  const buttonText = clienteStatus === "activo" ? "Inhabilitar" : "Habilitar";
-  const alertText =
-    clienteStatus === "activo"
-      ? "¿Confirmas la inhabilitación del cliente?"
-      : "¿Confirmas la habilitación del cliente?";
+  // Determinar texto y color del botón según el estado
+  const getButtonConfig = () => {
+    switch (clienteStatus) {
+      case "Activo":
+        return {
+          tipo: "secundario",
+          label: "Activo",
+          colorClass: "bg-green-100 text-green-800"
+        };
+      case "Inactivo":
+        return {
+          tipo: "alerta",
+          label: "Inactivo",
+          colorClass: "bg-red-100 text-red-800"
+        };
+      case "Pendiente":
+        return {
+          tipo: "cancelar",
+          label: "Pendiente",
+          colorClass: "bg-yellow-100 text-yellow-800"
+        };
+      default:
+        return {
+          tipo: "secundario",
+          label: "Estado",
+          colorClass: "bg-slate-100 text-slate-800"
+        };
+    }
+  };
+
+  const buttonConfig = getButtonConfig();
+  
+  // Determinar el mensaje para el diálogo de confirmación
+  const getAlertText = () => {
+    if (clienteStatus === "Activo") {
+      return "¿Confirmas la inhabilitación del cliente?";
+    } else if (clienteStatus === "Inactivo") {
+      return "¿Confirmas la habilitación del cliente?";
+    } else if (clienteStatus === "Pendiente") {
+      return "¿Confirmas la activación del cliente?";
+    } else {
+      return "¿Deseas cambiar el estado del cliente?";
+    }
+  };
 
   if (loading) {
     return (
@@ -229,9 +308,7 @@ const VerCliente = () => {
             <button onClick={handleVolver} className="mr-4">
               <IoArrowBack className="text-gray-600 text-2xl hover:text-orange-500 transition-colors" />
             </button>
-            <Tipografia
-              className="text-2xl font-bold text-gray-800"
-            >
+            <Tipografia className="text-2xl font-bold text-gray-800">
               Detalles del Cliente
             </Tipografia>
           </div>
@@ -243,8 +320,8 @@ const VerCliente = () => {
               className="sm:order-2"
             />
             <Botones
-              tipo={clienteStatus === "activo" ? "secundario" : "alerta"}
-              label={buttonText}
+              tipo={buttonConfig.tipo}
+              label={buttonConfig.label}
               onClick={handleShowAlert}
               className="sm:order-1"
             />
@@ -266,18 +343,13 @@ const VerCliente = () => {
                   variant="h2"
                   className="text-white text-center text-xl font-semibold"
                 >
-                  {clienteData.razonSocial}
+                  {clienteData.razonSocial || `${clienteData.nombre} ${clienteData.apellido}`.trim()}
                 </Tipografia>
                 <div
-                  className={`mt-3 px-4 py-1 rounded-full shadow-sm
-                  ${
-                    clienteData.estado === "activo"
-                      ? "bg-slate-100 text-slate-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
+                  className={`mt-3 px-4 py-1 rounded-full shadow-sm ${buttonConfig.colorClass}`}
                 >
                   <span className="text-sm font-medium">
-                    {clienteData.estado === "activo" ? "Activo" : "Inactivo"}
+                    {clienteData.estado}
                   </span>
                 </div>
               </div>
@@ -294,7 +366,6 @@ const VerCliente = () => {
                   {clienteData.nit}
                 </Tipografia>
               </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
                   <Tipografia
@@ -307,7 +378,6 @@ const VerCliente = () => {
                     {clienteData.celular}
                   </Tipografia>
                 </div>
-
                 <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
                   <Tipografia
                     variant="label"
@@ -331,7 +401,6 @@ const VerCliente = () => {
             >
               Información Detallada
             </Tipografia>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Tipografia
@@ -342,11 +411,10 @@ const VerCliente = () => {
                 </Tipografia>
                 <div className="border border-orange-200 rounded-lg p-3 shadow-sm">
                   <Tipografia className="font-medium">
-                    {clienteData.razonSocial}
+                    {clienteData.razonSocial || "No especificada"}
                   </Tipografia>
                 </div>
               </div>
-
               <div>
                 <Tipografia
                   variant="label"
@@ -354,13 +422,12 @@ const VerCliente = () => {
                 >
                   Nombre
                 </Tipografia>
-                <div className="border border-orange-200 rounded-lg p-3  shadow-sm">
+                <div className="border border-orange-200 rounded-lg p-3 shadow-sm">
                   <Tipografia className="font-medium">
                     {clienteData.nombre}
                   </Tipografia>
                 </div>
               </div>
-
               <div>
                 <Tipografia
                   variant="label"
@@ -374,7 +441,6 @@ const VerCliente = () => {
                   </Tipografia>
                 </div>
               </div>
-
               <div>
                 <Tipografia
                   variant="label"
@@ -382,13 +448,12 @@ const VerCliente = () => {
                 >
                   Teléfono Celular
                 </Tipografia>
-                <div className="border border-orange-200 rounded-lg p-3  shadow-sm">
+                <div className="border border-orange-200 rounded-lg p-3 shadow-sm">
                   <Tipografia className="font-medium">
                     {clienteData.celular}
                   </Tipografia>
                 </div>
               </div>
-
               <div>
                 <Tipografia
                   variant="label"
@@ -396,13 +461,12 @@ const VerCliente = () => {
                 >
                   NIT
                 </Tipografia>
-                <div className="border border-orange-200 rounded-lg p-3  shadow-sm">
+                <div className="border border-orange-200 rounded-lg p-3 shadow-sm">
                   <Tipografia className="font-medium">
                     {clienteData.nit}
                   </Tipografia>
                 </div>
               </div>
-
               <div className="md:col-span-2">
                 <Tipografia
                   variant="label"
@@ -425,8 +489,8 @@ const VerCliente = () => {
         <AlertaInhabilitar
           onClose={handleCloseAlert}
           onConfirm={handleConfirmStatusChange}
-          alertText={alertText}
-          isEnabling={clienteStatus !== "activo"}
+          alertText={getAlertText()}
+          isEnabling={clienteStatus !== "Activo"}
         />
       )}
     </div>
