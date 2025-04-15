@@ -23,6 +23,15 @@ const RegistrarProducto = () => {
     id_categoria: "",
   });
 
+  // Estado para errores de validación
+  const [errores, setErrores] = useState({
+    nombre_producto: "",
+    precio: "",
+    cantidad_ingreso: "",
+    descripcion: "",
+    id_categoria: "",
+  });
+
   // Estados para manejo de UI
   const [showCategorias, setShowCategorias] = useState(false);
   const [showNuevaCategoriaModal, setShowNuevaCategoriaModal] = useState(false);
@@ -90,6 +99,14 @@ const RegistrarProducto = () => {
       ...formData,
       [name]: value,
     });
+
+    // Limpiar error si el usuario está modificando el campo
+    if (errores[name]) {
+      setErrores({
+        ...errores,
+        [name]: "",
+      });
+    }
   };
 
   const handleCategoriaChange = (categoria) => {
@@ -99,6 +116,11 @@ const RegistrarProducto = () => {
       id_categoria: categoria.id_categoria,
     });
     setShowCategorias(false);
+    // Limpiar error de categoría
+    setErrores({
+      ...errores,
+      id_categoria: "",
+    });
   };
 
   const handleImageChange = (e) => {
@@ -133,25 +155,73 @@ const RegistrarProducto = () => {
     }
   };
 
+  // Función de validación del formulario
+  const validarFormulario = () => {
+    let erroresTemp = {};
+    let esValido = true;
+
+    // Validar nombre del producto (solo letras, números y espacios, mínimo 3 caracteres)
+    if (!formData.nombre_producto.trim()) {
+      erroresTemp.nombre_producto = "El nombre del producto es obligatorio";
+      esValido = false;
+    } else if (formData.nombre_producto.trim().length < 3) {
+      erroresTemp.nombre_producto = "El nombre debe tener al menos 3 caracteres";
+      esValido = false;
+    } else if (!/^[A-Za-zÁáÉéÍíÓóÚúÑñ0-9\s]+$/.test(formData.nombre_producto)) {
+      erroresTemp.nombre_producto = "El nombre solo debe contener letras, números y espacios";
+      esValido = false;
+    }
+
+    // Validar precio (debe ser un número positivo)
+    if (!formData.precio) {
+      erroresTemp.precio = "El precio es obligatorio";
+      esValido = false;
+    } else if (isNaN(Number(formData.precio)) || Number(formData.precio) <= 0) {
+      erroresTemp.precio = "El precio debe ser un número mayor a 0";
+      esValido = false;
+    }
+
+    // Validar cantidad (debe ser un número entero positivo)
+    if (!formData.cantidad_ingreso) {
+      erroresTemp.cantidad_ingreso = "La cantidad es obligatoria";
+      esValido = false;
+    } else if (isNaN(Number(formData.cantidad_ingreso)) || Number(formData.cantidad_ingreso) <= 0 || !Number.isInteger(Number(formData.cantidad_ingreso))) {
+      erroresTemp.cantidad_ingreso = "La cantidad debe ser un número entero mayor a 0";
+      esValido = false;
+    }
+
+    // Validar descripción (mínimo 10 caracteres)
+    if (!formData.descripcion.trim()) {
+      erroresTemp.descripcion = "La descripción es obligatoria";
+      esValido = false;
+    } else if (formData.descripcion.trim().length < 10) {
+      erroresTemp.descripcion = "La descripción debe tener al menos 10 caracteres";
+      esValido = false;
+    }
+
+    // Validar categoría seleccionada
+    if (!formData.id_categoria) {
+      erroresTemp.id_categoria = "Debe seleccionar una categoría";
+      esValido = false;
+    }
+
+    setErrores(erroresTemp);
+    return esValido;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validar el formulario antes de enviar
+    if (!validarFormulario()) {
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
     try {
       let imageId = null;
-
-      // Validación adicional
-      if (
-        !formData.nombre_producto ||
-        !formData.precio ||
-        !formData.cantidad_ingreso ||
-        !formData.id_categoria
-      ) {
-        setError("Por favor, complete todos los campos obligatorios");
-        setLoading(false);
-        return;
-      }
 
       // Subir imagen si existe
       if (imageFile) {
@@ -210,10 +280,10 @@ const RegistrarProducto = () => {
 
       // Crear producto
       const productoData = {
-        nombre_producto: formData.nombre_producto,
+        nombre_producto: formData.nombre_producto.trim(),
         precio: parseFloat(formData.precio),
         cantidad_ingreso: parseInt(formData.cantidad_ingreso),
-        descripcion: formData.descripcion || "Sin descripción",
+        descripcion: formData.descripcion.trim() || "Sin descripción",
         id_categoria: parseInt(formData.id_categoria),
         estado: "Activo",
         // El campo id_imagen es obligatorio según el backend
@@ -305,17 +375,30 @@ const RegistrarProducto = () => {
     setShowCancelarCategoriaAlerta(false);
   };
 
+  const validarNuevaCategoria = () => {
+    if (!nuevaCategoria.trim()) {
+      setCategoriaError("El nombre de la categoría es obligatorio");
+      return false;
+    } else if (nuevaCategoria.trim().length < 3) {
+      setCategoriaError("El nombre debe tener al menos 3 caracteres");
+      return false;
+    } else if (!/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(nuevaCategoria.trim())) {
+      setCategoriaError("El nombre solo debe contener letras y espacios");
+      return false;
+    }
+    return true;
+  };
+
   const agregarNuevaCategoria = async () => {
     // Validar que haya un nombre de categoría
-    if (nuevaCategoria.trim() === "") {
-      setCategoriaError("El nombre de la categoría es obligatorio");
+    if (!validarNuevaCategoria()) {
       return;
     }
 
     try {
       setLoading(true);
       const response = await productService.createCategory({
-        nombre_categoria: nuevaCategoria,
+        nombre_categoria: nuevaCategoria.trim(),
         descripcion: `Categoría para productos`, // Descripción genérica predeterminada
       });
 
@@ -325,7 +408,7 @@ const RegistrarProducto = () => {
 
       // Seleccionar la nueva categoría
       const nuevaCategoriaObj = categoriasResponse.data.find(
-        (c) => c.nombre_categoria === nuevaCategoria
+        (c) => c.nombre_categoria === nuevaCategoria.trim()
       );
 
       if (nuevaCategoriaObj) {
@@ -466,9 +549,16 @@ const RegistrarProducto = () => {
                     name="nombre_producto"
                     value={formData.nombre_producto}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className={`w-full px-3 py-2 border ${
+                      errores.nombre_producto ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                     required
                   />
+                  {errores.nombre_producto && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {errores.nombre_producto}
+                    </p>
+                  )}
                 </Tipografia>
               </div>
               <div>
@@ -485,12 +575,19 @@ const RegistrarProducto = () => {
                       name="precio"
                       value={formData.precio}
                       onChange={handleInputChange}
-                      className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className={`w-full pl-7 pr-3 py-2 border ${
+                        errores.precio ? "border-red-500" : "border-gray-300"
+                      } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                       required
                       min="0"
                       step="0.01"
                     />
                   </div>
+                  {errores.precio && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {errores.precio}
+                    </p>
+                  )}
                 </Tipografia>
               </div>
             </div>
@@ -505,7 +602,9 @@ const RegistrarProducto = () => {
                       name="id_categoria"
                       value={formData.id_categoria}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
+                      className={`w-full px-3 py-2 border ${
+                        errores.id_categoria ? "border-red-500" : "border-gray-300"
+                      } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none`}
                       required
                     >
                       <option value="">Selecciona una categoría</option>
@@ -529,6 +628,11 @@ const RegistrarProducto = () => {
                       </svg>
                     </div>
                   </div>
+                  {errores.id_categoria && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {errores.id_categoria}
+                    </p>
+                  )}
                 </Tipografia>
                 <div className="mt-2">
                   <button
@@ -550,10 +654,17 @@ const RegistrarProducto = () => {
                     name="cantidad_ingreso"
                     value={formData.cantidad_ingreso}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className={`w-full px-3 py-2 border ${
+                      errores.cantidad_ingreso ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                     required
                     min="0"
                   />
+                  {errores.cantidad_ingreso && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {errores.cantidad_ingreso}
+                    </p>
+                  )}
                 </Tipografia>
               </div>
               <div>
@@ -566,10 +677,17 @@ const RegistrarProducto = () => {
                     value={formData.descripcion}
                     onChange={handleInputChange}
                     rows="4"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className={`w-full px-3 py-2 border ${
+                      errores.descripcion ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                     placeholder="Describe el producto"
                     required
                   />
+                  {errores.descripcion && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {errores.descripcion}
+                    </p>
+                  )}
                 </Tipografia>
               </div>
             </div>
@@ -690,7 +808,9 @@ const RegistrarProducto = () => {
                   type="text"
                   value={nuevaCategoria}
                   onChange={(e) => setNuevaCategoria(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className={`w-full px-3 py-2 border ${
+                    categoriaError ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                   placeholder="Ejemplo: Lácteos, Cárnicos, etc."
                 />
                 {categoriaError && (
