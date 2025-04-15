@@ -208,11 +208,15 @@ const RegistroUsuario = () => {
     }
 
     // Validación número celular
-    if (!formData.numeroCelular.trim()) {
-      erroresTemp.numeroCelular = "El número de celular es obligatorio";
+    if (!formData.numeroCelular) {
+      erroresTemp.numeroCelular = "El número celular es obligatorio";
+      esValido = false;
+    } else if (!/^3\d{9}$/.test(formData.numeroCelular)) {
+      erroresTemp.numeroCelular =
+        "Ingrese un número celular colombiano válido (10 dígitos empezando con 3)";
       esValido = false;
     } else if (!/^\d{10}$/.test(formData.numeroCelular)) {
-      erroresTemp.numeroCelular = "Ingrese un número válido de 10 dígitos";
+      erroresTemp.numeroCelular = "Ingrese un número de 10 dígitos";
       esValido = false;
     }
 
