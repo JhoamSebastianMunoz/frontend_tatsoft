@@ -103,6 +103,9 @@ const RegistroCliente = () => {
     if (!formData.razonSocial.trim()) {
       erroresTemp.razonSocial = "La razón social es obligatoria";
       esValido = false;
+    } else if (!/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(formData.razonSocial.trim())) {
+      erroresTemp.razonSocial = "La razón social solo debe contener letras";
+      esValido = false;
     }
 
     if (!formData.nombre.trim() && !formData.razonSocial.trim()) {
@@ -110,9 +113,9 @@ const RegistroCliente = () => {
       esValido = false;
     } else if (
       formData.nombre.trim() &&
-      !/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(formData.nombre)
+      !/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{2,}$/.test(formData.nombre.trim())
     ) {
-      erroresTemp.nombre = "El nombre solo debe contener letras";
+      erroresTemp.nombre = "El nombre debe contener al menos 2 letras";
       esValido = false;
     }
 
@@ -121,17 +124,17 @@ const RegistroCliente = () => {
       esValido = false;
     } else if (
       formData.apellido.trim() &&
-      !/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(formData.apellido)
+      !/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{2,}$/.test(formData.apellido.trim())
     ) {
-      erroresTemp.apellido = "El apellido solo debe contener letras";
+      erroresTemp.apellido = "El apellido debe contener al menos 2 letras";
       esValido = false;
     }
 
     if (!formData.nit.trim()) {
       erroresTemp.nit = "El NIT es obligatorio";
       esValido = false;
-    } else if (!/^\d{1,9}-?\d?$/.test(formData.nit)) {
-      erroresTemp.nit = "Ingrese un NIT válido (ej. 900123456-7)";
+    } else if (!/^\d{6,9}-?\d?$/.test(formData.nit)) {
+      erroresTemp.nit = "Ingrese un NIT válido (mínimo 6 dígitos, máximo 10 caracteres, ej. 900123456-7)";
       esValido = false;
     }
 
@@ -146,8 +149,10 @@ const RegistroCliente = () => {
   const validarFormularioPaso2 = () => {
     let erroresTemp = {};
     let esValido = true;
-    // Para números colombianos (10 dígitos, puede empezar con 3)
-    if (!/^3\d{9}$/.test(formData.numeroCelular)) {
+    if (!formData.numeroCelular) {
+      erroresTemp.numeroCelular = "El número celular es obligatorio";
+      esValido = false;
+    } else if (!/^3\d{9}$/.test(formData.numeroCelular)) {
       erroresTemp.numeroCelular =
         "Ingrese un número celular colombiano válido (10 dígitos empezando con 3)";
       esValido = false;

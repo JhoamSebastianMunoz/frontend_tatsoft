@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { areaService } from "../../../context/services/ApiService";
 import Tipografia from "../../../components/atoms/Tipografia";
@@ -12,6 +12,19 @@ const RegistrarZona = () => {
     nombre_zona_trabajo: "",
     descripcion: ""
   });
+  
+  // Estado para errores específicos de cada campo
+  const [errores, setErrores] = useState({
+    nombre_zona_trabajo: "",
+    descripcion: ""
+  });
+  
+  // Estado para control del formulario
+  const [formaTocada, setFormaTocada] = useState({
+    nombre_zona_trabajo: false,
+    descripcion: false
+  });
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [error, setError] = useState("");
   
@@ -22,40 +35,156 @@ const RegistrarZona = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Marcar el campo como tocado
+    setFormaTocada(prev => ({
+      ...prev,
+      [name]: true
+    }));
   };
 
+  // Función para validar un campo específico
+  const validarCampo = (nombre, valor) => {
+    let mensajeError = "";
+    
+    switch (nombre) {
+      case "nombre_zona_trabajo":
+        if (!valor.trim()) {
+          mensajeError = "El nombre de la zona es obligatorio";
+        } else if (valor.trim().length < 3) {
+          mensajeError = "El nombre debe tener al menos 3 caracteres";
+        } else if (valor.trim().length > 50) {
+          mensajeError = "El nombre no puede exceder los 50 caracteres";
+        } else if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-_]+$/.test(valor)) {
+          mensajeError = "El nombre solo puede contener letras, números, espacios, guiones y guiones bajos";
+        }
+        break;
+        
+      case "descripcion":
+        if (!valor.trim()) {
+          mensajeError = "La descripción es obligatoria";
+        } else if (valor.trim().length < 10) {
+          mensajeError = "La descripción debe tener al menos 10 caracteres";
+        } else if (valor.trim().length > 500) {
+          mensajeError = "La descripción no puede exceder los 500 caracteres";
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    return mensajeError;
+  };
+  
+  // Efecto para validar campos cuando cambian
+  useEffect(() => {
+    const nuevosErrores = {...errores};
+    
+    // Solo validar campos que han sido tocados o si el formulario fue enviado
+    Object.keys(zona).forEach(campo => {
+      if (formaTocada[campo] || formSubmitted) {
+        nuevosErrores[campo] = validarCampo(campo, zona[campo]);
+      }
+    });
+    
+    setErrores(nuevosErrores);
+  }, [zona, formaTocada, formSubmitted]);
+  
+  // Verificar si el formulario es válido
+  const esFormularioValido = () => {
+    // Validar todos los campos sin modificar el estado
+    let formularioValido = true;
+    
+    Object.keys(zona).forEach(campo => {
+      const error = validarCampo(campo, zona[campo]);
+      if (error) {
+        formularioValido = false;
+      }
+    });
+    
+    return formularioValido;
+  };
+  
   const handleGuardarClick = (e) => {
     e.preventDefault();
+    setFormSubmitted(true);
     
-    // Verificar si los campos necesarios están completos
-    if (!zona.nombre_zona_trabajo || !zona.descripcion) {
-      setError("Por favor completa todos los campos requeridos");
+    // Verificar si los campos necesarios están completos y válidos
+    if (!esFormularioValido()) {
+      setError("Por favor corrige los errores en el formulario");
       return;
     }
     
+    setError("");
     setMostrarAlerta(true);
   };
 
   const handleConfirmarGuardar = async () => {
     setMostrarAlerta(false);
-    setError("");
     
     try {
       const zonaData = {
-        nombre_zona_trabajo: zona.nombre_zona_trabajo,
-        descripcion: zona.descripcion
+        nombre_zona_trabajo: zona.nombre_zona_trabajo.trim(),
+        descripcion: zona.descripcion.trim()
       };
       
       const respuesta = await areaService.createArea(zonaData);
       navigate("/gestion-zonas");
     } catch (error) {
       console.error("Error al crear zona:", error);
-      setError("Error al crear la zona. Por favor, intenta de nuevo más tarde.");
+      
+      // Manejo de errores específicos de la API
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(`Error: ${error.response.data.message}`);
+      } else {
+        setError("Error al crear la zona. Por favor, intenta de nuevo más tarde.");
+      }
     }
   };
 
   const handleCancelar = () => {
-    navigate("/gestion-zonas");
+    // Confirmar si hay cambios antes de salir
+    if (zona.nombre_zona_trabajo || zona.descripcion) {
+      if (window.confirm("¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.")) {
+        navigate("/gestion-zonas");
+      }
+    } else {
+      navigate("/gestion-zonas");
+    }
+  };
+
+  // Función para mostrar errores
+  const mostrarError = (campo) => {
+    return (formaTocada[campo] || formSubmitted) && errores[campo] ? (
+      <p className="text-red-500 text-sm mt-1">{errores[campo]}</p>
+    ) : null;
+  };
+
+  // Calcular el estado de los campos para estilizado dinámico
+  const getEstadoCampo = (campo) => {
+    if ((formaTocada[campo] || formSubmitted) && errores[campo]) {
+      return "error";
+    }
+    if (formaTocada[campo] && !errores[campo] && zona[campo]) {
+      return "valido";
+    }
+    return "normal";
+  };
+
+  // Función para aplicar clases según el estado del campo
+  const getClasesCampo = (campo) => {
+    const estado = getEstadoCampo(campo);
+    const clases = "w-full px-4 py-3 rounded-lg border transition duration-150 ";
+    
+    switch (estado) {
+      case "error":
+        return `${clases} border-red-500 focus:ring-2 focus:ring-red-300 focus:border-transparent`;
+      case "valido":
+        return `${clases} border-green-500 focus:ring-2 focus:ring-green-300 focus:border-transparent`;
+      default:
+        return `${clases} border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent`;
+    }
   };
 
   return (
@@ -92,29 +221,52 @@ const RegistrarZona = () => {
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-black block">
-                        Nombre de la zona
+                        Nombre de la zona <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        name="nombre_zona_trabajo"
-                        value={zona.nombre_zona_trabajo}
-                        onChange={handleChange}
-                        placeholder="Ingrese el nombre de la zona"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="nombre_zona_trabajo"
+                          value={zona.nombre_zona_trabajo}
+                          onChange={handleChange}
+                          placeholder="Ingrese el nombre de la zona"
+                          className={getClasesCampo("nombre_zona_trabajo")}
+                          onBlur={() => setFormaTocada(prev => ({ ...prev, nombre_zona_trabajo: true }))}
+                        />
+                        {getEstadoCampo("nombre_zona_trabajo") === "valido" && (
+                          <span className="absolute right-3 top-3 text-green-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
+                      {mostrarError("nombre_zona_trabajo")}
+                      {!errores.nombre_zona_trabajo && (
+                        <p className="text-gray-500 text-xs">El nombre debe tener entre 3 y 50 caracteres</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700 block">
-                        Descripción
+                        Descripción <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         name="descripcion"
                         value={zona.descripcion}
                         onChange={handleChange}
                         placeholder="Descripción de la zona y detalles relevantes"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-150 ease-in-out h-32"
+                        className={getClasesCampo("descripcion")}
+                        onBlur={() => setFormaTocada(prev => ({ ...prev, descripcion: true }))}
+                        rows="4"
                       />
+                      {mostrarError("descripcion")}
+                      <div className="flex justify-between">
+                        <p className="text-gray-500 text-xs">La descripción debe tener entre 10 y 500 caracteres</p>
+                        <p className="text-gray-500 text-xs">
+                          {zona.descripcion.length}/500
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -123,13 +275,13 @@ const RegistrarZona = () => {
                   <Boton
                     onClick={handleCancelar}
                     label="Cancelar"
-                    tipo="cancelar"
+                    tipo="secundario"
                     className="w-full sm:w-auto"
                   />
                   <Boton
                     onClick={handleGuardarClick}
                     label="Guardar"
-                    tipo="secundario"
+                    tipo="primario"
                     className="w-full sm:w-auto"
                   />
                 </div>

@@ -18,6 +18,7 @@ const Restablecer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
+  const [passwordErrors, setPasswordErrors] = useState([]);
 
   useEffect(() => {
     // Recuperar el correo electrónico de sessionStorage
@@ -29,9 +30,50 @@ const Restablecer = () => {
     setEmail(storedEmail);
   }, [navigate]);
 
+  // Función para validar la contraseña
+  const validatePassword = (password) => {
+    const errors = [];
+    
+    // Validar longitud mínima (8 caracteres)
+    if (password.length < 8) {
+      errors.push("La contraseña debe tener al menos 8 caracteres");
+    }
+    
+    // Validar que contenga al menos una letra mayúscula
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Al menos una letra mayúscula");
+    }
+    
+    // Validar que contenga al menos una letra minúscula
+    if (!/[a-z]/.test(password)) {
+      errors.push("Al menos una letra minúscula");
+    }
+    
+    // Validar que contenga al menos un número
+    if (!/\d/.test(password)) {
+      errors.push("Al menos un número");
+    }
+    
+    // Validar que contenga al menos un carácter especial
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      errors.push("Al menos un carácter especial");
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors: errors
+    };
+  };
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
+    
+    // Validar contraseña en tiempo real
+    if (id === "password") {
+      const validation = validatePassword(value);
+      setPasswordErrors(validation.errors);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -44,8 +86,9 @@ const Restablecer = () => {
     }
 
     // Validar la complejidad de la contraseña
-    if (formData.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      setError("La contraseña no cumple con los requisitos de seguridad");
       return;
     }
 
@@ -66,6 +109,18 @@ const Restablecer = () => {
       setLoading(false);
     }
   };
+
+  // Verificar si la confirmación de contraseña coincide
+  const passwordsMatch = formData.confirmPassword ? 
+    formData.password === formData.confirmPassword : 
+    true;
+
+  // Determinar si el botón de guardar debe estar deshabilitado
+  const isSubmitDisabled = loading || 
+    passwordErrors.length > 0 || 
+    !formData.password || 
+    !formData.confirmPassword || 
+    !passwordsMatch;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6 sm:px-10">
@@ -110,7 +165,24 @@ const Restablecer = () => {
               onChange={handleChange}
               required
             />
+            
+            {formData.password && passwordErrors.length > 0 && (
+              <div className="mt-2 bg-gray-50 p-3 rounded-md border border-gray-200">
+                <p className="text-sm text-gray-700 font-medium">La contraseña debe contener:</p>
+                <ul className="mt-1 text-xs text-gray-600 space-y-1">
+                  {passwordErrors.map((error, index) => (
+                    <li key={index} className="flex items-center text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+          
           <div className="relative mb-6">
             <Icono
               name="candado"
@@ -120,11 +192,16 @@ const Restablecer = () => {
               type="password"
               id="confirmPassword"
               label="Confirmar contraseña"
-              className="pl-10 pr-4 py-2 border rounded-lg w-full text-sm sm:text-base"
+              className={`pl-10 pr-4 py-2 border rounded-lg w-full text-sm sm:text-base ${
+                !passwordsMatch && formData.confirmPassword ? "border-red-500" : ""
+              }`}
               value={formData.confirmPassword}
               onChange={handleChange}
               required
             />
+            {!passwordsMatch && formData.confirmPassword && (
+              <p className="text-red-600 text-xs mt-1">Las contraseñas no coinciden</p>
+            )}
           </div>
 
           <div className="flex justify-center">
@@ -132,7 +209,7 @@ const Restablecer = () => {
               label={loading ? "Guardando..." : "Guardar"}
               className="w-full max-w-xs sm:max-w-sm"
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={isSubmitDisabled}
               type="submit"
             />
           </div>
