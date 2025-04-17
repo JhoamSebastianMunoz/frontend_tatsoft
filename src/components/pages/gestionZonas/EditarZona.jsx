@@ -9,46 +9,52 @@ import Sidebar from "../../organisms/Sidebar";
 const EditarZona = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [zona, setZona] = useState({
     nombre_zona_trabajo: "",
-    descripcion: ""
+    descripcion: "",
   });
-  
+
   const [zonaOriginal, setZonaOriginal] = useState(null);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [mostrarAlertaCancelar, setMostrarAlertaCancelar] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  
+
   // Cargar datos de la zona al iniciar
   useEffect(() => {
     const fetchZona = async () => {
       try {
         setLoading(true);
         const response = await areaService.getAreaById(id);
-        
+
         if (response && response.data) {
-          const zonaData = Array.isArray(response.data) ? response.data[0] : response.data;
-          
+          const zonaData = Array.isArray(response.data)
+            ? response.data[0]
+            : response.data;
+
           if (zonaData && zonaData.nombre_zona_trabajo) {
             const datosZona = {
               nombre_zona_trabajo: zonaData.nombre_zona_trabajo || "",
-              descripcion: zonaData.descripcion || ""
+              descripcion: zonaData.descripcion || "",
             };
-            
+
             setZona(datosZona);
             setZonaOriginal(datosZona); // Guardamos los datos originales
           } else {
-            setError("Los datos de la zona están incompletos o en un formato incorrecto");
+            setError(
+              "Los datos de la zona están incompletos o en un formato incorrecto"
+            );
           }
         } else {
           setError("No se encontraron datos de la zona");
         }
       } catch (error) {
         console.error("Error al cargar datos de la zona:", error);
-        setError("Error al cargar los datos de la zona. Por favor, intenta de nuevo más tarde.");
+        setError(
+          "Error al cargar los datos de la zona. Por favor, intenta de nuevo más tarde."
+        );
       } finally {
         setLoading(false);
       }
@@ -64,27 +70,29 @@ const EditarZona = () => {
   // Función para verificar si hay cambios sin guardar
   const hayCambiosSinGuardar = () => {
     if (!zonaOriginal) return false;
-    return zona.nombre_zona_trabajo !== zonaOriginal.nombre_zona_trabajo ||
-           zona.descripcion !== zonaOriginal.descripcion;
+    return (
+      zona.nombre_zona_trabajo !== zonaOriginal.nombre_zona_trabajo ||
+      zona.descripcion !== zonaOriginal.descripcion
+    );
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setZona(prevZona => ({
+    setZona((prevZona) => ({
       ...prevZona,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   const handleGuardarClick = (e) => {
     e.preventDefault();
-    
+
     // Validar campos requeridos
     if (!zona.nombre_zona_trabajo || !zona.descripcion) {
       setError("Por favor completa todos los campos requeridos");
       return;
     }
-    
+
     setMostrarAlerta(true);
   };
 
@@ -92,26 +100,28 @@ const EditarZona = () => {
     setMostrarAlerta(false);
     setLoading(true);
     setError("");
-    
+
     try {
       // Preparar datos para la API
       const zonaData = {
         nombre_zona_trabajo: zona.nombre_zona_trabajo,
-        descripcion: zona.descripcion
+        descripcion: zona.descripcion,
       };
-      
+
       await areaService.updateArea(id, zonaData);
-      
+
       // Actualizar el estado original con los nuevos datos guardados
-      setZonaOriginal({...zona});
+      setZonaOriginal({ ...zona });
       setGuardado(true);
-      
+
       setTimeout(() => {
         setGuardado(false);
       }, 2000);
     } catch (error) {
       console.error("Error al actualizar zona:", error);
-      setError("Error al actualizar la zona. Por favor, intenta de nuevo más tarde.");
+      setError(
+        "Error al actualizar la zona. Por favor, intenta de nuevo más tarde."
+      );
     } finally {
       setLoading(false);
     }
@@ -142,10 +152,14 @@ const EditarZona = () => {
       </div>
       <div className="flex-1 w-full px-3 sm:px-4 md:px-6 lg:px-8 pl-2 pr-10 ml-10">
         <Tipografia>
-          <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-8">
-              Editar Zona
-            </h1>
+          <div className="mt-4 mb-5 relative">
+            {/* Agregamos el icono de volver a la izquierda con posicionamiento absoluto */}
+            <div
+              className="cursor-pointer hover:opacity-80 transition-opacity ml-8 md:ml-48"
+              onClick={handleCancelar}
+            >
+              <Icono name="volver" size={45} color="#F78220" />
+            </div>
           </div>
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg ml-4">
@@ -155,12 +169,18 @@ const EditarZona = () => {
           <div className="max-w-4xl mx-auto pl-6 pr-3">
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 md:p-8">
               <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Información de la Zona
-                </h2>
+              <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-[#F78220] rounded-full"></div>
+                  <Tipografia size="xl" className="font-semibold text-gray-800">
+                    Editando Zona
+                  </Tipografia>
+                </div>
 
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-2">
+                    <p className="font-bold text-orange-800 mt-6">
+                  Información de la Zona
+                </p>
                     <label className="text-sm font-medium text-black block">
                       Nombre de la zona
                     </label>
@@ -213,7 +233,7 @@ const EditarZona = () => {
             <div className="px-6 py-5">
               <div className="text-center">
                 <Tipografia>
-                  <Icono name="confirmar" size="70" />
+                  <Icono name="confirmar" size="50" />
                   <h3 className="text-xl font-medium text-black mb-2">
                     ¿Desea guardar los cambios?
                   </h3>
@@ -272,7 +292,8 @@ const EditarZona = () => {
                     ¿Desea salir sin guardar?
                   </h3>
                   <p className="text-sm text-black mb-4">
-                    Hay cambios sin guardar. Si sales ahora, perderás los cambios realizados.
+                    Hay cambios sin guardar. Si sales ahora, perderás los
+                    cambios realizados.
                   </p>
                 </Tipografia>
               </div>

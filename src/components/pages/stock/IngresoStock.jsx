@@ -258,7 +258,7 @@ const IngresoStock = () => {
           <div className="flex flex-col items-center text-center">
             {alert.type === "success" ? (
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                <Icono name="check" size={30} className="text-green-500" />
+                <Icono name="confirmar" size={30} className="text-green-500" />
               </div>
             ) : (
               <div className="">
