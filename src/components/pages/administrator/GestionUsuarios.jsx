@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { userService } from "../../../context/services/ApiService";
 import Boton from "../../../components/atoms/Botones";
+import Icono from "../../../components/atoms/Iconos";
 import CampoTexto from "../../atoms/CamposTexto";
 import Tipografia from "../../../components/atoms/Tipografia";
 import Loading from "../../../components/Loading/Loading";
@@ -31,6 +32,10 @@ const GestionUsuarios = () => {
   const [zonaId, setZonaId] = useState(null);
   const [zonaNombre, setZonaNombre] = useState("");
   const [menuAbierto, setMenuAbierto] = useState(null);
+  // Estados adicionales para manejo de eliminación y mensajes
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Agregar estado para paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,23 +49,23 @@ const GestionUsuarios = () => {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        setLoading(true);
-        const response = await userService.getAllUsers();
-        setUsuarios(response.data);
-        setFilteredUsuarios(response.data);
-      } catch (error) {
-        console.error("Error al cargar usuarios:", error);
-        setError(
-          "Error al cargar la lista de usuarios. Por favor, intenta de nuevo más tarde."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUsuarios = async () => {
+    try {
+      setLoading(true);
+      const response = await userService.getAllUsers();
+      setUsuarios(response.data);
+      setFilteredUsuarios(response.data);
+    } catch (error) {
+      console.error("Error al cargar usuarios:", error);
+      setError(
+        "Error al cargar la lista de usuarios. Por favor, intenta de nuevo más tarde."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUsuarios();
   }, []);
 
@@ -83,6 +88,25 @@ const GestionUsuarios = () => {
     setFilteredUsuarios(results);
     setCurrentPage(1); // Resetear a primera página cuando cambian los filtros
   }, [usuarios, filtro, busqueda]);
+
+  // Efectos para gestionar los mensajes de éxito y error
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleBusquedaChange = (e) => {
     setBusqueda(e.target.value);
@@ -147,7 +171,39 @@ const GestionUsuarios = () => {
     });
   };
 
-  if (loading) {
+  // Funciones para gestionar la eliminación de usuarios
+  const handleEliminarClick = (usuario) => {
+    setUsuarioAEliminar(usuario);
+    setShowConfirmDelete(true);
+    setMenuAbierto(null); // Cerramos el menú al abrir el modal
+  };
+
+  const confirmarEliminacion = async () => {
+    if (!usuarioAEliminar) return;
+    
+    try {
+      setLoading(true);
+      await userService.deleteUser(usuarioAEliminar.id_usuario);
+      
+      setSuccessMessage(`El usuario ${usuarioAEliminar.nombreCompleto} ha sido eliminado con éxito.`);
+      // Actualizar la lista de usuarios después de eliminar
+      fetchUsuarios();
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      setError(`No se pudo eliminar el usuario. ${error.message || 'Intente nuevamente más tarde'}`);
+    } finally {
+      setLoading(false);
+      setShowConfirmDelete(false);
+      setUsuarioAEliminar(null);
+    }
+  };
+
+  const cancelarEliminacion = () => {
+    setShowConfirmDelete(false);
+    setUsuarioAEliminar(null);
+  };
+
+  if (loading && usuarios.length === 0) {
     return <Loading message="Cargando usuarios..." />;
   }
 
@@ -170,35 +226,65 @@ const GestionUsuarios = () => {
                 </h1>
               </div>
 
-              {error && (
-                <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md">
-                  <Tipografia className="text-red-700 text-sm">
-                    {error}
-                  </Tipografia>
+              {/* Mensajes de éxito */}
+              {successMessage && (
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+                  <div className="flex items-center">
+                    <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <p>{successMessage}</p>
+                  </div>
                 </div>
               )}
 
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
-                  <div className="flex justify-start w-full sm:w-auto">
+              {/* Mensajes de error */}
+              {error && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+                  <div className="flex items-center">
+                    <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Nuevo bloque con contador de usuarios totales y filtrados */}
+              <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
+                <div className="p-4 flex flex-col md:flex-row justify-between items-center">
+                  <div className="w-full md:w-auto mb-4 md:mb-0">
+                    <div className="flex items-center justify-center md:justify-start">
+                      <span className="bg-orange-200 text-orange-800 text-xs font-medium px-3 py-0.5 rounded-full mr-3">
+                        {usuarios.length} Total
+                      </span>
+                      <span className="bg-transparent text-orange-800 border border-orange-500 text-xs font-medium px-3 py-0.5 rounded-full">
+                        {filteredUsuarios.length} Filtrados
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="w-[200px] md:w-auto flex justify-end md:justify-start">
                     <Boton
-                      label="Registrar Usuario"
                       tipo="primario"
+                      label="Registrar Usuario"
                       onClick={handleRegistrarUsuario}
-                      size="small"
-                      className="w-full sm:w-auto"
+                      className="w-full text-sm md:text-base px-4 md:px-6 py-2"
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="flex flex-col space-y-3 w-full">
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 w-full">
                   <div className="flex flex-col space-y-1">
                     {/* Contenedor flex para tener filtro y buscador en la misma línea */}
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                       {/* Filtro por rol (a la izquierda) */}
                       <div className="w-full md:w-auto">
-                        <Tipografia className="text-gray-800 mb-1 px-1 text-base">
-                          Filtrar por rol:
-                        </Tipografia>
+                        <h2 className="text-lg font-medium mb-3 text-black">
+                          Filtros
+                        </h2>
                         <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2 mt-2">
                           {["Todos", "COLABORADOR", "ADMINISTRADOR"].map(
                             (opcion) => (
@@ -360,9 +446,15 @@ const GestionUsuarios = () => {
                                             `/gestion-zonas/colaboradores/${usuario.id_usuario}`
                                           )
                                         }
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                       >
                                         Ver Zonas{" "}
+                                      </button>
+                                      <button
+                                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-100"
+                                        onClick={() => handleEliminarClick(usuario)}
+                                      >
+                                        Eliminar
                                       </button>
                                     </>
                                   )}
@@ -526,6 +618,7 @@ const GestionUsuarios = () => {
                   </div>
                 </div>
               </div>
+
             </div>
           </Tipografia>
         </div>
@@ -546,6 +639,41 @@ const GestionUsuarios = () => {
               onClick={handleAsignarZona}
               size="small"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para eliminar usuario */}
+      {showConfirmDelete && usuarioAEliminar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center mb-3 md:mb-4">
+                <Icono name="eliminar" size="50" className="md:text-6xl" />
+              </div>
+              <h2 className="text-xl font-bold mb-4">Confirmar eliminación</h2>
+              <p className="mb-6">
+                ¿Estás seguro de que deseas eliminar al usuario{" "}
+                <span className="font-semibold">
+                  {usuarioAEliminar.nombreCompleto}
+                </span>? 
+                Esta acción no se puede deshacer.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Boton
+                  tipo="cancelar"
+                  label="Cancelar"
+                  onClick={cancelarEliminacion}
+                  className="w-full"
+                />
+                <Boton
+                  tipo="alerta"
+                  label="Eliminar"
+                  onClick={confirmarEliminacion}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

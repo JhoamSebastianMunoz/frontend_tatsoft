@@ -6,6 +6,7 @@ import AvatarTexto from "../../../components/molecules/AvatarTexto";
 import CamposTexto from "../../../components/atoms/CamposTexto";
 import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
+import Icono from "../../../components/atoms/Iconos";
 import Loading from "../../Loading/Loading";
 import Sidebar from "../../organisms/Sidebar";
 import { IoArrowBack } from "react-icons/io5";
@@ -171,7 +172,7 @@ const EditarPerfil = () => {
           <div className="w-full max-w-4xl">
             <div className="flex items-center mb-6">
               <button onClick={handleGoBack} className="mr-4">
-                <IoArrowBack className="text-gray-600 text-2xl hover:text-orange-500 transition-colors" />
+                <Icono name="volver" size={45} color="#F78220" />
               </button>
               <h1 className="text-2xl font-semibold text-gray-800">
                 Editar Perfil

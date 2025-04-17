@@ -74,20 +74,28 @@ const HistorialIngresos = () => {
         setUsuarios(usuariosUnicos);
         
         setLoading(false);
-      } catch (err) {
-        console.error("Error al obtener historial:", err);
-        console.error("Detalles del error:", {
-          mensaje: err.message,
-          respuesta: err.response?.data,
-          estado: err.response?.status
-        });
-        setError("Error al cargar el historial de ingresos. Por favor, intenta de nuevo más tarde.");
+      } catch (error) {
+        console.error("Error al cargar usuarios:", error);
+        setError(
+          "Error al cargar la lista de ingresos. Por favor, intenta de nuevo más tarde."
+        );
+      } finally {
         setLoading(false);
       }
     };
     
     obtenerHistorial();
   }, []);
+
+   useEffect(() => {
+      if (error) {
+        const timer = setTimeout(() => {
+          setError("");
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }, [error]);
+  
 
   // Efecto para actualizar la búsqueda en tiempo real cuando cambia searchTerm
   useEffect(() => {
@@ -248,23 +256,6 @@ const HistorialIngresos = () => {
   // Obtener la fecha de hoy en formato ISO para los inputs de fecha
   const hoy = new Date().toISOString().split("T")[0];
 
-  // Si hay error, mostrar mensaje de error
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold">Error</h2>
-          <p>{error}</p>
-          <button 
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            onClick={() => window.location.reload()}
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen overflow-x-hidden flex flex-col md:flex-row">
@@ -277,18 +268,23 @@ const HistorialIngresos = () => {
         </div>
       </div>
       
-      <div className="bg-slate-50 flex-1 pl-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
+      <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4 overflow-x-hidden bg-slate-50">
         <Tipografia>
           <div className="mt-4 mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 ml-5">Historial de Ingresos</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Historial de Ingresos</h1>
           </div>
+          {/* Mensajes de error */}
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-              <p className="font-medium">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
-          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4 ml-3">
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+                  <div className="flex items-center">
+                    <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
+          <div className="bg-white rounded-lg shadow-md border-l-2 border-orange-600 mb-4">
             <div className="p-3 flex flex-col sm:flex-row justify-between items-center">
               <div>
                 <div className="flex items-center mt-1">

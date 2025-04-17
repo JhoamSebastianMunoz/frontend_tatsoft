@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
 import Sidebar from "../../organisms/Sidebar";
+import Icono from "../../../components/atoms/Iconos";
 import AlertaInhabilitar from "../../pages/administrator/AlertaInhabilitar";
 import { clientService } from "../../../context/services/ApiService";
 import { IoArrowBack } from "react-icons/io5";
@@ -12,6 +13,7 @@ const VerCliente = () => {
   const [clienteStatus, setClienteStatus] = useState("Activo");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [clienteData, setClienteData] = useState({
     razonSocial: "",
     nombre: "",
@@ -26,6 +28,25 @@ const VerCliente = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Efectos para gestionar los mensajes de éxito y error
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   useEffect(() => {
     // Obtener datos del cliente desde la API
@@ -42,18 +63,18 @@ const VerCliente = () => {
         ) {
           const cliente = response.data[0];
           console.log("Cliente extraído:", cliente);
-          
+
           // Extraer nombre y apellido del nombre completo
           const nombreCompleto = cliente.nombre_completo_cliente
             ? cliente.nombre_completo_cliente.split(" ")
             : ["", ""];
-          
+
           // Normalizar el estado para que siempre tenga la primera letra en mayúscula
           let estadoNormalizado = "Activo"; // Valor por defecto
           if (cliente.estado) {
             // Convertir el estado a minúsculas para normalizar
             const estadoLower = cliente.estado.toLowerCase();
-            
+
             if (estadoLower.includes("activ")) {
               estadoNormalizado = "Activo";
             } else if (estadoLower.includes("inactiv")) {
@@ -62,9 +83,9 @@ const VerCliente = () => {
               estadoNormalizado = "Pendiente";
             }
           }
-          
+
           console.log("Estado normalizado:", estadoNormalizado);
-          
+
           // Mapear los datos del cliente al formato esperado por el componente
           const formattedData = {
             id_cliente: cliente.id_cliente,
@@ -77,6 +98,9 @@ const VerCliente = () => {
             estado: estadoNormalizado,
             fechaCreacion: formatearFecha(cliente.created_at) || "",
             email: cliente.email || "",
+            // Añadir más campos que puedan estar presentes en la API para asegurarnos de tener todos los necesarios
+            cedula: cliente.cedula || "",
+            id_zona_de_trabajo: cliente.id_zona_de_trabajo || 1,
           };
 
           console.log("Datos mapeados:", formattedData);
@@ -117,15 +141,156 @@ const VerCliente = () => {
   };
 
   const handleShowAlert = () => {
+    console.log("Mostrando alerta de confirmación");
     setShowAlert(true);
   };
 
   const handleCloseAlert = () => {
+    console.log("Cerrando alerta de confirmación");
     setShowAlert(false);
   };
 
+  const handleConfirmStatusChange = async () => {
+    console.log("Iniciando cambio de estado...");
+    try {
+      setLoading(true);
 
-  
+      // Determinar el nuevo estado según el estado actual
+      let nuevoEstado;
+      if (clienteStatus === "Activo") {
+        nuevoEstado = "Inactivo";
+      } else {
+        // Tanto para "Inactivo" como para "Pendiente", el nuevo estado será "Activo"
+        nuevoEstado = "Activo";
+      }
+
+      console.log(`Cambiando estado de ${clienteStatus} a ${nuevoEstado}`);
+
+      // Obtener el ID real del cliente
+      if (!clienteData.id_cliente) {
+        throw new Error("No se pudo obtener el ID del cliente para actualizar");
+      }
+
+      const clienteIdReal = clienteData.id_cliente;
+      console.log("ID del cliente para actualización:", clienteIdReal);
+
+      // Preparar los datos para actualizar
+      const clienteToUpdate = {
+        cedula: clienteData.cedula || "",
+        nombre_completo_cliente:
+          `${clienteData.nombre} ${clienteData.apellido}`.trim(),
+        direccion: clienteData.direccion || "",
+        telefono: clienteData.celular || "",
+        rut_nit: clienteData.nit || "",
+        razon_social: clienteData.razonSocial || "",
+        estado: nuevoEstado,
+        id_zona_de_trabajo: clienteData.id_zona_de_trabajo || 1,
+      };
+
+      console.log("Datos a enviar para actualización:", clienteToUpdate);
+
+      // Llamar directamente a clientService para actualizar
+      try {
+        console.log("Llamando a clientService.updateClient...");
+        const updateResponse = await clientService.updateClient(
+          clienteIdReal,
+          clienteToUpdate
+        );
+        console.log(
+          "Respuesta de actualización (clientService):",
+          updateResponse
+        );
+
+        // Si llegamos aquí, la actualización fue exitosa
+        console.log(
+          `Cliente ${
+            nuevoEstado === "Activo" ? "habilitado" : "inhabilitado"
+          } correctamente`
+        );
+
+        // Actualizar el estado local
+        setClienteStatus(nuevoEstado);
+        setClienteData((prev) => ({
+          ...prev,
+          estado: nuevoEstado,
+        }));
+
+        // Mostrar mensaje de éxito
+        setSuccessMessage(
+          `Cliente ${
+            nuevoEstado === "Activo" ? "activado" : "desactivado"
+          } correctamente.`
+        );
+      } catch (serviceError) {
+        console.error(
+          "Error al usar clientService.updateClient:",
+          serviceError
+        );
+
+        // Intentar como método alternativo usando fetch directamente
+        console.log("Intentando actualización con fetch directo...");
+        const token = localStorage.getItem("token");
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        const response = await fetch(
+          `https://backendareasandclients-apgba5dxbrbwb2ex.eastus2-01.azurewebsites.net/update-client/${clienteIdReal}`,
+          {
+            method: "PUT",
+            headers: headers,
+            body: JSON.stringify(clienteToUpdate),
+          }
+        );
+
+        const responseText = await response.text();
+        console.log("Respuesta de actualización (fetch):", responseText);
+
+        if (response.ok) {
+          console.log(
+            `Cliente ${
+              nuevoEstado === "Activo" ? "habilitado" : "inhabilitado"
+            } correctamente`
+          );
+
+          // Actualizar el estado local
+          setClienteStatus(nuevoEstado);
+          setClienteData((prev) => ({
+            ...prev,
+            estado: nuevoEstado,
+          }));
+
+          // Mostrar mensaje de éxito
+          setSuccessMessage(
+            `Cliente ${
+              nuevoEstado === "Activo" ? "activado" : "desactivado"
+            } correctamente.`
+          );
+        } else {
+          try {
+            const errorData = JSON.parse(responseText);
+            throw new Error(
+              `Error ${response.status}: ${
+                errorData.error || response.statusText
+              }`
+            );
+          } catch (e) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error al cambiar estado del cliente:", err);
+      setError(
+        "Error al cambiar el estado del cliente: " +
+          (err.message || "Error desconocido")
+      );
+    } finally {
+      setLoading(false);
+      setShowAlert(false);
+    }
+  };
 
   const handleEditarCliente = () => {
     // Guardar la ruta de origen en localStorage
@@ -145,31 +310,31 @@ const VerCliente = () => {
         return {
           tipo: "secundario",
           label: "Activo",
-          colorClass: "bg-green-100 text-green-800"
+          colorClass: "bg-green-100 text-green-800",
         };
       case "Inactivo":
         return {
-          tipo: "alerta",
+          tipo: "cancelar",
           label: "Inactivo",
-          colorClass: "bg-red-100 text-red-800"
+          colorClass: "bg-red-100 text-red-800",
         };
       case "Pendiente":
         return {
           tipo: "cancelar",
           label: "Pendiente",
-          colorClass: "bg-yellow-100 text-yellow-800"
+          colorClass: "bg-yellow-100 text-yellow-800",
         };
       default:
         return {
           tipo: "secundario",
           label: "Estado",
-          colorClass: "bg-slate-100 text-slate-800"
+          colorClass: "bg-slate-100 text-slate-800",
         };
     }
   };
 
   const buttonConfig = getButtonConfig();
-  
+
   // Determinar el mensaje para el diálogo de confirmación
   const getAlertText = () => {
     if (clienteStatus === "Activo") {
@@ -183,7 +348,7 @@ const VerCliente = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !clienteData.id_cliente) {
     return (
       <div className="min-h-screen bg-slate-100 ml-16 md:ml-64 flex items-center justify-center">
         <div className="flex flex-col items-center">
@@ -196,25 +361,6 @@ const VerCliente = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-100 ml-16 md:ml-64 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-md">
-          <div className="text-red-500 text-5xl mb-4">⚠️</div>
-          <Tipografia variant="h2" className="text-red-600 font-semibold mb-4">
-            Error
-          </Tipografia>
-          <Tipografia className="text-gray-600 mb-6">{error}</Tipografia>
-          <Botones
-            tipo="primario"
-            label="Volver a clientes"
-            onClick={handleVolver}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50">
       <Sidebar />
@@ -222,9 +368,9 @@ const VerCliente = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
           <div className="flex items-center mb-4 md:mb-0">
             <button onClick={handleVolver} className="mr-4">
-              <IoArrowBack className="text-gray-600 text-2xl hover:text-orange-500 transition-colors" />
+              <Icono name="volver" size={45} color="#F78220" />
             </button>
-            <Tipografia className="text-2xl font-bold text-gray-800">
+            <Tipografia size="xl" className="font-semibold text-gray-800">
               Detalles del Cliente
             </Tipografia>
           </div>
@@ -244,6 +390,50 @@ const VerCliente = () => {
           </div>
         </div>
 
+        {/* Mensajes de éxito */}
+        {successMessage && (
+          <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+            <div className="flex items-center">
+              <svg
+                className="h-6 w-6 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
+              </svg>
+              <p>{successMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Mensajes de error */}
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+            <div className="flex items-center">
+              <svg
+                className="h-6 w-6 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+              <p>{error}</p>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Tarjeta de información principal */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden lg:col-span-1">
@@ -259,7 +449,8 @@ const VerCliente = () => {
                   variant="h2"
                   className="text-white text-center text-xl font-semibold"
                 >
-                  {clienteData.razonSocial || `${clienteData.nombre} ${clienteData.apellido}`.trim()}
+                  {clienteData.razonSocial ||
+                    `${clienteData.nombre} ${clienteData.apellido}`.trim()}
                 </Tipografia>
                 <div
                   className={`mt-3 px-4 py-1 rounded-full shadow-sm ${buttonConfig.colorClass}`}
@@ -402,12 +593,45 @@ const VerCliente = () => {
       </div>
 
       {showAlert && (
-        <AlertaInhabilitar
-          onClose={handleCloseAlert}
-          onConfirm={handleConfirmStatusChange}
-          alertText={getAlertText()}
-          isEnabling={clienteStatus !== "Activo"}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto">
+            <div className="flex items-center justify-center mb-4">
+              {clienteStatus !== "Activo" ? (
+                <Icono
+                  name="confirmar"
+                  size="50"
+                  className="text-green-500 md:text-6xl"
+                />
+              ) : (
+                <Icono
+                  name="eliminarAlert"
+                  size="50"
+                  className="text-red-500 md:text-6xl"
+                />
+              )}
+            </div>
+            <Tipografia className="font-bold mb-4 text-base md:text-lg">
+              {getAlertText()}
+            </Tipografia>
+            <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-3">
+              <Botones
+                onClick={() => setShowAlert(false)}
+                label="Cancelar"
+                tipo="cancelar"
+                className="w-full sm:w-auto text-sm md:text-base"
+              />
+              <Botones
+                onClick={() => {
+                  console.log("Botón de confirmación presionado");
+                  handleConfirmStatusChange();
+                }}
+                label="Confirmar"
+                tipo={clienteStatus !== "Activo" ? "primario" : "alerta"}
+                className="w-full sm:w-auto text-sm md:text-base"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

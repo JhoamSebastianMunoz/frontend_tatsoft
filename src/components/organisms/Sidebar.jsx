@@ -146,7 +146,7 @@ const Sidebar = () => {
     {
       name: "inventario",
       label: "Gestión de Inventario",
-      path: "/inventario",
+      path: "/historial-ingresos",
       icon: "inventory",
       subItems: ["Historial de Ingresos","Ingreso de Stock"],
       subPaths: ["/historial-ingresos","/ingreso-stock"],
