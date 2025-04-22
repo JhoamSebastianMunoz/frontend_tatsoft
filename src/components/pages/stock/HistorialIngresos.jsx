@@ -277,9 +277,7 @@ const HistorialIngresos = () => {
           {error && (
                 <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
                   <div className="flex items-center">
-                    <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <Icono className="mr-2" name="eliminarAlert" size={20} />
                     <p>{error}</p>
                   </div>
                 </div>
@@ -502,9 +500,9 @@ const HistorialIngresos = () => {
                                             <div className="text-gray-600">Código:</div>
                                             <div className="font-medium">{detalleIngreso.id_registro}</div>
                                             <div className="text-gray-600">Usuario:</div>
-                                            <div className="font-medium">{detalleIngreso.nombre_usuario}</div>
+                                            <div className="font-medium">{ingreso.usuarioResponsable}</div>
                                             <div className="text-gray-600">Fecha:</div>
-                                            <div className="font-medium">{formatearFecha(detalleIngreso.fecha_ingreso)}</div>
+                                            <div className="font-medium">{formatearFecha(ingreso.usuarioResponsable)}</div>
                                           </div>
                                         </div>
                                         <div className="bg-white p-3 rounded shadow-sm">

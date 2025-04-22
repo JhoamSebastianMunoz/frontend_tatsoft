@@ -39,7 +39,7 @@ const CodigoVerificacion = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const fullCode = codigo.join("");
-    
+
     if (fullCode.length !== 4) {
       setError("Por favor, ingresa el código completo de 4 dígitos");
       return;
@@ -57,7 +57,9 @@ const CodigoVerificacion = () => {
       }
     } catch (error) {
       console.error("Error al validar código:", error);
-      setError("Ocurrió un error al validar el código. Inténtalo de nuevo más tarde.");
+      setError(
+        "Ocurrió un error al validar el código. Inténtalo de nuevo más tarde."
+      );
     } finally {
       setLoading(false);
     }
@@ -74,7 +76,7 @@ const CodigoVerificacion = () => {
         <div className="absolute top-5 left-7">
           <Icono
             name="volver"
-            customColor="black"
+            customColor="#F78220"
             size={40}
             className="cursor-pointer"
             onClick={() => navigate("/recuperar-password")}
@@ -85,7 +87,8 @@ const CodigoVerificacion = () => {
             Introduce tu código de verificación
           </h1>
           <p className="text-black-600 mb-7 p-3">
-            Hemos enviado un código de verificación de <span className="font-semibold">4</span> dígitos a tu correo
+            Hemos enviado un código de verificación de{" "}
+            <span className="font-semibold">4</span> dígitos a tu correo
             electrónico. Por favor, ingrésalo a continuación para continuar con
             la recuperación de tu contraseña.
           </p>
@@ -99,8 +102,8 @@ const CodigoVerificacion = () => {
           <div className="flex justify-end w-full pr-3 mb-5">
             <p className="text-black-800 text-sm p-1">
               ¿No recibiste el código?{" "}
-              <span 
-                className="font-semibold cursor-pointer text-purple-800"
+              <span
+                className="font-semibold cursor-pointer text-orange-700"
                 onClick={handleResendCode}
               >
                 Reenviar
@@ -123,17 +126,19 @@ const CodigoVerificacion = () => {
               ))}
             </div>
 
-            <Boton 
-              label={loading ? "Verificando..." : "Verificar código"}
-              onClick={handleSubmit}
-              disabled={loading}
-              type="submit"
-            />
+            <div className="flex justify-center">
+              <Boton
+                label={loading ? "Verificando..." : "Verificar código"}
+                onClick={handleSubmit}
+                disabled={loading}
+                type="submit"
+              />
+            </div>
           </form>
         </div>
 
         <footer className="absolute bottom-6 text-gray-500 text-sm">
-          © TatSoft 2025 
+          © TatSoft 2025
         </footer>
       </div>
     </Tipografia>

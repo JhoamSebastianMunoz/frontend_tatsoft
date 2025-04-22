@@ -49,7 +49,7 @@ const DetallesDevolucion = () => {
   };
 
   const handleVolver = () => {
-    navigate("/devoluciones/historial");
+    navigate("/acumulados");
   };
 
   const handleImprimirRecibo = () => {
@@ -252,6 +252,7 @@ const DetallesDevolucion = () => {
       <div className="fixed top-0 left-0 h-full z-10">
         <Sidebar />
       </div>
+      <Tipografia>
       <main className="w-full md:pl-[100px] pt-[40px] pl-[80px] md:pt-6 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
@@ -415,6 +416,7 @@ const DetallesDevolucion = () => {
         )}
       </div>
       </main>
+      </Tipografia>
     </div>
   );
 };

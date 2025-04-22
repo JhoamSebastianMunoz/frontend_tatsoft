@@ -241,10 +241,8 @@ const GestionUsuarios = () => {
               {/* Mensajes de error */}
               {error && (
                 <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-                  <div className="flex items-center">
-                    <svg className="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                  <div className="flex">
+                  <Icono className="mr-2" name="eliminarAlert" size={20} />
                     <p>{error}</p>
                   </div>
                 </div>
@@ -649,7 +647,7 @@ const GestionUsuarios = () => {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center justify-center mb-3 md:mb-4">
-                <Icono name="eliminar" size="50" className="md:text-6xl" />
+                <Icono name="alerta" size={24} customColor="#F59E0B" />
               </div>
               <h2 className="text-xl font-bold mb-4">Confirmar eliminación</h2>
               <p className="mb-6">
@@ -661,14 +659,16 @@ const GestionUsuarios = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <Boton
-                  tipo="cancelar"
+                  tipo="secundario"
                   label="Cancelar"
+                  size="small"
                   onClick={cancelarEliminacion}
                   className="w-full"
                 />
                 <Boton
-                  tipo="alerta"
+                  tipo="cancelar"
                   label="Eliminar"
+                  size="small"
                   onClick={confirmarEliminacion}
                   className="w-full"
                 />

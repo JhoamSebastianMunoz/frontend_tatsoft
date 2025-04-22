@@ -3,6 +3,7 @@ import Tipografia from "../../atoms/Tipografia";
 import Botones from "../../atoms/Botones";
 import CampoTexto from "../../atoms/CamposTexto";
 import Sidebar from "../../organisms/Sidebar";
+import Icono from "../../../components/atoms/Iconos";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 
@@ -783,6 +784,13 @@ verDetalles = (item) => {
           <div className="mt-4 mb-5">
             <h1 className="text-lg sm:text-2xl font-semibold text-gray-800 ml-4">Acumulados</h1>
           </div>
+          {/* Alertas */}
+          {showErrorAlert && (
+            <div className="flex bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded ml-3">
+              <Icono className="mr-2" name="eliminarAlert" size={20} />
+              <p>{error}</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 px-3">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="bg-orange-400 p-4 text-white">
@@ -940,14 +948,6 @@ verDetalles = (item) => {
               </div>
             </div>
           </div>
-          
-          {/* Alertas */}
-          {showErrorAlert && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded ml-3">
-              <p className="font-medium">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
           
           {showSuccessAlert && (
             <div className="bg-orange-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded ml-3">

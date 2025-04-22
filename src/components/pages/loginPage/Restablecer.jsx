@@ -152,6 +152,7 @@ const Restablecer = () => {
 
         <form onSubmit={handleSubmit} className="w-full max-w-sm">
           <div className="relative mb-4">
+            <div className="relative mb-4">
             <Icono
               name="candado"
               className="absolute left-3 top-2/3 transform -translate-y-1/2 text-gray-400"
@@ -165,6 +166,8 @@ const Restablecer = () => {
               onChange={handleChange}
               required
             />
+            </div>
+            
             
             {formData.password && passwordErrors.length > 0 && (
               <div className="mt-2 bg-gray-50 p-3 rounded-md border border-gray-200">

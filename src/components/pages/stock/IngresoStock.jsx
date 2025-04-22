@@ -310,18 +310,18 @@ const IngresoStock = () => {
     return <Loading message="Cargando productos..." />;
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <Icono name="alert-triangle" size={40} className="text-red-500 mx-auto mb-4" />
-          <Tipografia size="base" className="text-gray-600">
-            {error}
-          </Tipografia>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+  //       <div className="flex text-center">
+  //         <Icono className="mr-2" name="eliminarAlert" size={20} />
+  //         <Tipografia size="base" className="text-gray-600">
+  //           {error}
+  //         </Tipografia>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -346,6 +346,14 @@ const IngresoStock = () => {
               />
             </div>
           </div>
+          {error && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded">
+                  <div className="flex items-center">
+                    <Icono className="mr-2" name="eliminarAlert" size={20} />
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
 
           {/* Filtro de Productos */}
           <div className="bg-white rounded-lg shadow-md p-5 my-6">

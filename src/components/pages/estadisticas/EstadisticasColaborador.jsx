@@ -286,8 +286,8 @@ const EstadisticasColaborador = () => {
             {error && (
               <div className="bg-amber-50 border-l-4 border-amber-400 text-amber-700 p-4 mb-4 rounded">
                 <div className="flex items-center">
-                  <Icono name="warning" size={20} />
-                  <span className="ml-2 text-sm md:text-base">{error}</span>
+                  <Icono className="mr-2" name="eliminarAlert" size={20} />
+                  <span className="text-sm md:text-base">{error}</span>
                 </div>
               </div>
             )}

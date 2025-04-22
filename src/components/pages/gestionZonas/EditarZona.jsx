@@ -162,14 +162,15 @@ const EditarZona = () => {
             </div>
           </div>
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg ml-4">
+            <div className="flex mb-4 p-4 bg-red-50 border border-red-200 rounded-lg ml-4">
+              <Icono className="mr-2" name="eliminarAlert" size={20} />
               <p className="text-red-600">{error}</p>
             </div>
           )}
           <div className="max-w-4xl mx-auto pl-6 pr-3">
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 md:p-8">
               <div className="mb-8">
-              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <div className="w-1 h-6 bg-[#F78220] rounded-full"></div>
                   <Tipografia size="xl" className="font-semibold text-gray-800">
                     Editando Zona
@@ -179,8 +180,8 @@ const EditarZona = () => {
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-2">
                     <p className="font-bold text-orange-800 mt-6">
-                  Información de la Zona
-                </p>
+                      Información de la Zona
+                    </p>
                     <label className="text-sm font-medium text-black block">
                       Nombre de la zona
                     </label>
@@ -287,7 +288,7 @@ const EditarZona = () => {
             <div className="px-6 py-5">
               <div className="text-center">
                 <Tipografia>
-                  <Icono name="cancelar" size="50" color="#F87171" />
+                  <Icono name="alerta" size={24} customColor="#F59E0B"  />
                   <h3 className="text-lg font-medium text-black mb-3">
                     ¿Desea salir sin guardar?
                   </h3>
@@ -300,15 +301,15 @@ const EditarZona = () => {
             </div>
             <div className="bg-gray-50 px-6 py-4 flex flex-col gap-3">
               <Boton
-                onClick={handleConfirmarCancelar}
-                label="Salir sin guardar"
-                tipo="cancelar"
-                className="w-full"
-              />
-              <Boton
                 onClick={() => setMostrarAlertaCancelar(false)}
                 label="Continuar editando"
                 tipo="secundario"
+                className="w-full"
+              />
+              <Boton
+                onClick={handleConfirmarCancelar}
+                label="Sí, Cancelar"
+                tipo="cancelar"
                 className="w-full"
               />
             </div>

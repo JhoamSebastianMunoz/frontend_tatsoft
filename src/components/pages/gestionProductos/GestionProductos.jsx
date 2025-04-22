@@ -396,7 +396,7 @@ const GestionProductos = () => {
         </div>
       </div>
 
-      <div className="bg-slate-50 flex-1 pl-12 pr-8 md:pl-20 w-full lg:pl-[60px] px-3 sm:px-4 md:px-6 lg:px-8 ml-6 pl-4">
+      <div className="flex-1 w-full sm:pl-16 md:pl-20 md:px-6 lg:ml-2 pl-16 pr-2">
         <Tipografia>
           <div className="mt-4 mb-5">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
@@ -453,8 +453,8 @@ const GestionProductos = () => {
           </div>
 
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded">
-              <p className="font-medium">Error</p>
+            <div className="flex bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded">
+              <Icono className="mr-2" name="eliminarAlert" size={20} />
               <p>{error}</p>
             </div>
           )}
@@ -743,7 +743,7 @@ const GestionProductos = () => {
           <div className="bg-white rounded-lg p-6 shadow-lg w-96">
             {" "}
             <div className="flex justify-center mb-4">
-              <Icono name="eliminarAlert" size={70} />
+              <Icono name="alerta" size={24} customColor="#F59E0B"  />
             </div>
             <Tipografia variant="h2" size="xl" className="text-center mb-4">
               ¿Estás seguro de que deseas eliminar este producto?
@@ -758,7 +758,7 @@ const GestionProductos = () => {
                 onClick={cancelarEliminacion}
               />
               <Boton
-                tipo="primario"
+                tipo="cancelar"
                 label="Eliminar"
                 onClick={confirmarEliminacion}
               />

@@ -27,25 +27,22 @@ const AlertaCancelar = ({ onClose, onConfirm, onCancel }) => {
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
       <div className="bg-white p-3 sm:p-5 rounded-xl shadow-lg text-center w-full max-w-xs sm:max-w-sm">
         <div className="flex flex-col items-center">
-          <Icono
-            name="cancelar"
-            size={70}
-            color="red"
-            className="sm:w-16 sm:h-16"
-          />
+          <Icono name="alerta" size={24} customColor="#F59E0B" />
           <Tipografia className="mt-3 mb-4 sm:mb-5 text-sm sm:text-base">
             ¿Deseas cancelar el registro?
           </Tipografia>
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 justify-center w-full">
           <Boton
               label="Cancelar"
-              tipo="cancelar"
+              tipo="secundario"
+              size="small"
               onClick={handleCancelar}
               className="w-full sm:flex-1 text-sm sm:text-base py-2"
             />
             <Boton
-              tipo="alerta"
+              tipo="cancelar"
               label="Aceptar"
+              size="small"
               onClick={handleConfirmar}
               className="w-full sm:flex-1 text-sm sm:text-base py-2"
             />

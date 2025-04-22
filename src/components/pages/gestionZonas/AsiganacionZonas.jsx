@@ -181,7 +181,7 @@ const AsignacionZonas = () => {
   const closeSuccessAlert = () => {
     setShowSuccessAlert(false);
     // Redirigir al usuario después de cerrar la alerta de éxito
-    navigate(`/zonas-asignadas/${id}`);
+    navigate(`/gestion-zonas/colaboradores/${id}`);
   };
 
   const clearError = () => {
@@ -189,7 +189,7 @@ const AsignacionZonas = () => {
   };
 
   if (loading) {
-    return <Loading message="Cargando zonas..." />;
+    return <Loading message="Cargando zonas" />;
   }
 
   return (
@@ -244,13 +244,9 @@ const AsignacionZonas = () => {
             </div>
 
             {error && (
-              <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md flex justify-between items-center">
-                <Tipografia className="text-red-700 text-sm">{error}</Tipografia>
-                <button onClick={clearError} className="text-red-700">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+              <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md flex items-center">
+                <Icono className="mr-2" name="eliminarAlert" size={20} />
+                <p className="text-red-700 text-sm">{error}</p>
               </div>
             )}
 
@@ -326,21 +322,29 @@ const AsignacionZonas = () => {
       </div>
 
       {/* Alerta de Éxito */}
-      {showSuccessAlert && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Icono name="confirmar" size="65"/>
-              </div>
-              <Tipografia size="lg" className="font-bold mb-2">¡Operación exitosa!</Tipografia>
-              <Tipografia className="text-gray-600 mb-4">
-                {successMessage}
-              </Tipografia>
-            </div>
-          </div>
+{showSuccessAlert && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-8 max-w-md w-full">
+      <div className="flex flex-col items-center text-center">
+        <div className="flex items-center justify-center mb-4">
+          <Icono name="confirmar" size="50"/>
         </div>
-      )}
+        <Tipografia size="lg" className="font-bold mb-2">¡Operación exitosa!</Tipografia>
+        <Tipografia className="text-gray-600 mb-4">
+          {successMessage}
+        </Tipografia>
+        <Botones
+          label="Aceptar"
+          tipo="primario"
+          onClick={() => {
+            setShowSuccessAlert(false);
+            navigate(`/gestion-zonas/colaboradores/${id}`);
+          }}
+        />
+      </div>
+    </div>
+  </div>
+)}
       </Tipografia>
     </div>
   );

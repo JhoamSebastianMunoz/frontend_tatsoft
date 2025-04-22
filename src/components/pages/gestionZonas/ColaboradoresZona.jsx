@@ -271,24 +271,9 @@ const ColaboradoresZona = () => {
         </div>
         <div className="flex flex-col px-4 pt-5 pb-6 w-full">
           {error && (
-            <div className="mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md flex justify-between items-center">
+            <div className="mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md flex items-center">
+              <Icono className="mr-2" name="eliminarAlert" size={20} />
               <Tipografia className="text-red-700">{error}</Tipografia>
-              <button onClick={clearError} className="text-red-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
             </div>
           )}
 
@@ -493,22 +478,10 @@ const ColaboradoresZona = () => {
                   </div>
                 ) : zonaSeleccionada ? (
                   <div className="flex flex-col items-center justify-center text-center py-10">
-                    <div className="bg-orange-50 p-6 rounded-full mb-4">
-                      <svg
-                        className="w-16 h-16 text-orange-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
+                    <div className="bg-grey-50 p-6 rounded-full mb-2">
+                      <Icono name="gest-clientes" size={60}  />
                     </div>
-                    <Tipografia className="text-black font-medium mb-2">
+                    <Tipografia className="text-gray font-medium mb-2">
                       No hay clientes registrados en esta zona.
                     </Tipografia>
                   </div>
@@ -550,7 +523,7 @@ const ColaboradoresZona = () => {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center justify-center mb-4">
-                <Icono name="eliminarAlert" size="80" />
+                <Icono name="alerta" size={24} customColor="#F59E0B"  />
               </div>
               <Tipografia size="lg" className="font-bold mb-2">
                 ¿Eliminar esta zona?
@@ -588,8 +561,8 @@ const ColaboradoresZona = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full">
             <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Icono name="confirmar" size="65"/>
+              <div className="flex bg-grey-50 p-6 rounded-full items-center justify-center mb-4">
+                <Icono name="confirmar" size="50"/>
               </div>
               <Tipografia size="lg" className="font-bold mb-2">¡Operación exitosa!</Tipografia>
               <Tipografia className="text-gray-600 mb-4">

@@ -93,8 +93,9 @@ const EditarColaboradorZona = () => {
      
       {error && (
         <div className="px-6 py-2">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+          <div className="flex bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <Icono className="mr-2" name="eliminarAlert" size={20} />
+            <p>{error}</p>
           </div>
         </div>
       )}

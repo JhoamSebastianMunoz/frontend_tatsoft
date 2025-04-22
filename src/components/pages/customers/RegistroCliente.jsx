@@ -606,7 +606,7 @@ const RegistroCliente = () => {
           <div className="bg-white rounded-lg p-4 md:p-6 max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center justify-center mb-3 md:mb-4">
-                <Icono name="eliminarAlert" size="70" className="md:text-6xl" />
+                <Icono name="alerta" size={24} customColor="#F59E0B" />
               </div>
               <Tipografia
                 size="lg"
@@ -619,14 +619,14 @@ const RegistroCliente = () => {
               </Tipografia>
               <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
                 <Boton
-                  tipo="cancelar"
-                  label="No"
-                  size="medium"
+                  tipo="secundario"
+                  label="No, Continuar"
+                  size="small"
                   onClick={cancelarCancelacion}
                   className="w-full sm:w-auto text-sm md:text-base"
                 />
                 <Boton
-                  tipo="alerta"
+                  tipo="cancelar"
                   label="Sí, cancelar"
                   size="small"
                   onClick={confirmarCancelacion}

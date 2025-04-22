@@ -313,7 +313,8 @@ const EditarCliente = (props) => {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center text-red-600">
+        <div className="flex text-center text-red-600">
+          <Icono className="mr-2" name="eliminarAlert" size={20} />
           <Tipografia>{error}</Tipografia>
         </div>
       </div>
@@ -481,7 +482,7 @@ const EditarCliente = (props) => {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center justify-center mb-4">
-                <Icono name="eliminarAlert" size="80" />
+                <Icono name="alerta" size={24} customColor="#F59E0B" />
               </div>
               <Tipografia size="lg" className="font-bold mb-2">
                 ¿Estás seguro?
@@ -492,8 +493,8 @@ const EditarCliente = (props) => {
               </Tipografia>
               <div className="flex flex-col sm:flex-row w-full gap-3">
                 <Boton
-                  tipo="primario"
-                  label="Descartar cambios"
+                  tipo="cancelar"
+                  label="Sí, Cancelar"
                   size="small"
                   onClick={confirmCancel}
                   className="w-full"

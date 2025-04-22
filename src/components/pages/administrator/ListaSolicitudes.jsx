@@ -204,7 +204,8 @@ const ListaSolicitudes = () => {
           <Sidebar />
         </div>
         <div className="w-full flex-1 pl-[4.3rem] sm:pl-16 md:pl-20 lg:pl-20 xl:pl-20 px-2 sm:px-4 md:px-6 lg:px-2 py-4">
-          <div className="mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md">
+          <div className="flex mx-0 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-3 py-2 rounded-md">
+            <Icono className="mr-2" name="eliminarAlert" size={20} />
             <Tipografia className="text-red-700 text-sm">{error}</Tipografia>
           </div>
         </div>

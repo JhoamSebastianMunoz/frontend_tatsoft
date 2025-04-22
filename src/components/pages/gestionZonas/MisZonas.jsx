@@ -120,7 +120,8 @@ const MisZonas = () => {
         </div>
         <div className="flex flex-col px-4 pt-2 pb-6 w-full">
           {error && (
-            <div className="mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md">
+            <div className="flex mx-4 my-2 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md">
+              <Icono className="mr-2" name="eliminarAlert" size={20} />
               <Tipografia className="text-red-700">{error}</Tipografia>
             </div>
           )}

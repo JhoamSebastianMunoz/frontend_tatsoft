@@ -88,7 +88,8 @@ const VerUsuarioAdm = () => {
             </div>
 
             {error && (
-              <div className="mx-4 mb-4 bg-red-50 border-l-4 border-red-500 p-4">
+              <div className="flex mx-4 mb-4 bg-red-50 border-l-4 border-red-500 p-4">
+                <Icono className="mr-2" name="eliminarAlert" size={20} />
                 <p className="text-red-700">{error}</p>
               </div>
             )}

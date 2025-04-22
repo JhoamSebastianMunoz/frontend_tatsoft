@@ -398,10 +398,8 @@ const EditarProducto = () => {
           <div className="md:pl-[350px] pl-8 pr-4 pt-10 md:pt-4">
             <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-2xl mx-auto">
               {error && (
-                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-                  <Tipografia size="base" className="font-medium">
-                    Error
-                  </Tipografia>
+                <div className="flex bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+                  <Icono className="mr-2" name="eliminarAlert" size={20} />
                   <Tipografia size="base">{error}</Tipografia>
                 </div>
               )}
@@ -604,21 +602,22 @@ const EditarProducto = () => {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
             <div className="bg-white rounded-lg p-6 shadow-lg w-80">
               <div className="flex justify-center mb-4">
-                <Icono name="eliminarAlert" size={65} />
+                <Icono name="alerta" size={24} customColor="#F59E0B" />
               </div>
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
                 ¿Desea cancelar la edición?
               </Tipografia>
               <div className="flex justify-center space-x-2">
                 <Boton
-                  tipo="primario"
+                  tipo="secundario"
+                  size="small"
                   label="Seguir editando"
                   onClick={cancelarCancelacion}
                 />
                 <Boton
-                  tipo="secundario"
-                  size="medium"
-                  label="Cancelar"
+                  tipo="cancelar"
+                  size="small"
+                  label="Sí, Cancelar"
                   onClick={confirmarCancelacion}
                 />
               </div>
@@ -631,7 +630,7 @@ const EditarProducto = () => {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
             <div className="bg-white rounded-lg p-6 shadow-lg w-80">
               <div className="flex justify-center mb-4">
-                <Icono name="confirmar" size={65} />
+                <Icono name="confirmar" size={50} />
               </div>
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
                 Producto actualizado exitosamente

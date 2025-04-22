@@ -123,6 +123,7 @@ const RegistrarProducto = () => {
     });
   };
 
+  // Modificación en la función handleImageChange
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -146,10 +147,24 @@ const RegistrarProducto = () => {
 
       console.log("Archivo seleccionado:", file.name, file.type, file.size);
 
+      // Limpiar error previo si existe
+      setError("");
+
+      // Guardar el archivo para enviarlo al servidor posteriormente
       setImageFile(file);
+
+      // Crear la vista previa
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onload = () => {
         setImagePreview(reader.result);
+        console.log(
+          "Vista previa generada:",
+          reader.result.substring(0, 50) + "..."
+        );
+      };
+      reader.onerror = () => {
+        console.error("Error al leer el archivo");
+        setError("Error al procesar la imagen. Intente con otra imagen.");
       };
       reader.readAsDataURL(file);
     }
@@ -165,10 +180,12 @@ const RegistrarProducto = () => {
       erroresTemp.nombre_producto = "El nombre del producto es obligatorio";
       esValido = false;
     } else if (formData.nombre_producto.trim().length < 3) {
-      erroresTemp.nombre_producto = "El nombre debe tener al menos 3 caracteres";
+      erroresTemp.nombre_producto =
+        "El nombre debe tener al menos 3 caracteres";
       esValido = false;
     } else if (!/^[A-Za-zÁáÉéÍíÓóÚúÑñ0-9\s]+$/.test(formData.nombre_producto)) {
-      erroresTemp.nombre_producto = "El nombre solo debe contener letras, números y espacios";
+      erroresTemp.nombre_producto =
+        "El nombre solo debe contener letras, números y espacios";
       esValido = false;
     }
 
@@ -185,8 +202,13 @@ const RegistrarProducto = () => {
     if (!formData.cantidad_ingreso) {
       erroresTemp.cantidad_ingreso = "La cantidad es obligatoria";
       esValido = false;
-    } else if (isNaN(Number(formData.cantidad_ingreso)) || Number(formData.cantidad_ingreso) <= 0 || !Number.isInteger(Number(formData.cantidad_ingreso))) {
-      erroresTemp.cantidad_ingreso = "La cantidad debe ser un número entero mayor a 0";
+    } else if (
+      isNaN(Number(formData.cantidad_ingreso)) ||
+      Number(formData.cantidad_ingreso) <= 0 ||
+      !Number.isInteger(Number(formData.cantidad_ingreso))
+    ) {
+      erroresTemp.cantidad_ingreso =
+        "La cantidad debe ser un número entero mayor a 0";
       esValido = false;
     }
 
@@ -195,7 +217,8 @@ const RegistrarProducto = () => {
       erroresTemp.descripcion = "La descripción es obligatoria";
       esValido = false;
     } else if (formData.descripcion.trim().length < 10) {
-      erroresTemp.descripcion = "La descripción debe tener al menos 10 caracteres";
+      erroresTemp.descripcion =
+        "La descripción debe tener al menos 10 caracteres";
       esValido = false;
     }
 
@@ -211,12 +234,12 @@ const RegistrarProducto = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validar el formulario antes de enviar
     if (!validarFormulario()) {
       return;
     }
-    
+
     setLoading(true);
     setError("");
 
@@ -341,7 +364,17 @@ const RegistrarProducto = () => {
   };
 
   const handleCancelar = () => {
-    setShowCancelarAlerta(true);
+    if (
+      formData.nombre_producto ||
+      formData.precio ||
+      formData.cantidad_ingreso ||
+      formData.categoria ||
+      formData.descripcion
+    ) {
+      setShowCancelarAlerta(true);
+    } else {
+      navigate("/gestion-productos");
+    }
   };
 
   const confirmarCancelar = () => {
@@ -455,8 +488,8 @@ const RegistrarProducto = () => {
         </div>
         <Tipografia>
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-              <p className="font-medium">Error</p>
+            <div className="flex bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+              <Icono className="mr-2" name="eliminarAlert" size={20} />
               <p>{error}</p>
             </div>
           )}
@@ -484,6 +517,13 @@ const RegistrarProducto = () => {
                             src={imagePreview}
                             alt="Vista previa"
                             className="mx-auto h-48 w-auto object-contain"
+                            onError={(e) => {
+                              console.error("Error al cargar la imagen");
+                              setError(
+                                "Error al mostrar la vista previa. La imagen podría estar corrupta."
+                              );
+                              e.target.style.display = "none";
+                            }}
                           />
                           <button
                             type="button"
@@ -550,7 +590,9 @@ const RegistrarProducto = () => {
                     value={formData.nombre_producto}
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 border ${
-                      errores.nombre_producto ? "border-red-500" : "border-gray-300"
+                      errores.nombre_producto
+                        ? "border-red-500"
+                        : "border-gray-300"
                     } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                     required
                   />
@@ -603,7 +645,9 @@ const RegistrarProducto = () => {
                       value={formData.id_categoria}
                       onChange={handleInputChange}
                       className={`w-full px-3 py-2 border ${
-                        errores.id_categoria ? "border-red-500" : "border-gray-300"
+                        errores.id_categoria
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none`}
                       required
                     >
@@ -655,7 +699,9 @@ const RegistrarProducto = () => {
                     value={formData.cantidad_ingreso}
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 border ${
-                      errores.cantidad_ingreso ? "border-red-500" : "border-gray-300"
+                      errores.cantidad_ingreso
+                        ? "border-red-500"
+                        : "border-gray-300"
                     } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
                     required
                     min="0"
@@ -714,27 +760,29 @@ const RegistrarProducto = () => {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
             <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm">
               <div className="flex justify-center mb-4">
-                <Icono name="eliminarAlert" size={65} />
+                <Icono name="alerta" size={24} customColor="#F59E0B" />
               </div>
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
-                ¿Estás seguro de que deseas cancelar?
+                ¿Desea cancelar la operación?
               </Tipografia>
               <Tipografia
                 size="base"
                 className="text-center text-gray-600 ml-10"
               >
-                Los cambios no guardados se perderán.
+                Si cancela, perderá todos los datos que ha ingresado. ¿Está
+                seguro que desea salir?
               </Tipografia>
               <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-3">
                 <Boton
                   tipo="secundario"
-                  label="Cancelar"
+                  label="No, Continuar"
+                  size="small"
                   onClick={() => setShowCancelarAlerta(false)}
                   className="w-full sm:w-[200px] h-[45px] order-1"
                 />
                 <Boton
-                  tipo="primario"
-                  label="Continuar"
+                  tipo="cancelar"
+                  label="Sí, Cancelar"
                   size="small"
                   onClick={confirmarCancelar}
                   className="w-full sm:w-[200px] h-[45px] order-2"
@@ -747,26 +795,11 @@ const RegistrarProducto = () => {
         {showRegistroExitosoAlerta && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
             <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-sm">
-              <div className="flex justify-center mb-4 text-green-500">
-                <svg
-                  className="w-16 h-16"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+              <div className="flex items-center justify-center mb-3 md:mb-4">
+                <Icono name="confirmar" size="50" />
               </div>
               <Tipografia variant="h2" size="xl" className="text-center mb-4">
                 ¡Producto registrado exitosamente!
-              </Tipografia>
-              <Tipografia size="sm" className="text-center text-gray-500 mb-4">
-                Serás redirigido en unos segundos...
               </Tipografia>
             </div>
           </div>
@@ -851,11 +884,13 @@ const RegistrarProducto = () => {
                 <Boton
                   tipo="secundario"
                   label="Continuar editando"
+                  size="small"
                   onClick={cancelarCancelarCategoria}
                 />
                 <Boton
                   tipo="primario"
                   label="Sí, cancelar"
+                  size="small"
                   onClick={confirmarCancelarCategoria}
                 />
               </div>

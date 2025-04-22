@@ -183,7 +183,8 @@ const DetalleSolicitud = () => {
       <div className="flex">
         <Sidebar />
         <div className="flex-1 ml-16 p-8">
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-4 rounded">
+          <div className="flex bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-4 rounded">
+            <Icono className="mr-2" name="eliminarAlert" size={20} />
             <p>{error}</p>
           </div>
         </div>

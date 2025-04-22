@@ -333,7 +333,7 @@ const DetallesPreventa = () => {
               </div>
 
               {detalles.estado === "Pendiente" &&
-                user.rol === "COLABORADOR" && (
+                user.rol === "ADMINISTRADOR" && (
                   <div className="flex justify-end space-x-4 mt-4">
                       <Boton 
                         tipo="secundario"

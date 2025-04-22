@@ -583,11 +583,11 @@ const HistorialPreventas = () => {
       <Tipografia>
         <Sidebar />
         <div className="container mx-auto px-2 sm:px-4 py-2 w-full">
-            <div className="py-2">
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                Historial de Preventas
-              </h1>
-            </div>
+          <div className="py-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+              Historial de Preventas
+            </h1>
+          </div>
 
           {error && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 sm:p-3 mb-2 rounded">
@@ -602,6 +602,9 @@ const HistorialPreventas = () => {
           <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
               <div className="w-full sm:w-1/2 ">
+                <Tipografia className="text-gray-800 mb-1 px-1 text-base">
+                  Buscar
+                </Tipografia>
                 <CampoTexto
                   placeholder="Buscar por ID, fecha, total, estado o colaborador..."
                   value={filtroBusqueda}
