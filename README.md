@@ -6,6 +6,34 @@
 
 **TatSoft Frontend** es una aplicación web moderna desarrollada en React y Vite que funciona como un sistema integral de gestión de preventas para distribución directa "Tienda a Tienda". La plataforma está diseñada para optimizar los procesos comerciales, desde la gestión de usuarios y zonas, hasta la administración completa de productos, inventario, ventas y devoluciones.
 
+---
+
+## 📋 Tabla de Contenidos
+
+- [Descripción del Proyecto](#descripción-del-proyecto)
+- [Características Principales](#características-principales)
+- [Tecnología Stack](#-tecnología-stack)
+  - [Frontend](#frontend)
+  - [Librerías Complementarias](#librerías-complementarias)
+  - [Herramientas de Desarrollo](#herramientas-de-desarrollo)
+- [Requisitos Previos](#-requisitos-previos)
+- [Instalación y Configuración](#-instalación-y-configuración)
+- [Scripts Disponibles](#-scripts-disponibles)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Sistema de Roles y Permisos](#-sistema-de-roles-y-permisos)
+- [Enrutamiento Principal](#-enrutamiento-principal)
+- [Integración con APIs Externas](#-integración-con-apis-externas)
+- [Customización de Estilos](#-customización-de-estilos)
+- [Características Destacadas](#-características-destacadas)
+- [Despliegue](#-despliegue)
+- [Contribución](#-contribución)
+- [Guía de Componentes](#-guía-de-componentes)
+- [Reportar Problemas](#-reportar-problemas)
+- [Licencia](#-licencia)
+- [Autor](#-autor)
+- [Soporte](#-soporte)
+
+---
 ### Características Principales
 
 - **Autenticación y Autorización**: Sistema robusto de login con recuperación de contraseña y asignación de roles
@@ -315,9 +343,9 @@ Este proyecto está disponible bajo la licencia MIT.
 
 ## 👨‍💻 Autor
 
-**Jhoam Sebastian Munoz**
-- GitHub: [@JhoamSebastianMunoz](https://github.com/JhoamSebastianMunoz)
-- Repositorio: [frontend_tatsoft](https://github.com/JhoamSebastianMunoz/frontend_tatsoft)
+- Autor: Jhoam Sebastián Muñoz Betancourt
+- GitHub: https://github.com/JhoamSebastianMunoz
+- Email: jhoamsebastian68@gmail.com
 
 ---
 
