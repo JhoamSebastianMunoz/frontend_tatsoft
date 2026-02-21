@@ -340,9 +340,9 @@ Este proyecto está disponible bajo la licencia MIT.
 
 ---
 
-## Autor
+## 🧑🏽 Autor
 
-- Autor: Jhoam Sebastián Muñoz Betancourt
+Autoria: Jhoam Sebastián Muñoz Betancourt
 - GitHub: https://github.com/JhoamSebastianMunoz
 - Email: jhoamsebastian68@gmail.com
 
