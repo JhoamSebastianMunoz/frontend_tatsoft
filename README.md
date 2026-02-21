@@ -1,5 +1,4 @@
 
-```markdown name=README.md
 # 🛍️ TatSoft Frontend - Gestor de Preventa "Tienda a Tienda"
 
 ## Descripción del Proyecto
